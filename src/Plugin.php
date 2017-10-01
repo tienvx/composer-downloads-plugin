@@ -36,21 +36,35 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     {
         return [
             PackageEvents::POST_PACKAGE_INSTALL => 'installExtraFiles',
-            PackageEvents::POST_PACKAGE_UPDATE => 'installExtraFiles',
+            PackageEvents::POST_PACKAGE_UPDATE => 'updateExtraFiles',
         ];
     }
 
     public function installExtraFiles(PackageEvent $event)
     {
-        $downloadManager = $this->composer->getDownloadManager();
-        $installManager = $this->composer->getInstallationManager();
+        /** @var \Composer\Package\PackageInterface $package */
+        $package = $event->getOperation()->getPackage();
+        $installationManager = $event->getComposer()->getInstallationManager();
+        $downloadManager = $event->getComposer()->getDownloadManager();
 
-        foreach ($event->getInstalledRepo()->getPackages() as $package) {
-            // @todo: Move this logic into an InstallerInterface.
-            foreach ($this->parser->parse($package) as $extraFile) {
-                $path = $installManager->getInstallPath($package).'/'.$extraFile->getTargetDir();
-                $downloadManager->download($extraFile, $path);
-            }
+        foreach ($this->parser->parse($package) as $extraFile) {
+            $path = $installationManager->getInstallPath($package);
+            $path .= $extraFile->getTargetDir();
+            $downloadManager->download($extraFile, $path);
+        }
+    }
+
+    public function updateExtraFiles(PackageEvent $event)
+    {
+        /** @var \Composer\Package\PackageInterface $package */
+        $package = $event->getOperation()->getTargetPackage();
+        $installationManager = $event->getComposer()->getInstallationManager();
+        $downloadManager = $event->getComposer()->getDownloadManager();
+
+        foreach ($this->parser->parse($package) as $extraFile) {
+            $path = $installationManager->getInstallPath($package);
+            $path .= $extraFile->getTargetDir();
+            $downloadManager->download($extraFile, $path);
         }
     }
 

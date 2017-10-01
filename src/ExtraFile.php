@@ -32,4 +32,19 @@ class ExtraFile extends Package
     {
         return sprintf('%s:%s', $this->parent->getName(), $this->id);
     }
+
+    public function getVersion()
+    {
+        return $this->parent->getVersion();
+    }
+
+    public function getPrettyVersion()
+    {
+        return $this->parent->getPrettyVersion();
+    }
+
+    public function getFullPrettyVersion($truncate = true)
+    {
+        return $this->parent->getFullPrettyVersion($truncate);
+    }
 }

@@ -27,6 +27,8 @@ In your package's composer.json, require this plugin, and specify the extra file
   ...
 }
 ```
+The `ui` identifier here is an arbitrary ID for each dependency.
+
 The `url` key specifies the URL to fetch the content from.  If it points to a tarball or zip file, it will be unpacked on downloading.
 
 The `path` key specifies the folder (relative to where your package is installed in /vendor) that the content is installed into.

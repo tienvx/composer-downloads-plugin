@@ -1,7 +1,12 @@
 Composer Extra Files Plugin
 ===========================
 
-This Composer plugin allows you to request additional files to be downloaded with your composer package.  The canonical use case is including compiled code that you don't want committed to your repository.
+This Composer plugin allows you to request additional files to be downloaded with your composer package.
+
+### When should I use this?
+The most common use case is if you have compiled front-end code, where the compiled version is never committed to a git repository, and therefore isn't registered on packagist.org.  For example, if you want your distributed package to depend on an NPM/Bower package.
+
+Note: You probably shouldn't use this if you have the ability to [add repositories](https://getcomposer.org/doc/05-repositories.md) to your project's root composer.json.  There are better alternatives for this.  See [Composer Asset Plugin](https://github.com/fxpio/composer-asset-plugin) and [Asset Packagist](https://asset-packagist.org/).  This plugin is most useful for packages that are required by other packages, since Composer doesn't allow nested repositories.
 
 ## Usage
 In your package's composer.json, require this plugin, and specify the extra files in the "extra" section:

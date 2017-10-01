@@ -10,7 +10,7 @@ jobs:
           key: composer-v1-{{ checksum "composer.json" }}
       - run: composer install
       - save_cache:
-          key: composer-v3-{{ checksum "composer.json" }}
+          key: composer-v1-{{ checksum "composer.json" }}
           paths: [vendor, composer.lock]
       - run: |
           COMMIT_RANGE=`echo $CIRCLE_COMPARE_URL | cut -d/ -f7`

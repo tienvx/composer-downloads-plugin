@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  test:
+  build:
     working_directory: /srv
     docker:
       - image: lastcallmedia/php:7.0-dev

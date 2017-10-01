@@ -47,7 +47,7 @@ class ExtraFilesParser
         if (preg_match('/\.zip$/', $filename)) {
             return 'zip';
         }
-        if (preg_match('/\.tar\.gz$/', $filename)) {
+        if (preg_match('/\.(tar\.gz|tgz)$/', $filename)) {
             return 'tar';
         }
 

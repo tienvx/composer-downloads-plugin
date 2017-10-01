@@ -54,6 +54,7 @@ class ExtraFilesParserTest extends TestCase
             ['zip', 'http://example.com/foo.zip?abc#def'],
             ['tar', 'foo.tar.gz'],
             ['tar', 'http://example.com/foo.tar.gz?abc#def'],
+            ['tar', 'foo.tgz'],
             ['file', 'foo'],
         ];
     }

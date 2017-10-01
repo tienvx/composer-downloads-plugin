@@ -49,7 +49,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
         foreach ($this->parser->parse($package) as $extraFile) {
             $path = $installationManager->getInstallPath($package);
-            $path .= $extraFile->getTargetDir();
+            $path .= '/'.$extraFile->getTargetDir();
             $downloadManager->download($extraFile, $path);
         }
     }
@@ -63,7 +63,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
         foreach ($this->parser->parse($package) as $extraFile) {
             $path = $installationManager->getInstallPath($package);
-            $path .= $extraFile->getTargetDir();
+            $path .= '/'.$extraFile->getTargetDir();
             $downloadManager->download($extraFile, $path);
         }
     }

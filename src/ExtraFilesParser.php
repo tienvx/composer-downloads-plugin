@@ -12,9 +12,13 @@
 namespace LastCall\ExtraFiles;
 
 use Composer\Package\PackageInterface;
+use Composer\Package\RootPackageInterface;
+use Composer\Package\Version\VersionParser;
 
 class ExtraFilesParser
 {
+    const FAKE_VERSION = 'dev-master';
+
     /**
      * @param \Composer\Package\PackageInterface $package
      *
@@ -22,6 +26,7 @@ class ExtraFilesParser
      */
     public function parse(PackageInterface $package)
     {
+        $versionParser = new VersionParser();
         $extraFiles = [];
         $extra = $package->getExtra();
         if (!empty($extra['extra-files'])) {
@@ -31,7 +36,9 @@ class ExtraFilesParser
                     $id,
                     $extraFile['url'],
                     $this->parseDistType($extraFile['url']),
-                    $extraFile['path']
+                    $extraFile['path'],
+                    $package instanceof RootPackageInterface ? $versionParser->normalize(self::FAKE_VERSION) : $package->getVersion(),
+                    $package instanceof RootPackageInterface ? self::FAKE_VERSION : $package->getPrettyVersion()
                 );
                 $extraFiles[] = $file;
             }

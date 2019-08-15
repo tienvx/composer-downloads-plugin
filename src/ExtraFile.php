@@ -18,8 +18,14 @@ class ExtraFile extends Package
 {
     private $parent;
 
-    public function __construct(PackageInterface $parent, $id, $url, $type, $path)
+    public function __construct(PackageInterface $parent, $id, $url, $type, $path, $version = NULL, $prettyVersion = NULL)
     {
+
+        parent::__construct(
+            sprintf('%s:%s', $parent->getName(), $id),
+            $version ?? $parent->getVersion(),
+            $prettyVersion ?? $parent->getPrettyVersion()
+        );
         $this->parent = $parent;
         $this->id = $id;
         $this->setDistUrl($url);
@@ -28,23 +34,4 @@ class ExtraFile extends Package
         $this->setInstallationSource('dist');
     }
 
-    public function getName()
-    {
-        return sprintf('%s:%s', $this->parent->getName(), $this->id);
-    }
-
-    public function getVersion()
-    {
-        return $this->parent->getVersion();
-    }
-
-    public function getPrettyVersion()
-    {
-        return $this->parent->getPrettyVersion();
-    }
-
-    public function getFullPrettyVersion($truncate = true)
-    {
-        return $this->parent->getFullPrettyVersion($truncate);
-    }
 }

@@ -16,6 +16,8 @@ use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Installer\PackageEvent;
 use Composer\Installer\PackageEvents;
 use Composer\IO\IOInterface;
+use Composer\Package\Package;
+use Composer\Package\PackageInterface;
 use Composer\Plugin\PluginInterface;
 
 class Plugin implements PluginInterface, EventSubscriberInterface
@@ -45,13 +47,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         /** @var \Composer\Package\PackageInterface $package */
         $package = $event->getOperation()->getPackage();
         $installationManager = $event->getComposer()->getInstallationManager();
-        $downloadManager = $event->getComposer()->getDownloadManager();
-
-        foreach ($this->parser->parse($package) as $extraFile) {
-            $path = $installationManager->getInstallPath($package);
-            $path .= '/'.$extraFile->getTargetDir();
-            $downloadManager->download($extraFile, $path);
-        }
+        $this->installUpdateExtras($installationManager->getInstallPath($package), $package);
     }
 
     public function updateExtraFiles(PackageEvent $event)
@@ -59,13 +55,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         /** @var \Composer\Package\PackageInterface $package */
         $package = $event->getOperation()->getTargetPackage();
         $installationManager = $event->getComposer()->getInstallationManager();
-        $downloadManager = $event->getComposer()->getDownloadManager();
-
-        foreach ($this->parser->parse($package) as $extraFile) {
-            $path = $installationManager->getInstallPath($package);
-            $path .= '/'.$extraFile->getTargetDir();
-            $downloadManager->download($extraFile, $path);
-        }
+        $this->installUpdateExtras($installationManager->getInstallPath($package), $package);
     }
 
     public function activate(Composer $composer, IOInterface $io)
@@ -73,4 +63,18 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         $this->composer = $composer;
         $this->io = $io;
     }
+
+    /**
+     * @param string $basePath
+     * @param PackageInterface $package
+     */
+    protected function installUpdateExtras($basePath, $package)
+    {
+        $downloadManager = $this->composer->getDownloadManager();
+        foreach ($this->parser->parse($package) as $extraFile) {
+            $targetPath = $basePath . '/' . $extraFile->getTargetDir();
+            $downloadManager->download($extraFile, $targetPath);
+        }
+    }
+
 }

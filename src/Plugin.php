@@ -37,8 +37,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            PackageEvents::POST_PACKAGE_INSTALL => 'installExtraFiles',
-            PackageEvents::POST_PACKAGE_UPDATE => 'updateExtraFiles',
+            PackageEvents::POST_PACKAGE_INSTALL => ['installExtraFiles', 10],
+            PackageEvents::POST_PACKAGE_UPDATE => ['updateExtraFiles', 10],
         ];
     }
 

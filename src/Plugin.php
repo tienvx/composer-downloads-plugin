@@ -19,6 +19,8 @@ use Composer\IO\IOInterface;
 use Composer\Package\Package;
 use Composer\Package\PackageInterface;
 use Composer\Plugin\PluginInterface;
+use Composer\Script\Event;
+use Composer\Script\ScriptEvents;
 
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
@@ -39,9 +41,25 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         return [
             PackageEvents::POST_PACKAGE_INSTALL => ['installExtraFiles', 10],
             PackageEvents::POST_PACKAGE_UPDATE => ['updateExtraFiles', 10],
+            ScriptEvents::POST_INSTALL_CMD => ['installExtraFilesRoot', 10],
+            ScriptEvents::POST_UPDATE_CMD => ['installExtraFilesRoot', 10],
         ];
     }
 
+    public function installExtraFilesRoot(Event $event) {
+        $rootPackage = $this->composer->getPackage();
+        $this->installUpdateExtras(getcwd(), $rootPackage);
+
+        // Ensure that any other packages are properly reconciled.
+        $localRepo = $this->composer->getRepositoryManager()->getLocalRepository();
+        $installationManager = $this->composer->getInstallationManager();
+        foreach ($localRepo->getCanonicalPackages() as $package) {
+            /** @var \Composer\Package\PackageInterface $package */
+            if (!empty($package->getExtra()['extra-files'])) {
+                $this->installUpdateExtras($installationManager->getInstallPath($package), $package);
+            }
+        }
+    }
     public function installExtraFiles(PackageEvent $event)
     {
         /** @var \Composer\Package\PackageInterface $package */

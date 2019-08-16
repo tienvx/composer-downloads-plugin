@@ -38,7 +38,8 @@ class ExtraFilesParser
                     $this->parseDistType($extraFile['url']),
                     $extraFile['path'],
                     $package instanceof RootPackageInterface ? $versionParser->normalize(self::FAKE_VERSION) : $package->getVersion(),
-                    $package instanceof RootPackageInterface ? self::FAKE_VERSION : $package->getPrettyVersion()
+                    $package instanceof RootPackageInterface ? self::FAKE_VERSION : $package->getPrettyVersion(),
+                    $extraFile['ignore'] ?? NULL
                 );
                 $extraFiles[] = $file;
             }

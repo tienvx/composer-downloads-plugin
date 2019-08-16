@@ -111,6 +111,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             $this->io->write(sprintf("<info>Download extra file <comment>%s</comment></info>", $extraFile->getName()));
             $downloadManager->download($extraFile, $targetPath);
 
+            GlobCleaner::clean($this->io, $targetPath, $extraFile->findIgnores($targetPath));
+
             $meta = [
                 'name' => $extraFile->getName(),
                 'url' => $extraFile->getDistUrl(),

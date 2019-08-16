@@ -23,7 +23,7 @@ For example, suppose you publish a PHP package `foo/bar` which relies on an exte
 }
 ```
 
-When a down user of `foo/bar` runs `composer install`, it will fetch and extract the zip file, creating `vendor/foo/bar/extern/examplelib`. 
+When a downstream user of `foo/bar` runs `composer install`, it will fetch and extract the zip file, creating `vendor/foo/bar/extern/examplelib`. 
 
 This does not require consumers of `foo/bar` to make any special changes in their root-level project, and it uses `composer`'s built-in cache system.
 

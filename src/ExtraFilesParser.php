@@ -29,8 +29,20 @@ class ExtraFilesParser
         $versionParser = new VersionParser();
         $extraFiles = [];
         $extra = $package->getExtra();
+
+        $defaults = $extra['extra-files']['*'] ?? [];
+        $defaults['ignore'] = $defaults['ignore'] ?? NULL;
+
         if (!empty($extra['extra-files'])) {
             foreach ((array) $extra['extra-files'] as $id => $extraFile) {
+                if ($id === '*') continue;
+
+                $vars = ['{$id}' => $id];
+                $extraFile = array_merge($defaults, $extraFile);
+                foreach (['url', 'path'] as $prop) {
+                    $extraFile[$prop] = strtr($extraFile[$prop], $vars);
+                }
+
                 $file = new ExtraFile(
                     $package,
                     $id,
@@ -39,7 +51,7 @@ class ExtraFilesParser
                     $extraFile['path'],
                     $package instanceof RootPackageInterface ? $versionParser->normalize(self::FAKE_VERSION) : $package->getVersion(),
                     $package instanceof RootPackageInterface ? self::FAKE_VERSION : $package->getPrettyVersion(),
-                    $extraFile['ignore'] ?? NULL
+                    $extraFile['ignore']
                 );
                 $extraFiles[] = $file;
             }

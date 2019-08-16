@@ -17,7 +17,6 @@ class GlobCleaner
         if (empty($ignores)) {
             return;
         }
-        $io->write("<info>TODO</info>: Cleanup [$baseDir]: " . implode(' ', $ignores));
 
         $dirs = [];
 

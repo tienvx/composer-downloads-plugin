@@ -91,6 +91,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     protected function installUpdateExtras($basePath, $package)
     {
         $downloadManager = $this->composer->getDownloadManager();
+        $first = TRUE;
         foreach ($this->parser->parse($package) as $extraFile) {
             $targetPath = $basePath . '/' . $extraFile->getTargetDir();
             $dotFile = $targetPath . DIRECTORY_SEPARATOR . self::DOT_FILE;
@@ -108,7 +109,12 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 }
             }
 
-            $this->io->write(sprintf("<info>Download extra file <comment>%s</comment></info>", $extraFile->getName()));
+            if ($first) {
+                $this->io->write(sprintf("<info>Download extra files for <comment>%s</comment></info>", $package->getName()));
+                $first = FALSE;
+            }
+
+            $this->io->write(sprintf("<info>Download extra file <comment>%s</comment></info>", $extraFile->getName()), TRUE, IOInterface::VERBOSE);
             $downloadManager->download($extraFile, $targetPath);
 
             GlobCleaner::clean($this->io, $targetPath, $extraFile->findIgnores($targetPath));

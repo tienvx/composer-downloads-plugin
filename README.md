@@ -24,7 +24,8 @@ In your package's composer.json, require this plugin, and specify the extra file
     "extra-files": {
       "ui": {
         "url": "https://registry.npmjs.org/lastcall-mannequin-ui/-/lastcall-mannequin-ui-1.0.0-rc2.tgz",
-        "path": "ui"
+        "path": "ui",
+        "ignore": ["test", "doc", ".*"]
       }
     }
   }
@@ -37,6 +38,31 @@ The `ui` identifier here is an arbitrary ID for each dependency.
 The `url` key specifies the URL to fetch the content from.  If it points to a tarball or zip file, it will be unpacked on downloading.
 
 The `path` key specifies the folder (relative to where your package is installed in `/vendor`) that the content is installed into.
+
+The `ignore` key specifies a list of a files that should be excluded.
+
+## Usage: Define default properties
+
+In this example, we set a default values for `path` and `ignore`.
+
+```json
+{
+  "extra": {
+    "extra-files": {
+      "*": {
+        "path": "packages/{$id}",
+        "ignore": ["test", "tests", "doc", "docs"]
+      },
+      "jquery": {
+        "url": "https://github.com/jquery/jquery-dist/archive/1.12.4.zip"
+      },
+      "jquery-ui": {
+        "url": "https://github.com/components/jqueryui/archive/1.12.1.zip"
+      }
+    }
+  }
+}
+```
 
 ## Usage: Download the files
 

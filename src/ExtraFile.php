@@ -26,8 +26,8 @@ class ExtraFile extends Package
 
         parent::__construct(
             sprintf('%s:%s', $parent->getName(), $id),
-            $version ?? $parent->getVersion(),
-            $prettyVersion ?? $parent->getPrettyVersion()
+            $version ? $version : $parent->getVersion(),
+            $prettyVersion ? $prettyVersion : $parent->getPrettyVersion()
         );
         $this->parent = $parent;
         $this->id = $id;

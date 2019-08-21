@@ -30,8 +30,8 @@ class ExtraFilesParser
         $extraFiles = [];
         $extra = $package->getExtra();
 
-        $defaults = $extra['extra-files']['*'] ?? [];
-        $defaults['ignore'] = $defaults['ignore'] ?? NULL;
+        $defaults = isset($extra['extra-files']['*']) ? $extra['extra-files']['*'] : [];
+        $defaults['ignore'] = isset($defaults['ignore']) ? $defaults['ignore'] : NULL;
 
         if (!empty($extra['extra-files'])) {
             foreach ((array) $extra['extra-files'] as $id => $extraFile) {

@@ -11,11 +11,11 @@ class SniffTest extends IntegrationTestCase
         return parent::getComposerJson() + [
             'name' => 'test/sniff-test',
             'require' => [
-                'lastcall/composer-extra-files' => '@dev',
+                'civicrm/composer-downloads-plugin' => '@dev',
             ],
             'minimum-stability' => 'dev',
             'extra' => [
-                'extra-files' => [
+                'downloads' => [
                     'README' => [
                         'url' => 'https://github.com/composer/composer/raw/1.9.0/README.md',
                         'path' => 'docs/README.md'

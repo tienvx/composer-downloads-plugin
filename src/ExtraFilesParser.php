@@ -31,10 +31,10 @@ class ExtraFilesParser
         $extraFiles = [];
         $extra = $package->getExtra();
 
-        $defaults = isset($extra['extra-files']['*']) ? $extra['extra-files']['*'] : [];
+        $defaults = isset($extra['downloads']['*']) ? $extra['downloads']['*'] : [];
 
-        if (!empty($extra['extra-files'])) {
-            foreach ((array) $extra['extra-files'] as $id => $extraFile) {
+        if (!empty($extra['downloads'])) {
+            foreach ((array) $extra['downloads'] as $id => $extraFile) {
                 if ($id === '*') continue;
 
                 $vars = ['{$id}' => $id];

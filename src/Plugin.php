@@ -57,7 +57,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         $installationManager = $this->composer->getInstallationManager();
         foreach ($localRepo->getCanonicalPackages() as $package) {
             /** @var \Composer\Package\PackageInterface $package */
-            if (!empty($package->getExtra()['extra-files'])) {
+            if (!empty($package->getExtra()['downloads'])) {
                 $this->installUpdateExtras($installationManager->getInstallPath($package), $package);
             }
         }

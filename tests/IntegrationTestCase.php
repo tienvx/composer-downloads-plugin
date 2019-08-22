@@ -17,7 +17,7 @@ class IntegrationTestCase extends \PHPUnit\Framework\TestCase
             ],
 
             'repositories' => [
-                'composer-extra-files' => [
+                'composer-downloads-plugin' => [
                     'type' => 'path',
                     'url' => self::getPluginSourceDir(),
                 ],
@@ -27,7 +27,7 @@ class IntegrationTestCase extends \PHPUnit\Framework\TestCase
 
     /**
      * @return string
-     *   The root folder of the composer-extra-files.
+     *   The root folder of the composer-downloads-plugin.
      */
     public static function getPluginSourceDir()
     {

@@ -22,7 +22,7 @@ class ExtraFilesParserTest extends TestCase
     {
         $package = new Package('foo', '1.0.0', '1.0.0');
         $package->setExtra([
-            'extra-files' => $extra,
+            'downloads' => $extra,
         ]);
 
         return $package;

@@ -19,7 +19,7 @@ use LastCall\ExtraFiles\Subpackage;
 abstract class BaseHandler
 {
     const FAKE_VERSION = 'dev-master';
-    const DOT_DIR = '.composer-extra-files';
+    const DOT_DIR = '.composer-downloads';
 
     /**
      * @var array

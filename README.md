@@ -1,5 +1,8 @@
-Composer Extra Files Plugin
+Composer Downloads Plugin
 ===========================
+
+> This is a fork of [lastcall/composer-extra-files](https://github.com/LastCallMedia/ComposerExtraFiles/). Some of the
+> configuration options have changed, so it has been renamed to prevent it from conflicting in real-world usage.
 
 This `composer` plugin allows you to download extra files (`*.zip` or `*.tar.gz`) and extract them within your package.
 
@@ -9,10 +12,10 @@ For example, suppose you publish a PHP package `foo/bar` which relies on an exte
 {
   "name": "foo/bar",
   "require": {
-    "lastcall/composer-extra-files": "~1.0"
+    "civicrm/composer-downloads": "~1.0"
   },
   "extra": {
-    "extra-files": {
+    "downloads": {
       "examplelib": {
         "url": "`https://example.com/examplelib-0.1.zip`",
         "path": "extern/examplelib",
@@ -36,11 +39,11 @@ If you have the ability to maintain the root `composer.json` of consumers, then 
 * [Asset Packagist](https://asset-packagist.org/)
 * [Composer Asset Plugin](https://github.com/fxpio/composer-asset-plugin)
 
-The `extra-files` approach is most appropriate if (a) you publish an intermediate (non-root) project to diverse consumers and (b) the external assets are relatively stable.
+The `downloads` approach is most appropriate if (a) you publish an intermediate (non-root) project to diverse consumers and (b) the external assets are relatively stable.
 
 ## Configuration: Properties
 
-The `extra-files` contains a list of files to download. Each extra-file as a symbolic ID (e.g. `examplelib` above) and some mix of properties:
+The `downloads` contains a list of files to download. Each extra-file as a symbolic ID (e.g. `examplelib` above) and some mix of properties:
 
 * `url`: The URL to fetch the content from.  If it points to a tarball or zip file, it will be unpacked automatically.
 
@@ -60,7 +63,7 @@ You may set default values for downloaded files using the `*` entry.
 ```json
 {
   "extra": {
-    "extra-files": {
+    "downloads": {
       "*": {
         "path": "bower_components/{$id}",
         "ignore": ["test", "tests", "doc", "docs"]
@@ -78,14 +81,14 @@ You may set default values for downloaded files using the `*` entry.
 
 ## Tips
 
-In each downloaded folder, this plugin will create a small metadata file (`.composer-extra-files.json`) to track the origin of the current code. If you modify the `composer.json` to use a different URL, then it will re-download the file.
+In each downloaded folder, this plugin will create a small metadata file (`.composer-downloads.json`) to track the origin of the current code. If you modify the `composer.json` to use a different URL, then it will re-download the file.
 
 Download each extra file to a distinct `path`. Don't try to download into overlapping paths. (*This has not been tested, but it may lead to extraneous deletions/re-downloads.*)
 
-What should you do if you *normally* download the extra-file as `*.tgz` but sometimes (for local dev) need to grab bleeding edge content from somewhere else?  Simply delete the autodownloaded folder and replace it with your own.  `composer-extra-files` will detect that conflict (by virtue of the absent `.composer-extra-files.json`) and leave your code in place (until you choose to get rid of it). To switch back, you can simply delete the code and run `composer install` again.
+What should you do if you *normally* download the extra-file as `*.tgz` but sometimes (for local dev) need to grab bleeding edge content from somewhere else?  Simply delete the autodownloaded folder and replace it with your own.  `composer-downloads` will detect that conflict (by virtue of the absent `.composer-downloads.json`) and leave your code in place (until you choose to get rid of it). To switch back, you can simply delete the code and run `composer install` again.
 
 ## Known Limitations
 
-If you use `extra-files` in a root-project (or in symlinked dev repo), it will create+update extra-files, but it will not remove orphaned items automatically.  This could be addressed by doing a file-scan for `.composer-extra-files.json` (and deleting any orphan folders).  Since the edge-case is not particularly common right now, and since a file-scan could be time-consuming, it might make sense as a separate subcommand.
+If you use `downloads` in a root-project (or in symlinked dev repo), it will create+update downloads, but it will not remove orphaned items automatically.  This could be addressed by doing a file-scan for `.composer-downloads.json` (and deleting any orphan folders).  Since the edge-case is not particularly common right now, and since a file-scan could be time-consuming, it might make sense as a separate subcommand.
 
-I believe the limitation does *not* affect downstream consumers of a dependency. In that case, the regular `composer` install/update/removal mechanics should take care of any nested extra-files. However, this is a little tricky to test right now.
+I believe the limitation does *not* affect downstream consumers of a dependency. In that case, the regular `composer` install/update/removal mechanics should take care of any nested downloads. However, this is a little tricky to test right now.

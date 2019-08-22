@@ -1,12 +1,16 @@
 {
-    "name": "lastcall/composer-extra-files",
-    "description": "Composer plugin for requiring additional files from composer packages.",
+    "name": "civicrm/composer-downloads-plugin",
+    "description": "Composer plugin for downloading additional files within any composer package.",
     "type": "composer-plugin",
     "license": "MIT",
     "authors": [
         {
             "name": "Rob Bayliss",
             "email": "rob@lastcallmedia.com"
+        },
+        {
+            "name": "Tim Otten",
+            "email": "totten@civicrm.org"
         }
     ],
     "require": {

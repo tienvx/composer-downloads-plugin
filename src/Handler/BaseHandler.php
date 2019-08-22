@@ -33,6 +33,12 @@ abstract class BaseHandler
     protected $parent;
 
     /**
+     * @var string
+     *   Path to the parent package.
+     */
+    protected $parentPath;
+
+    /**
      * @var Subpackage
      */
     protected $subpackage;
@@ -40,11 +46,13 @@ abstract class BaseHandler
     /**
      * BaseHandler constructor.
      * @param PackageInterface $parent
+     * @param string $parentPath
      * @param array $extraFile
      */
-    public function __construct(PackageInterface $parent, $extraFile)
+    public function __construct(PackageInterface $parent, $parentPath, $extraFile)
     {
         $this->parent = $parent;
+        $this->parentPath = $parentPath;
         $this->extraFile = $extraFile;
     }
 
@@ -85,19 +93,22 @@ abstract class BaseHandler
     }
 
     /**
-     * @param string $basePath
      * @return string
      */
-    public function getTargetDir($basePath)
+    public function getTargetDir()
     {
-        return $basePath . '/' . $this->getSubpackage()->getTargetDir();
+        return $this->parentPath . '/' . $this->getSubpackage()->getTargetDir();
     }
 
     /**
      * @param Composer $composer
      * @param IOInterface $io
-     * @param $basePath
      */
-    abstract public function download(Composer $composer, IOInterface $io, $basePath);
+    abstract public function download(Composer $composer, IOInterface $io);
+
+    /**
+     * @return string
+     */
+    abstract public function getTrackingFile();
 
 }

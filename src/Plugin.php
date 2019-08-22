@@ -91,11 +91,11 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     protected function installUpdateExtras($basePath, $package)
     {
         $first = TRUE;
-        foreach ($this->parser->parse($package) as $extraFileHandler) {
+        foreach ($this->parser->parse($package, $basePath) as $extraFileHandler) {
             /** @var BaseHandler $extraFileHandler */
             $extraFilePkg = $extraFileHandler->getSubpackage();
-            $targetPath = $basePath . '/' . $extraFilePkg->getTargetDir();
-            $trackingFile = $extraFileHandler->getTrackingFile($basePath, $this->composer);
+            $targetPath = $extraFileHandler->getTargetDir();
+            $trackingFile = $extraFileHandler->getTrackingFile();
 
             if (file_exists($targetPath) && !file_exists($trackingFile)) {
                 $this->io->write(sprintf("<info>Extra file <comment>%s</comment> has been locally overriden in <comment>%s</comment>. To reset it, delete and reinstall.</info>", $extraFilePkg->getName(), $extraFilePkg->getTargetDir()), TRUE);

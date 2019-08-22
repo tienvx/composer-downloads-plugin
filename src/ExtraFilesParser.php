@@ -25,7 +25,7 @@ class ExtraFilesParser
      * @return BaseHandler[]
      *   Each item is a specification of an extra file, with defaults and variables evaluated.
      */
-    public function parse(PackageInterface $package)
+    public function parse(PackageInterface $package, $basePath)
     {
         $extraFiles = [];
         $extra = $package->getExtra();
@@ -46,7 +46,7 @@ class ExtraFilesParser
                 }
 
                 $class = $this->pickClass($extraFile['url']);
-                $extraFiles[] = new $class($package, $extraFile);
+                $extraFiles[] = new $class($package, $basePath, $extraFile);
             }
         }
         

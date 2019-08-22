@@ -12,7 +12,7 @@ For example, suppose you publish a PHP package `foo/bar` which relies on an exte
 {
   "name": "foo/bar",
   "require": {
-    "civicrm/composer-downloads": "~1.0"
+    "civicrm/composer-downloads-plugin": "~1.0"
   },
   "extra": {
     "downloads": {

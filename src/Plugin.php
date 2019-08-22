@@ -24,7 +24,6 @@ use Composer\Script\ScriptEvents;
 
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
-    const DOT_FILE = '.composer-extra-files.json';
 
     /** @var Composer */
     private $composer;
@@ -94,15 +93,16 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         $first = TRUE;
         foreach ($this->parser->parse($package) as $extraFile) {
             $targetPath = $basePath . '/' . $extraFile->getTargetDir();
-            $dotFile = $targetPath . DIRECTORY_SEPARATOR . self::DOT_FILE;
+            $trackingFile = $extraFile->getTrackingFile($basePath, $this->composer);
+            $this->io->write("Tracking file ($trackingFile)");
 
-            if (file_exists($targetPath) && !file_exists($dotFile)) {
+            if (file_exists($targetPath) && !file_exists($trackingFile)) {
                 $this->io->write(sprintf("<info>Extra file <comment>%s</comment> has been locally overriden in <comment>%s</comment>. To reset it, delete and reinstall.</info>", $extraFile->getName(), $extraFile->getTargetDir()), TRUE);
                 continue;
             }
 
-            if (file_exists($targetPath) && file_exists($dotFile)) {
-                $meta = @json_decode(file_get_contents($dotFile), 1);
+            if (file_exists($targetPath) && file_exists($trackingFile)) {
+                $meta = @json_decode(file_get_contents($trackingFile), 1);
                 if ($meta['url'] === $extraFile->getDistUrl()) {
                     $this->io->write(sprintf("<info>Skip extra file <comment>%s</comment></info>", $extraFile->getName()), TRUE, IOInterface::VERY_VERBOSE);
                     continue;
@@ -123,7 +123,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 'name' => $extraFile->getName(),
                 'url' => $extraFile->getDistUrl(),
             ];
-            file_put_contents($dotFile, json_encode(
+            if (!file_exists(dirname($trackingFile))) {
+                mkdir(dirname($trackingFile), 0777, TRUE);
+            }
+            file_put_contents($trackingFile, json_encode(
                 $meta,
                 JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES
             ));

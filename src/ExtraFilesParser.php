@@ -56,7 +56,7 @@ class ExtraFilesParser
                 $extraFiles[] = $file;
             }
         }
-
+        
         return $extraFiles;
     }
 

@@ -14,9 +14,13 @@ namespace LastCall\ExtraFiles;
 use Composer\IO\IOInterface;
 use Composer\Package\Package;
 use Composer\Package\PackageInterface;
+use Composer\Package\RootPackageInterface;
 
 class ExtraFile extends Package
 {
+    const DOT_FILE = '.composer-extra-files.json';
+    const DOT_DIR = '.composer-extra-files';
+
     private $parent;
 
     protected $ignore;
@@ -46,6 +50,16 @@ class ExtraFile extends Package
     public function findIgnores($targetPath)
     {
         return $this->ignore;
+    }
+
+    public function getTrackingFile($basePath, $composer)
+    {
+        $base = ($this->getDistType() === 'file')
+            ? dirname($this->getTargetDir()) : $this->getTargetDir();
+        $file = basename($this->id) . '-' . md5($this->id) . '.json';
+        return $base .
+            DIRECTORY_SEPARATOR . self::DOT_DIR .
+            DIRECTORY_SEPARATOR . $file;
     }
 
 }

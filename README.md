@@ -48,8 +48,8 @@ The `extra-files` contains a list of files to download. Each extra-file as a sym
 
 * `type`: Determines how the download is handled
     * `archive`: The `url` references a zip or tarball which should be extracted at the given `path`. (Default for URLs involving `*.zip`, `*.tar.gz`, or `*.tgz`.)
+    * `file`: The `url` should be downloaded to the given `path`.
     * `phar`: The `url` references a PHP executable which should be installed at the given `path`.
-    * `file`: The `url` should be downloaded *under* the `path`.
 
 * `ignore`: A list of a files that should be omited from the extracted folder. (This supports a subset of `.gitignore` notation.)
 

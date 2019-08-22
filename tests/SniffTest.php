@@ -18,7 +18,7 @@ class SniffTest extends IntegrationTestCase
                 'extra-files' => [
                     'README' => [
                         'url' => 'https://github.com/composer/composer/raw/1.9.0/README.md',
-                        'path' => 'docs'
+                        'path' => 'docs/README.md'
                     ],
                     'jquery-full' => [
                         'url' => 'https://github.com/civicrm/jquery/archive/1.12.4-civicrm-1.2.zip',

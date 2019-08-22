@@ -35,7 +35,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
     public function __construct()
     {
-        $this->parser = new ExtraFilesParser();
+        $this->parser = new DownloadsParser();
     }
 
     public static function getSubscribedEvents()

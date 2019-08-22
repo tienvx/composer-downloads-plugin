@@ -17,7 +17,7 @@ use LastCall\ExtraFiles\Handler\BaseHandler;
 use LastCall\ExtraFiles\Handler\FileHandler;
 use LastCall\ExtraFiles\Handler\PharHandler;
 
-class ExtraFilesParser
+class DownloadsParser
 {
 
     /**

@@ -13,10 +13,10 @@ namespace LastCall\ExtraFiles\Tests;
 
 use Composer\Package\Package;
 use LastCall\ExtraFiles\Subpackage;
-use LastCall\ExtraFiles\ExtraFilesParser;
+use LastCall\ExtraFiles\DownloadsParser;
 use PHPUnit\Framework\TestCase;
 
-class ExtraFilesParserTest extends TestCase
+class DownloadsParserTest extends TestCase
 {
     private function getPackage(array $extra = [])
     {
@@ -31,7 +31,7 @@ class ExtraFilesParserTest extends TestCase
     public function testIgnoresPackagesWithoutExtraFiles()
     {
         $package = new Package('foo', '1.0.0', '1.0.0');
-        $parser = new ExtraFilesParser();
+        $parser = new DownloadsParser();
         $this->assertEquals([], $parser->parse($package, "/EXAMPLE"));
     }
 
@@ -42,7 +42,7 @@ class ExtraFilesParserTest extends TestCase
         ]);
         $this->assertEquals(
             [new Subpackage($package, 'bar', 'foo', 'file', 'bar')],
-            [(new ExtraFilesParser())->parse($package, "/EXAMPLE")[0]->getSubpackage()]
+            [(new DownloadsParser())->parse($package, "/EXAMPLE")[0]->getSubpackage()]
         );
     }
 
@@ -67,7 +67,7 @@ class ExtraFilesParserTest extends TestCase
         $package = $this->getPackage([
             'bar' => ['url' => $url, 'path' => 'bar'],
         ]);
-        $parsed = (new ExtraFilesParser())->parse($package, "/EXAMPLE");
+        $parsed = (new DownloadsParser())->parse($package, "/EXAMPLE");
         $this->assertEquals($expectedType, $parsed[0]->getSubpackage()->getDistType());
     }
 }

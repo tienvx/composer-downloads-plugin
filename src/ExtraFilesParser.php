@@ -15,6 +15,7 @@ use Composer\Package\PackageInterface;
 use LastCall\ExtraFiles\Handler\ArchiveHandler;
 use LastCall\ExtraFiles\Handler\BaseHandler;
 use LastCall\ExtraFiles\Handler\FileHandler;
+use LastCall\ExtraFiles\Handler\PharHandler;
 
 class ExtraFilesParser
 {
@@ -45,7 +46,7 @@ class ExtraFilesParser
                     }
                 }
 
-                $class = $this->pickClass($extraFile['url']);
+                $class = $this->pickClass($extraFile);
                 $extraFiles[] = new $class($package, $basePath, $extraFile);
             }
         }
@@ -53,14 +54,23 @@ class ExtraFilesParser
         return $extraFiles;
     }
 
-    public function pickClass($url)
+    public function pickClass($extraFile)
     {
-        $parts = parse_url($url);
-        $filename = pathinfo($parts['path'], PATHINFO_BASENAME);
-        if (preg_match('/\.(zip|tar\.gz|tgz)$/', $filename)) {
-            return ArchiveHandler::CLASS;
+        $types = [
+            'archive' => ArchiveHandler::CLASS,
+            'file' => FileHandler::CLASS,
+            'phar' => PharHandler::CLASS,
+        ];
+        if (isset($extraFile['type'], $types[$extraFile['type']])) {
+            return $types[$extraFile['type']];
         }
 
-        return FileHandler::CLASS;
+        $parts = parse_url($extraFile['url']);
+        $filename = pathinfo($parts['path'], PATHINFO_BASENAME);
+        if (preg_match('/\.(zip|tar\.gz|tgz)$/', $filename)) {
+            return $types['archive'];
+        }
+
+        return $types['file'];
     }
 }

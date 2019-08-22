@@ -12,7 +12,7 @@
 namespace LastCall\ExtraFiles\Tests;
 
 use Composer\Package\Package;
-use LastCall\ExtraFiles\ExtraFile;
+use LastCall\ExtraFiles\Subpackage;
 use LastCall\ExtraFiles\ExtraFilesParser;
 use PHPUnit\Framework\TestCase;
 
@@ -41,7 +41,7 @@ class ExtraFilesParserTest extends TestCase
             'bar' => ['url' => 'foo', 'path' => 'bar'],
         ]);
         $this->assertEquals(
-            [new ExtraFile($package, 'bar', 'foo', 'file', 'bar')],
+            [new Subpackage($package, 'bar', 'foo', 'file', 'bar')],
             (new ExtraFilesParser())->parse($package)
         );
     }

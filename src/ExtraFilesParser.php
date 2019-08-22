@@ -22,7 +22,8 @@ class ExtraFilesParser
     /**
      * @param \Composer\Package\PackageInterface $package
      *
-     * @return \LastCall\ExtraFiles\ExtraFile[]
+     * @return array[]
+     *   Each item is a specification of an extra file, with defaults and variables evaluated.
      */
     public function parse(PackageInterface $package)
     {
@@ -40,10 +41,12 @@ class ExtraFilesParser
                 $extraFile = array_merge($defaults, $extraFile);
                 $extraFile['id'] = $id;
                 foreach (['url', 'path'] as $prop) {
-                    $extraFile[$prop] = strtr($extraFile[$prop], $vars);
+                    if (isset($extraFile[$prop])) {
+                        $extraFile[$prop] = strtr($extraFile[$prop], $vars);
+                    }
                 }
 
-                $extraFiles[] = $this->createSubpackage($package, $extraFile);
+                $extraFiles[$id] = $extraFile;
             }
         }
         
@@ -53,12 +56,12 @@ class ExtraFilesParser
     /**
      * @param PackageInterface $parent
      * @param array $extraFile
-     * @return ExtraFile
+     * @return Subpackage
      */
     public function createSubpackage(PackageInterface $parent, $extraFile)
     {
         $versionParser = new VersionParser();
-        $file = new ExtraFile(
+        $file = new Subpackage(
             $parent,
             $extraFile['id'],
             $extraFile['url'],

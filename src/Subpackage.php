@@ -16,7 +16,13 @@ use Composer\Package\Package;
 use Composer\Package\PackageInterface;
 use Composer\Package\RootPackageInterface;
 
-class ExtraFile extends Package
+/**
+ * Class Subpackage
+ * @package LastCall\ExtraFiles
+ *
+ * A subpackage is simulated package which lives beneath some parent package.
+ */
+class Subpackage extends Package
 {
     const DOT_FILE = '.composer-extra-files.json';
     const DOT_DIR = '.composer-extra-files';

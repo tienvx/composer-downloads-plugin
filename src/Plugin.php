@@ -91,10 +91,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     {
         $downloadManager = $this->composer->getDownloadManager();
         $first = TRUE;
-        foreach ($this->parser->parse($package) as $extraFile) {
+        foreach ($this->parser->parse($package) as $extraFileSpec) {
+            $extraFile = $this->parser->createSubpackage($package, $extraFileSpec);
             $targetPath = $basePath . '/' . $extraFile->getTargetDir();
             $trackingFile = $extraFile->getTrackingFile($basePath, $this->composer);
-            $this->io->write("Tracking file ($trackingFile)");
 
             if (file_exists($targetPath) && !file_exists($trackingFile)) {
                 $this->io->write(sprintf("<info>Extra file <comment>%s</comment> has been locally overriden in <comment>%s</comment>. To reset it, delete and reinstall.</info>", $extraFile->getName(), $extraFile->getTargetDir()), TRUE);

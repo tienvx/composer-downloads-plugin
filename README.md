@@ -6,7 +6,7 @@ Composer Downloads Plugin
 
 This `composer` plugin allows you to download extra files (`*.zip` or `*.tar.gz`) and extract them within your package.
 
-For example, suppose you publish a PHP package `foo/bar` which relies on an external artifact (such as JS, CSS, or image library). Place this configuration in the `composer.json` for `foo/bar`:
+For example, suppose you publish a PHP package `foo/bar` which relies on an external artifact `examplelib-0.1.zip` (containing some JS, CSS, or image). Place this configuration in the `composer.json` for `foo/bar`:
 
 ```json
 {
@@ -81,14 +81,14 @@ You may set default values for downloaded files using the `*` entry.
 
 ## Tips
 
-In each downloaded folder, this plugin will create a small metadata file (`.composer-downloads.json`) to track the origin of the current code. If you modify the `composer.json` to use a different URL, then it will re-download the file.
+In each downloaded folder, this plugin will create a small metadata folder (`.composer-downloads`) to track the origin of the current code. If you modify the `composer.json` to use a different URL, then it will re-download the file.
 
 Download each extra file to a distinct `path`. Don't try to download into overlapping paths. (*This has not been tested, but it may lead to extraneous deletions/re-downloads.*)
 
-What should you do if you *normally* download the extra-file as `*.tgz` but sometimes (for local dev) need to grab bleeding edge content from somewhere else?  Simply delete the autodownloaded folder and replace it with your own.  `composer-downloads` will detect that conflict (by virtue of the absent `.composer-downloads.json`) and leave your code in place (until you choose to get rid of it). To switch back, you can simply delete the code and run `composer install` again.
+What should you do if you *normally* download the extra-file as `*.tgz` but sometimes (for local dev) need to grab bleeding edge content from somewhere else?  Simply delete the autodownloaded folder and replace it with your own.  `composer-downloads-plugin` will detect that conflict (by virtue of the absent `.composer-downloads`) and leave your code in place (until you choose to get rid of it). To switch back, you can simply delete the code and run `composer install` again.
 
 ## Known Limitations
 
-If you use `downloads` in a root-project (or in symlinked dev repo), it will create+update downloads, but it will not remove orphaned items automatically.  This could be addressed by doing a file-scan for `.composer-downloads.json` (and deleting any orphan folders).  Since the edge-case is not particularly common right now, and since a file-scan could be time-consuming, it might make sense as a separate subcommand.
+If you use `downloads` in a root-project (or in symlinked dev repo), it will create+update downloads, but it will not remove orphaned items automatically.  This could be addressed by doing a file-scan for `.composer-downloads` (and deleting any orphan folders).  Since the edge-case is not particularly common right now, and since a file-scan could be time-consuming, it might make sense as a separate subcommand.
 
-I believe the limitation does *not* affect downstream consumers of a dependency. In that case, the regular `composer` install/update/removal mechanics should take care of any nested downloads. However, this is a little tricky to test right now.
+I believe the limitation does *not* affect downstream consumers of a dependency. In that case, the regular `composer` install/update/removal mechanics should take care of any nested downloads.

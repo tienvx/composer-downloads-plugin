@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace LastCall\ExtraFiles;
+namespace LastCall\DownloadsPlugin;
 
 use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;
@@ -21,7 +21,7 @@ use Composer\Package\PackageInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
-use LastCall\ExtraFiles\Handler\BaseHandler;
+use LastCall\DownloadsPlugin\Handler\BaseHandler;
 
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
@@ -41,16 +41,16 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            PackageEvents::POST_PACKAGE_INSTALL => ['installExtraFiles', 10],
-            PackageEvents::POST_PACKAGE_UPDATE => ['updateExtraFiles', 10],
-            ScriptEvents::POST_INSTALL_CMD => ['installExtraFilesRoot', 10],
-            ScriptEvents::POST_UPDATE_CMD => ['installExtraFilesRoot', 10],
+            PackageEvents::POST_PACKAGE_INSTALL => ['installDownloads', 10],
+            PackageEvents::POST_PACKAGE_UPDATE => ['updateDownloads', 10],
+            ScriptEvents::POST_INSTALL_CMD => ['installDownloadsRoot', 10],
+            ScriptEvents::POST_UPDATE_CMD => ['installDownloadsRoot', 10],
         ];
     }
 
-    public function installExtraFilesRoot(Event $event) {
+    public function installDownloadsRoot(Event $event) {
         $rootPackage = $this->composer->getPackage();
-        $this->installUpdateExtras(getcwd(), $rootPackage);
+        $this->installUpdateDownloads(getcwd(), $rootPackage);
 
         // Ensure that any other packages are properly reconciled.
         $localRepo = $this->composer->getRepositoryManager()->getLocalRepository();
@@ -58,24 +58,24 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         foreach ($localRepo->getCanonicalPackages() as $package) {
             /** @var \Composer\Package\PackageInterface $package */
             if (!empty($package->getExtra()['downloads'])) {
-                $this->installUpdateExtras($installationManager->getInstallPath($package), $package);
+                $this->installUpdateDownloads($installationManager->getInstallPath($package), $package);
             }
         }
     }
-    public function installExtraFiles(PackageEvent $event)
+    public function installDownloads(PackageEvent $event)
     {
         /** @var \Composer\Package\PackageInterface $package */
         $package = $event->getOperation()->getPackage();
         $installationManager = $event->getComposer()->getInstallationManager();
-        $this->installUpdateExtras($installationManager->getInstallPath($package), $package);
+        $this->installUpdateDownloads($installationManager->getInstallPath($package), $package);
     }
 
-    public function updateExtraFiles(PackageEvent $event)
+    public function updateDownloads(PackageEvent $event)
     {
         /** @var \Composer\Package\PackageInterface $package */
         $package = $event->getOperation()->getTargetPackage();
         $installationManager = $event->getComposer()->getInstallationManager();
-        $this->installUpdateExtras($installationManager->getInstallPath($package), $package);
+        $this->installUpdateDownloads($installationManager->getInstallPath($package), $package);
     }
 
     public function activate(Composer $composer, IOInterface $io)
@@ -88,7 +88,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      * @param string $basePath
      * @param PackageInterface $package
      */
-    protected function installUpdateExtras($basePath, $package)
+    protected function installUpdateDownloads($basePath, $package)
     {
         $first = TRUE;
         foreach ($this->parser->parse($package, $basePath) as $extraFileHandler) {

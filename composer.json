@@ -26,15 +26,15 @@
     },
     "autoload": {
         "psr-4": {
-            "LastCall\\ExtraFiles\\": "src/"
+            "LastCall\\DownloadsPlugin\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "LastCall\\ExtraFiles\\Tests\\": "tests/"
+            "LastCall\\DownloadsPlugin\\Tests\\": "tests/"
         }
     },
     "extra": {
-        "class": "LastCall\\ExtraFiles\\Plugin"
+        "class": "LastCall\\DownloadsPlugin\\Plugin"
     }
 }

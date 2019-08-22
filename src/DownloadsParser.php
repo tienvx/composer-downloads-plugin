@@ -9,13 +9,13 @@
  * with this source code in the file LICENSE.
  */
 
-namespace LastCall\ExtraFiles;
+namespace LastCall\DownloadsPlugin;
 
 use Composer\Package\PackageInterface;
-use LastCall\ExtraFiles\Handler\ArchiveHandler;
-use LastCall\ExtraFiles\Handler\BaseHandler;
-use LastCall\ExtraFiles\Handler\FileHandler;
-use LastCall\ExtraFiles\Handler\PharHandler;
+use LastCall\DownloadsPlugin\Handler\ArchiveHandler;
+use LastCall\DownloadsPlugin\Handler\BaseHandler;
+use LastCall\DownloadsPlugin\Handler\FileHandler;
+use LastCall\DownloadsPlugin\Handler\PharHandler;
 
 class DownloadsParser
 {

@@ -1,5 +1,5 @@
 <?php
-namespace LastCall\ExtraFiles;
+namespace LastCall\DownloadsPlugin;
 
 use Composer\IO\IOInterface;
 

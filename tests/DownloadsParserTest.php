@@ -9,11 +9,11 @@
  * with this source code in the file LICENSE.
  */
 
-namespace LastCall\ExtraFiles\Tests;
+namespace LastCall\DownloadsPlugin\Tests;
 
 use Composer\Package\Package;
-use LastCall\ExtraFiles\Subpackage;
-use LastCall\ExtraFiles\DownloadsParser;
+use LastCall\DownloadsPlugin\Subpackage;
+use LastCall\DownloadsPlugin\DownloadsParser;
 use PHPUnit\Framework\TestCase;
 
 class DownloadsParserTest extends TestCase
@@ -28,7 +28,7 @@ class DownloadsParserTest extends TestCase
         return $package;
     }
 
-    public function testIgnoresPackagesWithoutExtraFiles()
+    public function testIgnoresPackagesWithoutDownloads()
     {
         $package = new Package('foo', '1.0.0', '1.0.0');
         $parser = new DownloadsParser();

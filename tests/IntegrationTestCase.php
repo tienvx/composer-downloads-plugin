@@ -1,5 +1,5 @@
 <?php
-namespace LastCall\ExtraFiles\Tests;
+namespace LastCall\DownloadsPlugin\Tests;
 
 use ProcessHelper\ProcessHelper as PH;
 

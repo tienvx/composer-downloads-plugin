@@ -6,14 +6,14 @@
  * Time: 6:31 PM
  */
 
-namespace LastCall\ExtraFiles\Handler;
+namespace LastCall\DownloadsPlugin\Handler;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Package\RootPackageInterface;
 use Composer\Package\Version\VersionParser;
-use LastCall\ExtraFiles\Subpackage;
+use LastCall\DownloadsPlugin\Subpackage;
 
 
 abstract class BaseHandler

@@ -1,6 +1,6 @@
 <?php
 
-namespace LastCall\ExtraFiles\Handler;
+namespace LastCall\DownloadsPlugin\Handler;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;

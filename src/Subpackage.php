@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace LastCall\ExtraFiles;
+namespace LastCall\DownloadsPlugin;
 
 use Composer\IO\IOInterface;
 use Composer\Package\Package;
@@ -18,7 +18,7 @@ use Composer\Package\RootPackageInterface;
 
 /**
  * Class Subpackage
- * @package LastCall\ExtraFiles
+ * @package LastCall\DownloadsPlugin
  *
  * A subpackage is simulated package which lives beneath some parent package.
  */

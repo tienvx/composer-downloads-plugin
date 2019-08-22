@@ -26,7 +26,6 @@ class ExtraFilesParser
      */
     public function parse(PackageInterface $package)
     {
-        $versionParser = new VersionParser();
         $extraFiles = [];
         $extra = $package->getExtra();
 
@@ -39,25 +38,37 @@ class ExtraFilesParser
 
                 $vars = ['{$id}' => $id];
                 $extraFile = array_merge($defaults, $extraFile);
+                $extraFile['id'] = $id;
                 foreach (['url', 'path'] as $prop) {
                     $extraFile[$prop] = strtr($extraFile[$prop], $vars);
                 }
 
-                $file = new ExtraFile(
-                    $package,
-                    $id,
-                    $extraFile['url'],
-                    $this->parseDistType($extraFile['url']),
-                    $extraFile['path'],
-                    $package instanceof RootPackageInterface ? $versionParser->normalize(self::FAKE_VERSION) : $package->getVersion(),
-                    $package instanceof RootPackageInterface ? self::FAKE_VERSION : $package->getPrettyVersion(),
-                    $extraFile['ignore']
-                );
-                $extraFiles[] = $file;
+                $extraFiles[] = $this->createSubpackage($package, $extraFile);
             }
         }
         
         return $extraFiles;
+    }
+
+    /**
+     * @param PackageInterface $parent
+     * @param array $extraFile
+     * @return ExtraFile
+     */
+    public function createSubpackage(PackageInterface $parent, $extraFile)
+    {
+        $versionParser = new VersionParser();
+        $file = new ExtraFile(
+            $parent,
+            $extraFile['id'],
+            $extraFile['url'],
+            $this->parseDistType($extraFile['url']),
+            $extraFile['path'],
+            $parent instanceof RootPackageInterface ? $versionParser->normalize(self::FAKE_VERSION) : $parent->getVersion(),
+            $parent instanceof RootPackageInterface ? self::FAKE_VERSION : $parent->getPrettyVersion(),
+            $extraFile['ignore']
+        );
+        return $file;
     }
 
     public function parseDistType($url)

@@ -32,7 +32,7 @@ class ExtraFilesParserTest extends TestCase
     {
         $package = new Package('foo', '1.0.0', '1.0.0');
         $parser = new ExtraFilesParser();
-        $this->assertEquals([], $parser->parse($package));
+        $this->assertEquals([], $parser->parse($package, "/EXAMPLE"));
     }
 
     public function testAddsFiles()
@@ -42,7 +42,7 @@ class ExtraFilesParserTest extends TestCase
         ]);
         $this->assertEquals(
             [new Subpackage($package, 'bar', 'foo', 'file', 'bar')],
-            [(new ExtraFilesParser())->parse($package)[0]->getSubpackage()]
+            [(new ExtraFilesParser())->parse($package, "/EXAMPLE")[0]->getSubpackage()]
         );
     }
 
@@ -67,7 +67,7 @@ class ExtraFilesParserTest extends TestCase
         $package = $this->getPackage([
             'bar' => ['url' => $url, 'path' => 'bar'],
         ]);
-        $parsed = (new ExtraFilesParser())->parse($package);
+        $parsed = (new ExtraFilesParser())->parse($package, "/EXAMPLE");
         $this->assertEquals($expectedType, $parsed[0]->getSubpackage()->getDistType());
     }
 }

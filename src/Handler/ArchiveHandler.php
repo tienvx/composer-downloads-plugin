@@ -33,7 +33,7 @@ class ArchiveHandler extends BaseHandler
     {
         $file = basename($this->extraFile['id']) . '-' . md5($this->extraFile['id']) . '.json';
         return
-            $this->getTargetDir() .
+            $this->getTargetPath() .
             DIRECTORY_SEPARATOR . self::DOT_DIR .
             DIRECTORY_SEPARATOR . $file;
     }
@@ -56,7 +56,7 @@ class ArchiveHandler extends BaseHandler
      */
     public function download(Composer $composer, IOInterface $io)
     {
-        $targetPath = $this->getTargetDir();
+        $targetPath = $this->getTargetPath();
         $downloadManager = $composer->getDownloadManager();
         $downloadManager->download($this->getSubpackage(), $targetPath);
         GlobCleaner::clean($io, $targetPath, $this->findIgnores());

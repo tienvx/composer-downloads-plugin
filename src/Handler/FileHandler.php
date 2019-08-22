@@ -19,7 +19,7 @@ class FileHandler extends BaseHandler
     {
         $file = basename($this->extraFile['id']) . '-' . md5($this->extraFile['id']) . '.json';
         return
-            dirname($this->getTargetDir()) .
+            $this->getTargetPath() .
             DIRECTORY_SEPARATOR . self::DOT_DIR .
             DIRECTORY_SEPARATOR . $file;
     }
@@ -30,7 +30,7 @@ class FileHandler extends BaseHandler
      */
     public function download(Composer $composer, IOInterface $io) {
         $downloadManager = $composer->getDownloadManager();
-        $downloadManager->download($this->getSubpackage(), $this->getTargetDir());
+        $downloadManager->download($this->getSubpackage(), $this->getTargetPath());
     }
 
 }

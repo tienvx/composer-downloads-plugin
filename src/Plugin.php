@@ -94,7 +94,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         foreach ($this->parser->parse($package, $basePath) as $extraFileHandler) {
             /** @var BaseHandler $extraFileHandler */
             $extraFilePkg = $extraFileHandler->getSubpackage();
-            $targetPath = $extraFileHandler->getTargetDir();
+            $targetPath = $extraFileHandler->getTargetPath();
             $trackingFile = $extraFileHandler->getTrackingFile();
 
             if (file_exists($targetPath) && !file_exists($trackingFile)) {

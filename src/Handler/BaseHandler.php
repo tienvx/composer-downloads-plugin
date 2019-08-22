@@ -95,9 +95,9 @@ abstract class BaseHandler
     /**
      * @return string
      */
-    public function getTargetDir()
+    public function getTargetPath()
     {
-        return $this->parentPath . '/' . $this->getSubpackage()->getTargetDir();
+        return $this->parentPath . '/' . $this->extraFile['path'];
     }
 
     /**

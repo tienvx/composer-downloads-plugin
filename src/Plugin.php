@@ -21,6 +21,7 @@ use Composer\Package\PackageInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
+use LastCall\ExtraFiles\Handler\BaseHandler;
 
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
@@ -89,22 +90,22 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     protected function installUpdateExtras($basePath, $package)
     {
-        $downloadManager = $this->composer->getDownloadManager();
         $first = TRUE;
-        foreach ($this->parser->parse($package) as $extraFileSpec) {
-            $extraFile = $this->parser->createSubpackage($package, $extraFileSpec);
-            $targetPath = $basePath . '/' . $extraFile->getTargetDir();
-            $trackingFile = $extraFile->getTrackingFile($basePath, $this->composer);
+        foreach ($this->parser->parse($package) as $extraFileHandler) {
+            /** @var BaseHandler $extraFileHandler */
+            $extraFilePkg = $extraFileHandler->getSubpackage();
+            $targetPath = $basePath . '/' . $extraFilePkg->getTargetDir();
+            $trackingFile = $extraFileHandler->getTrackingFile($basePath, $this->composer);
 
             if (file_exists($targetPath) && !file_exists($trackingFile)) {
-                $this->io->write(sprintf("<info>Extra file <comment>%s</comment> has been locally overriden in <comment>%s</comment>. To reset it, delete and reinstall.</info>", $extraFile->getName(), $extraFile->getTargetDir()), TRUE);
+                $this->io->write(sprintf("<info>Extra file <comment>%s</comment> has been locally overriden in <comment>%s</comment>. To reset it, delete and reinstall.</info>", $extraFilePkg->getName(), $extraFilePkg->getTargetDir()), TRUE);
                 continue;
             }
 
             if (file_exists($targetPath) && file_exists($trackingFile)) {
                 $meta = @json_decode(file_get_contents($trackingFile), 1);
-                if ($meta['url'] === $extraFile->getDistUrl()) {
-                    $this->io->write(sprintf("<info>Skip extra file <comment>%s</comment></info>", $extraFile->getName()), TRUE, IOInterface::VERY_VERBOSE);
+                if ($meta['url'] === $extraFilePkg->getDistUrl()) {
+                    $this->io->write(sprintf("<info>Skip extra file <comment>%s</comment></info>", $extraFilePkg->getName()), TRUE, IOInterface::VERY_VERBOSE);
                     continue;
                 }
             }
@@ -114,20 +115,14 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 $first = FALSE;
             }
 
-            $this->io->write(sprintf("<info>Download extra file <comment>%s</comment></info>", $extraFile->getName()), TRUE, IOInterface::VERBOSE);
-            $downloadManager->download($extraFile, $targetPath);
+            $this->io->write(sprintf("<info>Download extra file <comment>%s</comment></info>", $extraFilePkg->getName()), TRUE, IOInterface::VERBOSE);
+            $extraFileHandler->download($this->composer, $this->io, $basePath);
 
-            GlobCleaner::clean($this->io, $targetPath, $extraFile->findIgnores($targetPath));
-
-            $meta = [
-                'name' => $extraFile->getName(),
-                'url' => $extraFile->getDistUrl(),
-            ];
             if (!file_exists(dirname($trackingFile))) {
                 mkdir(dirname($trackingFile), 0777, TRUE);
             }
             file_put_contents($trackingFile, json_encode(
-                $meta,
+                $extraFileHandler->createTrackingData(),
                 JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES
             ));
         }

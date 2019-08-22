@@ -12,17 +12,17 @@
 namespace LastCall\ExtraFiles;
 
 use Composer\Package\PackageInterface;
-use Composer\Package\RootPackageInterface;
-use Composer\Package\Version\VersionParser;
+use LastCall\ExtraFiles\Handler\ArchiveHandler;
+use LastCall\ExtraFiles\Handler\BaseHandler;
+use LastCall\ExtraFiles\Handler\FileHandler;
 
 class ExtraFilesParser
 {
-    const FAKE_VERSION = 'dev-master';
 
     /**
      * @param \Composer\Package\PackageInterface $package
      *
-     * @return array[]
+     * @return BaseHandler[]
      *   Each item is a specification of an extra file, with defaults and variables evaluated.
      */
     public function parse(PackageInterface $package)
@@ -31,7 +31,6 @@ class ExtraFilesParser
         $extra = $package->getExtra();
 
         $defaults = isset($extra['extra-files']['*']) ? $extra['extra-files']['*'] : [];
-        $defaults['ignore'] = isset($defaults['ignore']) ? $defaults['ignore'] : NULL;
 
         if (!empty($extra['extra-files'])) {
             foreach ((array) $extra['extra-files'] as $id => $extraFile) {
@@ -46,45 +45,22 @@ class ExtraFilesParser
                     }
                 }
 
-                $extraFiles[$id] = $extraFile;
+                $class = $this->pickClass($extraFile['url']);
+                $extraFiles[] = new $class($package, $extraFile);
             }
         }
         
         return $extraFiles;
     }
 
-    /**
-     * @param PackageInterface $parent
-     * @param array $extraFile
-     * @return Subpackage
-     */
-    public function createSubpackage(PackageInterface $parent, $extraFile)
-    {
-        $versionParser = new VersionParser();
-        $file = new Subpackage(
-            $parent,
-            $extraFile['id'],
-            $extraFile['url'],
-            $this->parseDistType($extraFile['url']),
-            $extraFile['path'],
-            $parent instanceof RootPackageInterface ? $versionParser->normalize(self::FAKE_VERSION) : $parent->getVersion(),
-            $parent instanceof RootPackageInterface ? self::FAKE_VERSION : $parent->getPrettyVersion(),
-            $extraFile['ignore']
-        );
-        return $file;
-    }
-
-    public function parseDistType($url)
+    public function pickClass($url)
     {
         $parts = parse_url($url);
         $filename = pathinfo($parts['path'], PATHINFO_BASENAME);
-        if (preg_match('/\.zip$/', $filename)) {
-            return 'zip';
-        }
-        if (preg_match('/\.(tar\.gz|tgz)$/', $filename)) {
-            return 'tar';
+        if (preg_match('/\.(zip|tar\.gz|tgz)$/', $filename)) {
+            return ArchiveHandler::CLASS;
         }
 
-        return 'file';
+        return FileHandler::CLASS;
     }
 }

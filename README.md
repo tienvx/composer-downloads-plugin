@@ -45,16 +45,16 @@ The `downloads` approach is most appropriate if (a) you publish an intermediate 
 
 The `downloads` contains a list of files to download. Each extra-file as a symbolic ID (e.g. `examplelib` above) and some mix of properties:
 
-* `url`: The URL to fetch the content from.  If it points to a tarball or zip file, it will be unpacked automatically.
+* `url`: The URL to fetch the content from.
 
 * `path`: The releative path where content will be extracted.
 
-* `type`: Determines how the download is handled
+* `type`: (*Optional*) Determines how the download is handled
     * `archive`: The `url` references a zip or tarball which should be extracted at the given `path`. (Default for URLs involving `*.zip`, `*.tar.gz`, or `*.tgz`.)
-    * `file`: The `url` should be downloaded to the given `path`.
+    * `file`: The `url` should be downloaded to the given `path`. (Default for all other URLs.)
     * `phar`: The `url` references a PHP executable which should be installed at the given `path`.
 
-* `ignore`: A list of a files that should be omited from the extracted folder. (This supports a subset of `.gitignore` notation.)
+* `ignore`: (*Optional*) A list of a files that should be omited from the extracted folder. (This supports a subset of `.gitignore` notation.)
 
 ## Configuration: Defaults
 

@@ -72,14 +72,28 @@ abstract class BaseHandler
         $extraFile = $this->extraFile;
         $parent = $this->parent;
 
+        if (isset($extraFile['version'])) {
+            // $version = $versionParser->normalize($extraFile['version']);
+            $version = $versionParser->normalize(self::FAKE_VERSION);
+            $prettyVersion = $extraFile['version'];
+        }
+        elseif ($parent instanceof RootPackageInterface) {
+            $version = $versionParser->normalize(self::FAKE_VERSION);
+            $prettyVersion = self::FAKE_VERSION;
+        }
+        else {
+            $version = $parent->getVersion();
+            $prettyVersion = $parent->getPrettyVersion();
+        }
+
         $package = new Subpackage(
             $parent,
             $extraFile['id'],
             $extraFile['url'],
             NULL,
             $extraFile['path'],
-            $parent instanceof RootPackageInterface ? $versionParser->normalize(self::FAKE_VERSION) : $parent->getVersion(),
-            $parent instanceof RootPackageInterface ? self::FAKE_VERSION : $parent->getPrettyVersion()
+            $version,
+            $prettyVersion
         );
 
         return $package;

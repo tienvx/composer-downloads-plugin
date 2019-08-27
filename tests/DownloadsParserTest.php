@@ -40,10 +40,9 @@ class DownloadsParserTest extends TestCase
         $package = $this->getPackage([
             'bar' => ['url' => 'foo', 'path' => 'bar'],
         ]);
-        $this->assertEquals(
-            [new Subpackage($package, 'bar', 'foo', 'file', 'bar')],
-            [(new DownloadsParser())->parse($package, "/EXAMPLE")[0]->getSubpackage()]
-        );
+        $expectSubpackage = new Subpackage($package, 'bar', 'foo', 'file', 'bar');
+        $actualSubpackage = (new DownloadsParser())->parse($package, "/EXAMPLE")[0]->getSubpackage();
+        $this->assertEquals([$expectSubpackage], [$actualSubpackage]);
     }
 
     public function getDownloadTypeTests()

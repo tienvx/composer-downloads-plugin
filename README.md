@@ -56,6 +56,14 @@ The `downloads` contains a list of files to download. Each extra-file as a symbo
 
 * `ignore`: (*Optional*) A list of a files that should be omited from the extracted folder. (This supports a subset of `.gitignore` notation.)
 
+* `version`: (*Optional*) A version number for the downloaded artifact. This has no functional impact on the lifecycle of the artifact, but
+   it can affect the console output, and it can be optionally used as a variable when setting `url` or `path`.
+
+Values in `url` and `path` support the following variables:
+
+* `{$id}`: The symbolic identifier of the download. (In the introductory example, it would be `examplelib`.)
+* `{$version}`: The displayed/simulated/pretty version number of the package.
+
 ## Configuration: Defaults
 
 You may set default values for downloaded files using the `*` entry.

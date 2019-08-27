@@ -25,7 +25,8 @@ class SniffTest extends IntegrationTestCase
                         'path' => 'extern/jquery-full',
                     ],
                     'jquery-lesser' => [
-                        'url' => 'https://github.com/civicrm/jquery/archive/1.12.4-civicrm-1.2.zip',
+                        'version' => '1.12.4-civicrm-1.2',
+                        'url' => 'https://github.com/civicrm/jquery/archive/{$version}.zip',
                         'path' => 'extern/jquery-lesser',
                         'ignore' => ['Gruntfile.js']
                     ],
@@ -42,7 +43,7 @@ class SniffTest extends IntegrationTestCase
     public static function setUpBeforeClass() {
         parent::setUpBeforeClass();
         self::initTestProject(static::getComposerJson());
-        PH::runOk('composer install');
+        PH::runOk('composer install -v');
     }
 
     public function getExampleChecksums() {

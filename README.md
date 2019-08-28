@@ -4,9 +4,11 @@ Composer Downloads Plugin
 > This is a fork of [lastcall/composer-extra-files](https://github.com/LastCallMedia/ComposerExtraFiles/). Some of the
 > configuration options have changed, so it has been renamed to prevent it from conflicting in real-world usage.
 
-This `composer` plugin allows you to download extra files (`*.zip` or `*.tar.gz`) and extract them within your package.
+The "Downloads" plugin allows you to download extra files (`*.zip` or `*.tar.gz`) and extract them within your package. It is simple, fast, and isolated.
 
-For example, suppose you publish a PHP package `foo/bar` which relies on an external artifact `examplelib-0.1.zip` (containing some JS, CSS, or image). Place this configuration in the `composer.json` for `foo/bar`:
+## Example
+
+Suppose you publish a PHP package `foo/bar` which relies on an external artifact `examplelib-0.1.zip`. Place this configuration in the `composer.json` for `foo/bar`:
 
 ```json
 {
@@ -28,18 +30,22 @@ For example, suppose you publish a PHP package `foo/bar` which relies on an exte
 
 When a downstream user of `foo/bar` runs `composer install`, it will fetch and extract the zip file, creating `vendor/foo/bar/extern/examplelib`. 
 
-This does not require consumers of `foo/bar` to make any special changes in their root-level project, and it uses `composer`'s built-in cache system.
+## Evaluation
 
-## When should I use this?
+The primary strengths of `composer-downloads-plugin` are:
 
-The most common use-case is if you have compiled front-end code, where the compiled version is never committed to a git repository, and therefore isn't registered on packagist.org.  For example, if you want your distributed package to depend on an NPM/Bower package.
+* __Simple__: It downloads a URL (ZIP/TAR file) and extracts it. It only needs to know two things: *what to download* (`url`) and *where to put it* (`path`). It runs as pure-PHP without any external dependencies.
+* __Fast__: It does not require scanning, indexing, or mapping any large registries. It uses `composer`'s built-in caching system.
+* __Isolated__: As the author of a package `foo/bar`, you define the content under the `vendor/foo/bar` folder. When others use `foo/bar`, there is no need for special instructions, no root-level configuration, no interaction with other packages.
 
-If you have the ability to maintain the root `composer.json` of consumers, then consider these alternatives -- when using multiple NPM/Bower packages, they provide more robust functionality (such as automatic updates and version-constraints).
+The "Downloads" plugin is only a download mechanism. Use it to *assimilate* an external resource as part of a `composer` package.
+
+The "Downloads" plugin is __not__ a *dependency management system*. There is no logic to scan registries, resolve transitive dependencies, identify version-conflicts, etc among diverse external resources.  If you need that functionality, then you may want a *bridge* to integrate `composer` with an external dependency management tool. A few good bridges to consider:
 
 * [Asset Packagist](https://asset-packagist.org/)
 * [Composer Asset Plugin](https://github.com/fxpio/composer-asset-plugin)
-
-The `downloads` approach is most appropriate if (a) you publish an intermediate (non-root) project to diverse consumers and (b) the external assets are relatively stable.
+* [Composer Bower Plugin](https://github.com/php-kit/composer-bower-plugin)
+* [Foxy](https://github.com/fxpio/foxy)
 
 ## Configuration: Properties
 

@@ -35,7 +35,7 @@ When a downstream user of `foo/bar` runs `composer install`, it will fetch and e
 The primary strengths of `composer-downloads-plugin` are:
 
 * __Simple__: It downloads a URL (ZIP/TAR file) and extracts it. It only needs to know two things: *what to download* (`url`) and *where to put it* (`path`). It runs as pure-PHP without any external dependencies.
-* __Fast__: It does not require scanning, indexing, or mapping any large registries. It uses `composer`'s built-in caching system.
+* __Fast__: The logic does not require scanning, indexing, or mapping any large registries. The download system uses `composer`'s built-in cache.
 * __Isolated__: As the author of a package `foo/bar`, you define the content under the `vendor/foo/bar` folder. When others use `foo/bar`, there is no need for special instructions, no root-level configuration, no interaction with other packages.
 
 The "Downloads" plugin is only a download mechanism. Use it to *assimilate* an external resource as part of a `composer` package.

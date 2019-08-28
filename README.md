@@ -14,12 +14,12 @@ Suppose you publish a PHP package `foo/bar` which relies on an external artifact
 {
   "name": "foo/bar",
   "require": {
-    "civicrm/composer-downloads-plugin": "~1.0"
+    "civicrm/composer-downloads-plugin": "~2.1"
   },
   "extra": {
     "downloads": {
       "examplelib": {
-        "url": "`https://example.com/examplelib-0.1.zip`",
+        "url": "https://example.com/examplelib-0.1.zip",
         "path": "extern/examplelib",
         "ignore": ["test", "doc", ".*"]
       }

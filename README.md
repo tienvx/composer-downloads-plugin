@@ -1,10 +1,11 @@
 Composer Downloads Plugin
 ===========================
 
-> This is a fork of [lastcall/composer-extra-files](https://github.com/LastCallMedia/ComposerExtraFiles/). Some of the
-> configuration options have changed, so it has been renamed to prevent it from conflicting in real-world usage.
-
 The "Downloads" plugin allows you to download extra files (`*.zip` or `*.tar.gz`) and extract them within your package.
+
+This is an updated version of [lastcall/composer-extra-files](https://github.com/LastCallMedia/ComposerExtraFiles/).
+It adds integration tests, fixes some bugs, and makes a few other improvements. Some of the
+configuration options have changed, so it has been renamed to prevent it from conflicting in real-world usage.
 
 ## Example
 
@@ -49,7 +50,7 @@ The "Downloads" plugin is __not__ a *dependency management system*. There is no 
 
 ## Configuration: Properties
 
-The `downloads` contains a list of files to download. Each extra-file as a symbolic ID (e.g. `examplelib` above) and some mix of properties:
+The `extra.downloads` section contains a list of files to download. Each extra-file has a symbolic ID (e.g. `examplelib` above) and some mix of properties:
 
 * `url`: The URL to fetch the content from.
 
@@ -95,11 +96,33 @@ You may set default values for downloaded files using the `*` entry.
 
 ## Tips
 
-In each downloaded folder, this plugin will create a small metadata folder (`.composer-downloads`) to track the origin of the current code. If you modify the `composer.json` to use a different URL, then it will re-download the file.
+* In each downloaded folder, this plugin will create a small metadata folder (`.composer-downloads`) to track the origin of the current code. If you modify the `composer.json` to use a different URL, then it will re-download the file.
 
-Download each extra file to a distinct `path`. Don't try to download into overlapping paths. (*This has not been tested, but it may lead to extraneous deletions/re-downloads.*)
+* Download each extra file to a distinct `path`. Don't try to download into overlapping paths. (*This has not been tested, but I expect downloads are not well-ordered, and you may find that updates require re-downloading.*)
 
-What should you do if you *normally* download the extra-file as `*.tgz` but sometimes (for local dev) need to grab bleeding edge content from somewhere else?  Simply delete the autodownloaded folder and replace it with your own.  `composer-downloads-plugin` will detect that conflict (by virtue of the absent `.composer-downloads`) and leave your code in place (until you choose to get rid of it). To switch back, you can simply delete the code and run `composer install` again.
+* What should you do if you *normally* download the extra-file as `*.tar.gz` but sometimes (for local dev) need to grab bleeding edge content from somewhere else?  Simply delete the autodownloaded folder and replace it with your own.  `composer-downloads-plugin` will detect that conflict (by virtue of the absent `.composer-downloads`) and leave your code in place (until you choose to get rid of it). To switch back, you can simply delete the code and run `composer install` again.
+
+* I've used this as an off-ramp/replacement for `bower`:
+    * The `composer.json` looks a bit like this:
+        ```json
+        "extra": {
+          "downloads": {
+            "*": {
+              "path": "bower_components/{$id}"
+            },
+            "angular": {
+              "url": "https://github.com/angular/bower-angular/archive/v1.5.11.zip"
+            },
+            "angular-bootstrap": {
+              "url": "https://github.com/angular-ui/bootstrap-bower/archive/2.5.0.zip"
+            },
+            "angular-file-upload": {
+              "url": "https://github.com/nervgh/angular-file-upload/archive/v1.1.6.zip",
+              "ignore": ["examples"]
+            }
+        }
+        ```
+    * To determine the download URL of each bower project, run `bower info <project>`. This will usually give a Github project for which the URL can be quickly guessed.
 
 ## Known Limitations
 

@@ -73,7 +73,7 @@ Values in `url` and `path` support the following variables:
 
 ## Configuration: Defaults
 
-You may set default values for downloaded files using the `*` entry.
+You may set default properties for all downloads. Place them under `*`, as in:
 
 ```json
 {
@@ -94,6 +94,11 @@ You may set default values for downloaded files using the `*` entry.
 }
 ```
 
+This example will:
+
+* Create `bower_components/jquery` (based on jQuery 1.12.4), minus any test/doc folders.
+* Create `bower_components/jquery-ui` (based on jQueryUI 1.12.1), minus any test/doc folders.
+
 ## Tips
 
 * In each downloaded folder, this plugin will create a small metadata folder (`.composer-downloads`) to track the origin of the current code. If you modify the `composer.json` to use a different URL, then it will re-download the file.
@@ -101,28 +106,6 @@ You may set default values for downloaded files using the `*` entry.
 * Download each extra file to a distinct `path`. Don't try to download into overlapping paths. (*This has not been tested, but I expect downloads are not well-ordered, and you may find that updates require re-downloading.*)
 
 * What should you do if you *normally* download the extra-file as `*.tar.gz` but sometimes (for local dev) need to grab bleeding edge content from somewhere else?  Simply delete the autodownloaded folder and replace it with your own.  `composer-downloads-plugin` will detect that conflict (by virtue of the absent `.composer-downloads`) and leave your code in place (until you choose to get rid of it). To switch back, you can simply delete the code and run `composer install` again.
-
-* I've used this as an off-ramp/replacement for `bower`:
-    * The `composer.json` looks a bit like this:
-        ```json
-        "extra": {
-          "downloads": {
-            "*": {
-              "path": "bower_components/{$id}"
-            },
-            "angular": {
-              "url": "https://github.com/angular/bower-angular/archive/v1.5.11.zip"
-            },
-            "angular-bootstrap": {
-              "url": "https://github.com/angular-ui/bootstrap-bower/archive/2.5.0.zip"
-            },
-            "angular-file-upload": {
-              "url": "https://github.com/nervgh/angular-file-upload/archive/v1.1.6.zip",
-              "ignore": ["examples"]
-            }
-        }
-        ```
-    * To determine the download URL of each bower project, run `bower info <project>`. This will usually give a Github project for which the URL can be quickly guessed.
 
 ## Known Limitations
 

@@ -103,7 +103,24 @@ abstract class BaseHandler
         return [
             'name' => $this->getSubpackage()->getName(),
             'url' => $this->getSubpackage()->getDistUrl(),
+            'checksum' => $this->getChecksum(),
         ];
+    }
+
+    /**
+     * @return string
+     *   A unique identifier for this configuration of this asset.
+     *   If the identifier changes, that implies that the asset should be
+     *   replaced/redownloaded.
+     */
+    public function getChecksum() {
+        $extraFile = $this->extraFile;
+        return hash('sha256', serialize([
+            get_class($this),
+            $extraFile['id'],
+            $extraFile['url'],
+            $extraFile['path'],
+        ]));
     }
 
     /**

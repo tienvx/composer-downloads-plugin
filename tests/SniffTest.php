@@ -4,6 +4,14 @@ namespace LastCall\DownloadsPlugin\Tests;
 
 use ProcessHelper\ProcessHelper as PH;
 
+/**
+ * Class SniffTest
+ * @package LastCall\DownloadsPlugin\Tests
+ *
+ * This is general integration test of the plugin. It creates an example project which uses the
+ * current/under-development plugin. The example project includes a handful of downloads which
+ * employ a cross-section of the configuration options.
+ */
 class SniffTest extends IntegrationTestCase
 {
 
@@ -16,13 +24,15 @@ class SniffTest extends IntegrationTestCase
             'minimum-stability' => 'dev',
             'extra' => [
                 'downloads' => [
+                    '*' => [
+                        'path' => 'extern/{$id}',
+                    ],
                     'README' => [
                         'url' => 'https://github.com/composer/composer/raw/1.9.0/README.md',
                         'path' => 'docs/README.md'
                     ],
                     'jquery-full' => [
                         'url' => 'https://github.com/civicrm/jquery/archive/1.12.4-civicrm-1.2.zip',
-                        'path' => 'extern/jquery-full',
                     ],
                     'jquery-lesser' => [
                         'version' => '1.12.4-civicrm-1.2',

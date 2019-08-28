@@ -100,3 +100,49 @@ What should you do if you *normally* download the extra-file as `*.tgz` but some
 If you use `downloads` in a root-project (or in symlinked dev repo), it will create+update downloads, but it will not remove orphaned items automatically.  This could be addressed by doing a file-scan for `.composer-downloads` (and deleting any orphan folders).  Since the edge-case is not particularly common right now, and since a file-scan could be time-consuming, it might make sense as a separate subcommand.
 
 I believe the limitation does *not* affect downstream consumers of a dependency. In that case, the regular `composer` install/update/removal mechanics should take care of any nested downloads.
+
+## Automated Tests
+
+The `tests/` folder includes unit-tests and integration-tests written with
+PHPUnit.  Each integration-test generates a new folder/project with a
+plausible, representative `composer.json` file and executes `composer
+install`.  It checks the output has the expected files.
+
+To run the tests, you will need `composer` and `phpunit` in the `PATH`.
+
+```
+[~/src/composer-downloads-plugin] which composer
+/Users/myuser/bin/composer
+
+[~/src/composer-downloads-plugin] which phpunit
+/Users/myuser/bin/phpunit
+
+[~/src/composer-downloads-plugin] phpunit
+PHPUnit 5.7.27 by Sebastian Bergmann and contributors.
+
+.....                                                               5 / 5 (100%)
+
+Time: 40.35 seconds, Memory: 10.00MB
+
+OK (5 tests, 7 assertions)
+```
+
+The integration tests can be a bit large/slow. To monitor the tests more
+closesly, set the `DEBUG` variable, as in:
+
+```
+[~/src/composer-downloads-plugin] env DEBUG=2 phpunit
+```
+
+## Local Dev Harness
+
+What if you want to produce an environment which uses the current plugin
+code - one where you can quickly re-run `composer` commands while
+iterating on code?
+
+You may use any of the integration-tests to initialize a baseline
+environment:
+
+```
+env USE_TEST_PROJECT=$HOME/src/myprj DEBUG=2 phpunit tests/SniffTest.php
+```

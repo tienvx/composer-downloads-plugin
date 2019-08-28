@@ -87,7 +87,7 @@ class SniffTest extends IntegrationTestCase
             unlink($path);
         }
         $this->assertFileNotExists($file);
-        PH::runOk('composer install');
+        PH::runOk('composer install -v');
 
         // And make sure it all worked out...
         $this->assertFileChecksum($file, $sha256, 'Redownload');

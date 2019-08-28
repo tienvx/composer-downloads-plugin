@@ -4,7 +4,7 @@ Composer Downloads Plugin
 > This is a fork of [lastcall/composer-extra-files](https://github.com/LastCallMedia/ComposerExtraFiles/). Some of the
 > configuration options have changed, so it has been renamed to prevent it from conflicting in real-world usage.
 
-The "Downloads" plugin allows you to download extra files (`*.zip` or `*.tar.gz`) and extract them within your package. It is simple, fast, and isolated.
+The "Downloads" plugin allows you to download extra files (`*.zip` or `*.tar.gz`) and extract them within your package.
 
 ## Example
 

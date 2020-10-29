@@ -53,7 +53,7 @@ class SniffTest extends IntegrationTestCase
     public static function setUpBeforeClass() {
         parent::setUpBeforeClass();
         self::initTestProject(static::getComposerJson());
-      $composer_path = self::getComposerPath();
+        $composer_path = self::getComposerPath();
         PH::runOk("$composer_path install -v");
     }
 

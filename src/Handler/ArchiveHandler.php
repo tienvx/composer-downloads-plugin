@@ -2,11 +2,9 @@
 
 namespace LastCall\DownloadsPlugin\Handler;
 
-use Clue\React\Block;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use LastCall\DownloadsPlugin\GlobCleaner;
-use React\Promise\PromiseInterface;
 
 class ArchiveHandler extends BaseHandler
 {
@@ -81,8 +79,7 @@ class ArchiveHandler extends BaseHandler
           $composer->getLoop()->wait([$promise]);
           $promise = $downloadManager->install($this->getSubpackage(), $targetPath);
           $composer->getLoop()->wait([$promise]);
-        }
-        else {
+        } else {
           $downloadManager->download($this->getSubpackage(), $targetPath);
         }
         GlobCleaner::clean($io, $targetPath, $this->findIgnores());

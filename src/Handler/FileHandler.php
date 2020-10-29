@@ -49,20 +49,17 @@ class FileHandler extends BaseHandler
         $pkg = clone $this->getSubpackage();
         $pkg->setTargetDir($tmpDir);
         $downloadManager = $composer->getDownloadManager();
-        $promise = $downloadManager->download($pkg, $tmpDir);
-
         // composer:v2
-        if ($promise instanceof PromiseInterface) {
-          $file = '';
-          $promise->then(static function($res) use (&$file) {
-            $file = $res;
+        if (version_compare(Composer::getVersion(), '2.0.0') >= 0) {
+          $promise = $downloadManager->download($pkg, $tmpDir);
+          $promise->then(static function($res) use ($cfs, $target, $tmpDir) {
+            $cfs->rename($res, $target);
+            $cfs->remove($tmpDir);
           });
-          $composer->getLoop()->wait([$promise]);
-          $cfs->rename($file, $target);
-          $cfs->remove($tmpDir);
         }
         // composer:v1
         else {
+          $downloadManager->download($pkg, $tmpDir);
           foreach ((array)glob("$tmpDir/*") as $file) {
             if (is_file($file)) {
               $cfs->rename($file, $target);

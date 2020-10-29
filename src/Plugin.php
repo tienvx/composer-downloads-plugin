@@ -126,7 +126,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             }
 
             $this->io->write(sprintf("<info>Download extra file <comment>%s</comment></info>", $extraFilePkg->getName()), TRUE, IOInterface::VERBOSE);
-            $extraFileHandler->download($this->composer, $this->io, $basePath);
+            $extraFileHandler->download($this->composer, $this->io);
 
             if (!file_exists(dirname($trackingFile))) {
                 mkdir(dirname($trackingFile), 0777, TRUE);

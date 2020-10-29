@@ -2,9 +2,11 @@
 
 namespace LastCall\DownloadsPlugin\Handler;
 
+use Clue\React\Block;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use LastCall\DownloadsPlugin\GlobCleaner;
+use React\Promise\PromiseInterface;
 
 class ArchiveHandler extends BaseHandler
 {
@@ -72,7 +74,15 @@ class ArchiveHandler extends BaseHandler
     {
         $targetPath = $this->getTargetPath();
         $downloadManager = $composer->getDownloadManager();
-        $downloadManager->download($this->getSubpackage(), $targetPath);
+        $promise = $downloadManager->download($this->getSubpackage(), $targetPath);
+        if ($promise instanceof PromiseInterface) {
+          // @todo $dest is the raw archive. did old downloader unpack it?
+          $dest = '';
+          $promise->then(static function ($res) use (&$dest) {
+            $dest = $res;
+          });
+          $composer->getLoop()->wait([$promise]);
+        }
         GlobCleaner::clean($io, $targetPath, $this->findIgnores());
     }
 

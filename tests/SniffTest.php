@@ -53,7 +53,7 @@ class SniffTest extends IntegrationTestCase
     public static function setUpBeforeClass() {
         parent::setUpBeforeClass();
         self::initTestProject(static::getComposerJson());
-        PH::runOk('composer install -v');
+        PH::runOk('COMPOSER_ALLOW_XDEBUG=1 composer install -v');
     }
 
     public function getExampleChecksums() {
@@ -87,7 +87,7 @@ class SniffTest extends IntegrationTestCase
             unlink($path);
         }
         $this->assertFileNotExists($file);
-        PH::runOk('composer install -v');
+        PH::runOk('COMPOSER_ALLOW_XDEBUG=1 composer install -v');
 
         // And make sure it all worked out...
         $this->assertFileChecksum($file, $sha256, 'Redownload');

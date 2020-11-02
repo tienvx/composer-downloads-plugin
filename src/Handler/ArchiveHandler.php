@@ -72,7 +72,16 @@ class ArchiveHandler extends BaseHandler
     {
         $targetPath = $this->getTargetPath();
         $downloadManager = $composer->getDownloadManager();
-        $downloadManager->download($this->getSubpackage(), $targetPath);
+
+        // In composer:v2, download and extract were separated.
+        if (version_compare(Composer::getVersion(), '2.0.0') >= 0) {
+          $promise = $downloadManager->download($this->getSubpackage(), $targetPath);
+          $composer->getLoop()->wait([$promise]);
+          $promise = $downloadManager->install($this->getSubpackage(), $targetPath);
+          $composer->getLoop()->wait([$promise]);
+        } else {
+          $downloadManager->download($this->getSubpackage(), $targetPath);
+        }
         GlobCleaner::clean($io, $targetPath, $this->findIgnores());
     }
 

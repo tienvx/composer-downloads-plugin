@@ -53,7 +53,8 @@ class SniffTest extends IntegrationTestCase
     public static function setUpBeforeClass() {
         parent::setUpBeforeClass();
         self::initTestProject(static::getComposerJson());
-        PH::runOk('composer install -v');
+        $composer_path = self::getComposerPath();
+        PH::runOk("$composer_path install -v");
     }
 
     public function getExampleChecksums() {
@@ -87,7 +88,8 @@ class SniffTest extends IntegrationTestCase
             unlink($path);
         }
         $this->assertFileNotExists($file);
-        PH::runOk('composer install -v');
+        $composer_path = self::getComposerPath();
+        PH::runOk("$composer_path install -v");
 
         // And make sure it all worked out...
         $this->assertFileChecksum($file, $sha256, 'Redownload');
@@ -101,6 +103,10 @@ class SniffTest extends IntegrationTestCase
             $this->assertFileExists($file, "($message) File should exist");
             $this->assertEquals($sha256, hash('sha256', file_get_contents($file)), "($message) File should given checksum");
         }
+    }
+
+    private static function getComposerPath() {
+      return realpath(__DIR__ . '/../vendor/bin/composer');
     }
 
 }

@@ -74,7 +74,8 @@ class ArchiveHandler extends BaseHandler
         $downloadManager = $composer->getDownloadManager();
 
         // In composer:v2, download and extract were separated.
-        if (version_compare(Composer::getVersion(), '2.0.0') >= 0) {
+        $version = method_exists(Composer::class, 'getVersion') ? Composer::getVersion() : Composer::VERSION;
+        if (version_compare($version, '2.0.0') >= 0) {
           $promise = $downloadManager->download($this->getSubpackage(), $targetPath);
           $composer->getLoop()->wait([$promise]);
           $promise = $downloadManager->install($this->getSubpackage(), $targetPath);

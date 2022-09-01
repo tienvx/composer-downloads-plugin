@@ -1,9 +1,12 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: totten
- * Date: 8/21/19
- * Time: 6:31 PM
+
+/*
+ * This file is part of Composer Extra Files Plugin.
+ *
+ * (c) 2017 Last Call Media, Rob Bayliss <rob@lastcallmedia.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
  */
 
 namespace LastCall\DownloadsPlugin\Handler;
@@ -15,15 +18,14 @@ use Composer\Package\RootPackageInterface;
 use Composer\Package\Version\VersionParser;
 use LastCall\DownloadsPlugin\Subpackage;
 
-
 abstract class BaseHandler
 {
-    const FAKE_VERSION = 'dev-master';
-    const DOT_DIR = '.composer-downloads';
+    public const FAKE_VERSION = 'dev-master';
+    public const DOT_DIR = '.composer-downloads';
 
     /**
      * @var array
-     *   File specification from composer.json, with defaults/substitutions applied.
+     *            File specification from composer.json, with defaults/substitutions applied.
      */
     protected $extraFile;
 
@@ -34,7 +36,7 @@ abstract class BaseHandler
 
     /**
      * @var string
-     *   Path to the parent package.
+     *             Path to the parent package
      */
     protected $parentPath;
 
@@ -45,9 +47,9 @@ abstract class BaseHandler
 
     /**
      * BaseHandler constructor.
-     * @param PackageInterface $parent
+     *
      * @param string $parentPath
-     * @param array $extraFile
+     * @param array  $extraFile
      */
     public function __construct(PackageInterface $parent, $parentPath, $extraFile)
     {
@@ -56,10 +58,12 @@ abstract class BaseHandler
         $this->extraFile = $extraFile;
     }
 
-    public function getSubpackage() {
-        if ($this->subpackage === NULL) {
+    public function getSubpackage()
+    {
+        if (null === $this->subpackage) {
             $this->subpackage = $this->createSubpackage();
         }
+
         return $this->subpackage;
     }
 
@@ -76,12 +80,10 @@ abstract class BaseHandler
             // $version = $versionParser->normalize($extraFile['version']);
             $version = $versionParser->normalize(self::FAKE_VERSION);
             $prettyVersion = $extraFile['version'];
-        }
-        elseif ($parent instanceof RootPackageInterface) {
+        } elseif ($parent instanceof RootPackageInterface) {
             $version = $versionParser->normalize(self::FAKE_VERSION);
             $prettyVersion = self::FAKE_VERSION;
-        }
-        else {
+        } else {
             $version = $parent->getVersion();
             $prettyVersion = $parent->getPrettyVersion();
         }
@@ -90,7 +92,7 @@ abstract class BaseHandler
             $parent,
             $extraFile['id'],
             $extraFile['url'],
-            NULL,
+            null,
             $extraFile['path'],
             $version,
             $prettyVersion
@@ -99,7 +101,8 @@ abstract class BaseHandler
         return $package;
     }
 
-    public function createTrackingData() {
+    public function createTrackingData()
+    {
         return [
             'name' => $this->getSubpackage()->getName(),
             'url' => $this->getSubpackage()->getDistUrl(),
@@ -109,14 +112,16 @@ abstract class BaseHandler
 
     /**
      * @return string
-     *   A unique identifier for this configuration of this asset.
-     *   If the identifier changes, that implies that the asset should be
-     *   replaced/redownloaded.
+     *                A unique identifier for this configuration of this asset.
+     *                If the identifier changes, that implies that the asset should be
+     *                replaced/redownloaded.
      */
-    public function getChecksum() {
+    public function getChecksum()
+    {
         $extraFile = $this->extraFile;
+
         return hash('sha256', serialize([
-            get_class($this),
+            static::class,
             $extraFile['id'],
             $extraFile['url'],
             $extraFile['path'],
@@ -128,18 +133,13 @@ abstract class BaseHandler
      */
     public function getTargetPath()
     {
-        return $this->parentPath . '/' . $this->extraFile['path'];
+        return $this->parentPath.'/'.$this->extraFile['path'];
     }
 
-    /**
-     * @param Composer $composer
-     * @param IOInterface $io
-     */
     abstract public function download(Composer $composer, IOInterface $io);
 
     /**
      * @return string
      */
     abstract public function getTrackingFile();
-
 }

@@ -19,12 +19,9 @@ use LastCall\DownloadsPlugin\Handler\PharHandler;
 
 class DownloadsParser
 {
-
     /**
-     * @param \Composer\Package\PackageInterface $package
-     *
-     * @return BaseHandler[]
-     *   Each item is a specification of an extra file, with defaults and variables evaluated.
+     * @return baseHandler[]
+     *                       Each item is a specification of an extra file, with defaults and variables evaluated
      */
     public function parse(PackageInterface $package, $basePath)
     {
@@ -35,7 +32,9 @@ class DownloadsParser
 
         if (!empty($extra['downloads'])) {
             foreach ((array) $extra['downloads'] as $id => $extraFile) {
-                if ($id === '*') continue;
+                if ('*' === $id) {
+                    continue;
+                }
 
                 $extraFile = array_merge($defaults, $extraFile);
                 $extraFile['id'] = $id;
@@ -52,23 +51,23 @@ class DownloadsParser
                 $extraFiles[] = new $class($package, $basePath, $extraFile);
             }
         }
-        
+
         return $extraFiles;
     }
 
     public function pickClass($extraFile)
     {
         $types = [
-            'archive' => ArchiveHandler::CLASS,
-            'file' => FileHandler::CLASS,
-            'phar' => PharHandler::CLASS,
+            'archive' => ArchiveHandler::class,
+            'file' => FileHandler::class,
+            'phar' => PharHandler::class,
         ];
         if (isset($extraFile['type'], $types[$extraFile['type']])) {
             return $types[$extraFile['type']];
         }
 
         $parts = parse_url($extraFile['url']);
-        $filename = pathinfo($parts['path'], PATHINFO_BASENAME);
+        $filename = pathinfo($parts['path'], \PATHINFO_BASENAME);
         if (preg_match('/\.(zip|tar\.gz|tgz)$/', $filename)) {
             return $types['archive'];
         }

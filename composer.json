@@ -21,7 +21,7 @@
     "require-dev": {
         "composer/composer": "~1.0 || ~2.0",
         "phpunit/phpunit": "^8.5 || ^9.5",
-        "friendsofphp/php-cs-fixer": "^2.3",
+        "friendsofphp/php-cs-fixer": "~3.4.0",
         "totten/process-helper": "^1.0.1"
     },
     "autoload": {

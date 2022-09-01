@@ -11,31 +11,25 @@
 
 namespace LastCall\DownloadsPlugin;
 
-use Composer\IO\IOInterface;
 use Composer\Package\Package;
 use Composer\Package\PackageInterface;
-use Composer\Package\RootPackageInterface;
 
 /**
- * Class Subpackage
- * @package LastCall\DownloadsPlugin
- *
- * A subpackage is simulated package which lives beneath some parent package.
+ * Class Subpackage.
  */
 class Subpackage extends Package
 {
-
     /**
      * @var PackageInterface
      */
     private $parent;
 
-    public function __construct(PackageInterface $parent, $id, $url, $type, $path, $version = NULL, $prettyVersion = NULL)
+    public function __construct(PackageInterface $parent, $id, $url, $type, $path, $version = null, $prettyVersion = null)
     {
         parent::__construct(
             sprintf('%s:%s', $parent->getName(), $id),
-            $version ? $version : $parent->getVersion(),
-            $prettyVersion ? $prettyVersion : $parent->getPrettyVersion()
+            $version ?: $parent->getVersion(),
+            $prettyVersion ?: $parent->getPrettyVersion()
         );
         $this->parent = $parent;
         $this->id = $id;
@@ -44,5 +38,4 @@ class Subpackage extends Package
         $this->setTargetDir($path);
         $this->setInstallationSource('dist');
     }
-
 }

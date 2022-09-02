@@ -16,6 +16,8 @@ use LastCall\DownloadsPlugin\Handler\ArchiveHandler;
 use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\PharHandler;
+use LastCall\DownloadsPlugin\Variables\DefaultVariablesProvider;
+use LastCall\DownloadsPlugin\Variables\VariablesProviderInterface;
 
 class DownloadsParser
 {
@@ -39,12 +41,19 @@ class DownloadsParser
 
                 $extraFile = array_merge($defaults, $extraFile);
                 $extraFile['id'] = $id;
+                $variablesProvider = is_a(
+                        $extraFile['variables_provider'] ?? '',
+                        VariablesProviderInterface::class,
+                        true
+                    ) ?
+                    $extraFile['variables_provider'] :
+                    DefaultVariablesProvider::class;
                 foreach (['url', 'path'] as $prop) {
                     if (isset($extraFile[$prop])) {
-                        $extraFile[$prop] = strtr($extraFile[$prop], [
-                            '{$id}' => $extraFile['id'],
-                            '{$version}' => isset($extraFile['version']) ? $extraFile['version'] : '',
-                        ]);
+                        $extraFile[$prop] = strtr(
+                            $extraFile[$prop],
+                            \call_user_func([$variablesProvider, 'getAll'], $extraFile)
+                        );
                     }
                 }
 

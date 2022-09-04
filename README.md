@@ -43,7 +43,15 @@ When a downstream user of `foo/bar` runs `composer require foo/bar`, it will dow
 * `path`: The releative path where content will be extracted.
 
 * `type`: (*Optional*) Determines how the download is handled. If omit, the extension in `url` will be used to detect.
-    * `archive`: The archive file `url` will be downloaded and extracted to `path`.
+    * `archive`: The archive file `url` will be downloaded and extracted to `path`. Supported extensions:
+      * `*.zip`
+      * `*.rar`
+      * `*.tar.xz`
+      * `*.tar.gz`
+      * `*.tar.bz2`
+      * `*.tar`
+      * `*.gz`
+      * `*.tgz`
     * `file`: The file `url` will be downloaded and placed at `path`.
     * `phar`: The PHP executable file `url` will be downloaded and placed at `path`.
 

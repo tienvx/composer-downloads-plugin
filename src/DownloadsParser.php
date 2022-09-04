@@ -68,7 +68,7 @@ class DownloadsParser
 
         $parts = parse_url($extraFile['url']);
         $filename = pathinfo($parts['path'], PATHINFO_BASENAME);
-        if (preg_match('/\.(zip|tar\.gz|tgz)$/', $filename)) {
+        if (preg_match('/\.(zip|rar|tar|gz|tgz|bz2|xz)$/', $filename)) {
             return $types['archive'];
         }
 

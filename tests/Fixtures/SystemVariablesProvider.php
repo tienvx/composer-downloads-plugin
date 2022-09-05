@@ -28,6 +28,7 @@ class SystemVariablesProvider extends DefaultVariablesProvider implements Variab
             ],
             'Darwin' => [
                 'x86_64' => 'all',
+                'arm64' => 'all',
             ],
         ];
         $extensionMap = [

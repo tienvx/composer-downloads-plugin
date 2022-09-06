@@ -16,8 +16,8 @@ use LastCall\DownloadsPlugin\Handler\ArchiveHandler;
 use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\PharHandler;
-use LastCall\DownloadsPlugin\Variables\DefaultVariablesProvider;
-use LastCall\DownloadsPlugin\Variables\VariablesProviderInterface;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 
 class DownloadsParser
 {
@@ -41,19 +41,9 @@ class DownloadsParser
 
                 $extraFile = array_merge($defaults, $extraFile);
                 $extraFile['id'] = $id;
-                $variablesProvider = is_a(
-                        $extraFile['variables_provider'] ?? '',
-                        VariablesProviderInterface::class,
-                        true
-                    ) ?
-                    $extraFile['variables_provider'] :
-                    DefaultVariablesProvider::class;
                 foreach (['url', 'path'] as $prop) {
                     if (isset($extraFile[$prop])) {
-                        $extraFile[$prop] = strtr(
-                            $extraFile[$prop],
-                            \call_user_func([$variablesProvider, 'getAll'], $extraFile)
-                        );
+                        $extraFile[$prop] = strtr($extraFile[$prop], $this->getVariables($extraFile));
                     }
                 }
 
@@ -65,7 +55,7 @@ class DownloadsParser
         return $extraFiles;
     }
 
-    public function pickClass($extraFile)
+    protected function pickClass(array $extraFile): string
     {
         $types = [
             'archive' => ArchiveHandler::CLASS,
@@ -83,5 +73,30 @@ class DownloadsParser
         }
 
         return $types['file'];
+    }
+
+    protected function getVariables(array $extraFile): array
+    {
+        $variables = [
+            '{$id}' => $extraFile['id'],
+            '{$version}' => $extraFile['version'] ?? '',
+        ];
+        if (!empty($extraFile['variables'])) {
+            $expressionLanguage = new ExpressionLanguage();
+            $expressionLanguage->addFunction(ExpressionFunction::fromPhp('strtolower'));
+            $expressionLanguage->addFunction(ExpressionFunction::fromPhp('php_uname'));
+            foreach ((array) $extraFile['variables'] as $key => $value) {
+                if (!preg_match('/^{\$[^}]+}$/', $key)) {
+                    throw new \UnexpectedValueException(sprintf('Expected variable key in this format "{$variable-name}", "%s" given.', $key));
+                }
+                $result = $expressionLanguage->evaluate($value);
+                if (!is_string($result)) {
+                    throw new \UnexpectedValueException(sprintf('Expected the the result of expression "%s" to be a string, "%s" given.', $value, get_debug_type($result)));
+                }
+                $variables[$key] = $result;
+            }
+        }
+
+        return $variables;
     }
 }

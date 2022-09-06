@@ -66,9 +66,9 @@ The `extra.downloads` section contains a list of files to download. Each extra-f
 * `version`: (*Optional*) A version number for the downloaded artifact. This has no functional impact on the lifecycle of the artifact, but
    it can affect the console output, and it can be optionally used as a variable when setting `url` or `path`.
 
-* `variables_provider`: (*Optional*) A class name that implement `LastCall\DownloadsPlugin\Variables\VariablesProviderInterface`. Allow setting new variables with custom logic.
+* `variables`: (*Optional*) List of custom variables. Each variable has id in format `{$variable-name}` and value in [Expression Syntax](https://symfony.com/doc/current/components/expression_language/syntax.html) that should be evaluated into a `string`.
 
-Values in `url` and `path` support the following variables:
+Values in `url` and `path` support the following default variables:
 
 * `{$id}`: The symbolic identifier of the download. (In the introductory example, it would be `examplelib`.)
 * `{$version}`: The displayed/simulated/pretty version number of the package.

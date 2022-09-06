@@ -48,7 +48,11 @@ class SniffTest extends IntegrationTestCase
                     'symfony-cli' => [
                         'type' => 'archive',
                         'version' => 'v5.4.13',
-                        'variables_provider' => '\\LastCall\\DownloadsPlugin\\Tests\\Fixtures\\SystemVariablesProvider',
+                        'variables' => [
+                            '{$os}' => 'strtolower(constant("PHP_OS_FAMILY"))',
+                            '{$architecture}' => 'constant("PHP_OS_FAMILY") === "Darwin" ? "all" : (php_uname("m") in ["AMD64", "x86_64"] ? "amd64" : php_uname("m"))',
+                            '{$extension}' => 'constant("PHP_OS_FAMILY") === "Windows" ? "zip" : "tar.gz"',
+                        ],
                         'url' => 'https://github.com/symfony-cli/symfony-cli/releases/download/{$version}/symfony-cli_{$os}_{$architecture}.{$extension}',
                         'path' => 'extern/{$id}',
                         'ignore' => ['LICENSE', 'README.md'],

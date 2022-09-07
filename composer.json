@@ -24,7 +24,7 @@
         "leongrdic/smplang": "^1.0"
     },
     "require-dev": {
-        "composer/composer": "~1.0 || ~2.0",
+        "composer/composer": "~1.6 || ~2.0",
         "phpunit/phpunit": "^9.5",
         "friendsofphp/php-cs-fixer": "^3.4",
         "symfony/process": "^5.4 || ^6.1"

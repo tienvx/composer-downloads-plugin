@@ -12,7 +12,9 @@
 namespace LastCall\DownloadsPlugin\Tests\Unit;
 
 use Composer\Package\Package;
+use Composer\Package\Version\VersionParser;
 use LastCall\DownloadsPlugin\DownloadsParser;
+use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Subpackage;
 use PHPUnit\Framework\TestCase;
 
@@ -159,7 +161,8 @@ class DownloadsParserTest extends TestCase
         $package = $this->getPackage([
             'bar' => ['url' => $url, 'path' => 'bar', 'variables' => $variables, 'version' => '1.2.3'],
         ]);
-        $expectSubpackage = new Subpackage($package, 'bar', $expectedUrl, 'zip', 'bar', 'dev-master', '1.2.3');
+        $versionParser = new VersionParser();
+        $expectSubpackage = new Subpackage($package, 'bar', $expectedUrl, 'zip', 'bar', $versionParser->normalize(BaseHandler::FAKE_VERSION), '1.2.3');
         $actualSubpackage = (new DownloadsParser())->parse($package, '/EXAMPLE')[0]->getSubpackage();
         $this->assertEquals($expectSubpackage, $actualSubpackage);
     }

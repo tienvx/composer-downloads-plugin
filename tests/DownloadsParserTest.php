@@ -69,4 +69,93 @@ class DownloadsParserTest extends TestCase
         $parsed = (new DownloadsParser())->parse($package, "/EXAMPLE");
         $this->assertEquals($expectedType, $parsed[0]->getSubpackage()->getDistType());
     }
+
+    public function getInvalidVariableKeyTests()
+    {
+        return [
+            ['baz'],
+            ['$baz'],
+            ['{baz}'],
+            ['${baz}'],
+            ['{$baz'],
+            ['$baz}'],
+        ];
+    }
+
+    /**
+     * @dataProvider getInvalidVariableKeyTests
+     */
+    public function testInvalidVariableKey(string $invalidVariableKey)
+    {
+        $package = $this->getPackage([
+            'bar' => [
+                'url' => "http://example.com/foo-$invalidVariableKey.zip",
+                'path' => 'bar',
+                'variables' => [
+                    $invalidVariableKey => '"baz"',
+                ],
+            ],
+        ]);
+        $this->expectException(\UnexpectedValueException::class);
+        $this->expectDeprecationMessage(sprintf('Expected variable key in this format "{$variable-name}", "%s" given.', $invalidVariableKey));
+        (new DownloadsParser())->parse($package, "/EXAMPLE");
+    }
+
+    public function getInvalidVariableValueTests()
+    {
+        return [
+            ["{ foo: 'bar' }", 'array'],
+            ["['foo', 'baz']", 'array'],
+            ['true', 'bool'],
+            ['false', 'bool'],
+            ['null', 'null'],
+            ['123', 'int'],
+            ['1.92', 'float'],
+            ['1e-2', 'float'],
+        ];
+    }
+
+    /**
+     * @dataProvider getInvalidVariableValueTests
+     */
+    public function testInvalidVariableValue(string $invalidVariableValue, string $type)
+    {
+        $package = $this->getPackage([
+            'bar' => [
+                'url' => 'http://example.com/foo-{$baz}.zip',
+                'path' => 'bar',
+                'variables' => [
+                    '{$baz}' => $invalidVariableValue,
+                ],
+            ],
+        ]);
+        $this->expectException(\UnexpectedValueException::class);
+        $this->expectDeprecationMessage(sprintf('Expected the the result of expression "%s" to be a string, "%s" given.', $invalidVariableValue, $type));
+        (new DownloadsParser())->parse($package, "/EXAMPLE");
+    }
+
+    public function getVariableTests()
+    {
+        return [
+            ['http://example.com/foo.zip', 'http://example.com/foo.zip', ['{$foo}' => '"foo"']],
+            ['http://example.com/{$bar}.zip', 'http://example.com/{$bar}.zip', ['{$foo}' => '"foo"']],
+            ['http://example.com/foo.zip', 'http://example.com/{$foo}.zip', ['{$foo}' => '"foo"']],
+            ['http://example.com/foo-bar-1.2.3.zip', 'http://example.com/{$foo}-{$id}-{$version}.zip', ['{$foo}' => '"foo"']],
+            ['http://example.com/foo-{$bar}.zip', 'http://example.com/{$foo}-{$bar}.zip', ['{$foo}' => '"foo"']],
+            ['http://example.com/foo-bar-baz.zip', 'http://example.com/{$foo}-{$bar}.zip', ['{$foo}' => '"foo"', '{$bar}' => '"bar"~"-"~"baz"']],
+        ];
+    }
+
+    /**
+     * @dataProvider getVariableTests
+     */
+    public function testReplacesVariables($expectedUrl, $url, $variables)
+    {
+        $package = $this->getPackage([
+            'bar' => ['url' => $url, 'path' => 'bar', 'variables' => $variables, 'version' => '1.2.3'],
+        ]);
+        $expectSubpackage = new Subpackage($package, 'bar', $expectedUrl, 'zip', 'bar', 'dev-master', '1.2.3');
+        $actualSubpackage = (new DownloadsParser())->parse($package, "/EXAMPLE")[0]->getSubpackage();
+        $this->assertEquals([$expectSubpackage], [$actualSubpackage]);
+    }
 }

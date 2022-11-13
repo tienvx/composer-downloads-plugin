@@ -156,6 +156,6 @@ class DownloadsParserTest extends TestCase
         ]);
         $expectSubpackage = new Subpackage($package, 'bar', $expectedUrl, 'zip', 'bar', 'dev-master', '1.2.3');
         $actualSubpackage = (new DownloadsParser())->parse($package, "/EXAMPLE")[0]->getSubpackage();
-        $this->assertEquals([$expectSubpackage], [$actualSubpackage]);
+        $this->assertEquals($expectSubpackage, $actualSubpackage);
     }
 }

@@ -12,12 +12,13 @@
 namespace LastCall\DownloadsPlugin;
 
 use Composer\Package\PackageInterface;
+use LastCall\DownloadsPlugin\ExpressionLanguage\ExpressionFunctionProvider;
 use LastCall\DownloadsPlugin\Handler\ArchiveHandler;
 use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\PharHandler;
-use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
+use LastCall\DownloadsPlugin\ExpressionLanguage\ExpressionLanguage;
 
 class DownloadsParser
 {
@@ -82,14 +83,18 @@ class DownloadsParser
             '{$version}' => $extraFile['version'] ?? '',
         ];
         if (!empty($extraFile['variables'])) {
-            $expressionLanguage = new ExpressionLanguage();
-            $expressionLanguage->addFunction(ExpressionFunction::fromPhp('strtolower'));
-            $expressionLanguage->addFunction(ExpressionFunction::fromPhp('php_uname'));
+            $expressionLanguage = new ExpressionLanguage(null, [
+                new ExpressionFunctionProvider(),
+            ]);
             foreach ((array) $extraFile['variables'] as $key => $value) {
                 if (!preg_match('/^{\$[^}]+}$/', $key)) {
                     throw new \UnexpectedValueException(sprintf('Expected variable key in this format "{$variable-name}", "%s" given.', $key));
                 }
-                $result = $expressionLanguage->evaluate($value);
+                $result = $expressionLanguage->evaluate($value, [
+                    'PHP_OS' => PHP_OS,
+                    'PHP_OS_FAMILY' => PHP_OS_FAMILY,
+                    'PHP_SHLIB_SUFFIX' => PHP_SHLIB_SUFFIX,
+                ]);
                 if (!is_string($result)) {
                     throw new \UnexpectedValueException(sprintf('Expected the the result of expression "%s" to be a string, "%s" given.', $value, get_debug_type($result)));
                 }

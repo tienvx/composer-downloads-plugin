@@ -57,6 +57,10 @@ class SniffTest extends IntegrationTestCase
                         'path' => 'extern/{$id}',
                         'ignore' => ['LICENSE', 'README.md'],
                     ],
+                    'jpeg.documents' => [
+                        'url' => 'https://www.ijg.org/files/jpeg.documents.gz',
+                        'path' => 'docs/jpeg'
+                    ],
                 ],
             ],
             'config' => [
@@ -98,6 +102,7 @@ class SniffTest extends IntegrationTestCase
             ['extern/jquery-lesser', 'extern/jquery-lesser/Gruntfile.js', NULL],
             ['bin/cv', 'bin/cv', 'bf162d5d7dd0bef087d7dd07f474039b2e25c4bcca328a2b2097958ac6294476'],
             ['extern/symfony-cli', $fileMap[\PHP_OS_FAMILY]['file'], $fileMap[\PHP_OS_FAMILY]['sha256']],
+            ['docs/jpeg', 'docs/jpeg/jpeg.documents', '551ffc93efc23d3eab35a8b4347273dd44664ee4e1419d7cb732fa9756c9bf87'],
         ];
     }
 

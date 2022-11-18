@@ -51,9 +51,14 @@ class DownloadsParserTest extends TestCase
             ['zip', 'foo.zip'],
             ['zip', 'foo.zip?foo'],
             ['zip', 'http://example.com/foo.zip?abc#def'],
+            ['rar', 'foo.rar'],
+            ['xz', 'foo.tar.xz'],
             ['tar', 'foo.tar.gz'],
             ['tar', 'http://example.com/foo.tar.gz?abc#def'],
+            ['tar', 'foo.tar.bz2'],
             ['tar', 'foo.tgz'],
+            ['tar', 'foo.tar'],
+            ['gzip', 'foo.gz'],
             ['file', 'foo'],
         ];
     }

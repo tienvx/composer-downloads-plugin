@@ -22,8 +22,14 @@ class ArchiveHandler extends BaseHandler
         $filename = pathinfo($parts['path'], PATHINFO_BASENAME);
         if (preg_match('/\.zip$/', $filename)) {
             return 'zip';
-        } elseif (preg_match('/\.(tar\.gz|tgz)$/', $filename)) {
+        } if (preg_match('/\.rar$/', $filename)) {
+            return 'rar';
+        } if (preg_match('/\.tar\.xz$/', $filename)) {
+            return 'xz';
+        } elseif (preg_match('/\.(tar\.gz|tar\.bz2|tgz|tar)$/', $filename)) {
             return 'tar';
+        } elseif (preg_match('/\.gz$/', $filename)) {
+            return 'gzip';
         } else {
             throw new \RuntimeException("Failed to determine archive type for $filename");
         }

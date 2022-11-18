@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace LastCall\DownloadsPlugin\Tests;
+namespace LastCall\DownloadsPlugin\Tests\Unit;
 
 use Composer\Package\Package;
 use LastCall\DownloadsPlugin\Subpackage;
@@ -104,7 +104,7 @@ class DownloadsParserTest extends TestCase
     public function getInvalidVariableValueTests()
     {
         return [
-            ["{ foo: 'bar' }", 'array'],
+            ["{ foo: 'bar' }", 'stdClass'],
             ["['foo', 'baz']", 'array'],
             ['true', 'bool'],
             ['false', 'bool'],

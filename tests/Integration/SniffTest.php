@@ -1,6 +1,6 @@
 <?php
 
-namespace LastCall\DownloadsPlugin\Tests;
+namespace LastCall\DownloadsPlugin\Tests\Integration;
 
 use ProcessHelper\ProcessHelper as PH;
 
@@ -50,7 +50,7 @@ class SniffTest extends IntegrationTestCase
                         'version' => 'v5.4.13',
                         'variables' => [
                             '{$os}' => 'strtolower(PHP_OS_FAMILY)',
-                            '{$architecture}' => 'PHP_OS_FAMILY === "Darwin" ? "all" : (php_uname("m") in ["AMD64", "x86_64"] ? "amd64" : php_uname("m"))',
+                            '{$architecture}' => 'PHP_OS_FAMILY === "Darwin" ? "all" : (in_array(php_uname("m"), ["AMD64", "x86_64"]) ? "amd64" : php_uname("m"))',
                             '{$extension}' => 'PHP_OS_FAMILY === "Windows" ? "zip" : "tar.gz"',
                         ],
                         'url' => 'https://github.com/symfony-cli/symfony-cli/releases/download/{$version}/symfony-cli_{$os}_{$architecture}.{$extension}',
@@ -120,7 +120,7 @@ class SniffTest extends IntegrationTestCase
         else {
             unlink($path);
         }
-        $this->assertFileNotExists($file);
+        $this->assertFileDoesNotExist($file);
         $composer_path = self::getComposerPath();
         PH::runOk("$composer_path install -v");
 
@@ -130,7 +130,7 @@ class SniffTest extends IntegrationTestCase
 
     public function assertFileChecksum($file, $sha256, $message = NULL) {
         if ($sha256 === NULL) {
-            $this->assertFileNotExists($file, "($message) File should not exist");
+            $this->assertFileDoesNotExist($file, "($message) File should not exist");
         }
         else {
             $this->assertFileExists($file, "($message) File should exist");
@@ -139,7 +139,7 @@ class SniffTest extends IntegrationTestCase
     }
 
     private static function getComposerPath() {
-      return realpath(__DIR__ . '/../vendor/bin/composer');
+      return realpath(__DIR__ . '/../../vendor/bin/composer');
     }
 
 }

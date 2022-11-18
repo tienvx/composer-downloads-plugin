@@ -12,13 +12,11 @@
 namespace LastCall\DownloadsPlugin;
 
 use Composer\Package\PackageInterface;
-use LastCall\DownloadsPlugin\ExpressionLanguage\ExpressionFunctionProvider;
 use LastCall\DownloadsPlugin\Handler\ArchiveHandler;
 use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\PharHandler;
-use Symfony\Component\ExpressionLanguage\ExpressionFunction;
-use LastCall\DownloadsPlugin\ExpressionLanguage\ExpressionLanguage;
+use Le\SMPLang\SMPLang;
 
 class DownloadsParser
 {
@@ -83,18 +81,23 @@ class DownloadsParser
             '{$version}' => $extraFile['version'] ?? '',
         ];
         if (!empty($extraFile['variables'])) {
-            $expressionLanguage = new ExpressionLanguage(null, [
-                new ExpressionFunctionProvider(),
+            $smpl = new SMPLang([
+                'strtolower' => strtolower(...),
+                'php_uname' => php_uname(...),
+                'in_array' => in_array(...),
+                'str_contains' => str_contains(...),
+                'str_starts_with' => str_starts_with(...),
+                'str_ends_with' => str_ends_with(...),
+                'matches' => fn (string $pattern, string $subject) => preg_match($pattern, $subject) === 1,
+                'PHP_OS' => PHP_OS,
+                'PHP_OS_FAMILY' => PHP_OS_FAMILY,
+                'PHP_SHLIB_SUFFIX' => PHP_SHLIB_SUFFIX,
             ]);
             foreach ((array) $extraFile['variables'] as $key => $value) {
                 if (!preg_match('/^{\$[^}]+}$/', $key)) {
                     throw new \UnexpectedValueException(sprintf('Expected variable key in this format "{$variable-name}", "%s" given.', $key));
                 }
-                $result = $expressionLanguage->evaluate($value, [
-                    'PHP_OS' => PHP_OS,
-                    'PHP_OS_FAMILY' => PHP_OS_FAMILY,
-                    'PHP_SHLIB_SUFFIX' => PHP_SHLIB_SUFFIX,
-                ]);
+                $result = $smpl->evaluate($value);
                 if (!is_string($result)) {
                     throw new \UnexpectedValueException(sprintf('Expected the the result of expression "%s" to be a string, "%s" given.', $value, get_debug_type($result)));
                 }

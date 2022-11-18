@@ -16,6 +16,8 @@ use LastCall\DownloadsPlugin\Handler\ArchiveHandler;
 use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\PharHandler;
+use Le\SMPLang\SMPLang;
+use Closure;
 
 class DownloadsParser
 {
@@ -41,10 +43,7 @@ class DownloadsParser
                 $extraFile['id'] = $id;
                 foreach (['url', 'path'] as $prop) {
                     if (isset($extraFile[$prop])) {
-                        $extraFile[$prop] = strtr($extraFile[$prop], [
-                            '{$id}' => $extraFile['id'],
-                            '{$version}' => isset($extraFile['version']) ? $extraFile['version'] : '',
-                        ]);
+                        $extraFile[$prop] = strtr($extraFile[$prop], $this->getVariables($extraFile));
                     }
                 }
 
@@ -56,7 +55,7 @@ class DownloadsParser
         return $extraFiles;
     }
 
-    public function pickClass($extraFile)
+    protected function pickClass(array $extraFile): string
     {
         $types = [
             'archive' => ArchiveHandler::CLASS,
@@ -74,5 +73,39 @@ class DownloadsParser
         }
 
         return $types['file'];
+    }
+
+    protected function getVariables(array $extraFile): array
+    {
+        $variables = [
+            '{$id}' => $extraFile['id'],
+            '{$version}' => $extraFile['version'] ?? '',
+        ];
+        if (!empty($extraFile['variables'])) {
+            $smpl = new SMPLang([
+                'strtolower' => Closure::fromCallable('strtolower'),
+                'php_uname' => Closure::fromCallable('php_uname'),
+                'in_array' => Closure::fromCallable('in_array'),
+                'str_contains' => Closure::fromCallable('str_contains'),
+                'str_starts_with' => Closure::fromCallable('str_starts_with'),
+                'str_ends_with' => Closure::fromCallable('str_ends_with'),
+                'matches' => fn (string $pattern, string $subject) => preg_match($pattern, $subject) === 1,
+                'PHP_OS' => PHP_OS,
+                'PHP_OS_FAMILY' => PHP_OS_FAMILY,
+                'PHP_SHLIB_SUFFIX' => PHP_SHLIB_SUFFIX,
+            ]);
+            foreach ((array) $extraFile['variables'] as $key => $value) {
+                if (!preg_match('/^{\$[^}]+}$/', $key)) {
+                    throw new \UnexpectedValueException(sprintf('Expected variable key in this format "{$variable-name}", "%s" given.', $key));
+                }
+                $result = $smpl->evaluate($value);
+                if (!is_string($result)) {
+                    throw new \UnexpectedValueException(sprintf('Expected the the result of expression "%s" to be a string, "%s" given.', $value, get_debug_type($result)));
+                }
+                $variables[$key] = $result;
+            }
+        }
+
+        return $variables;
     }
 }

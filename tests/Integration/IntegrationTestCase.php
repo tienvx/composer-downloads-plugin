@@ -1,5 +1,5 @@
 <?php
-namespace LastCall\DownloadsPlugin\Tests;
+namespace LastCall\DownloadsPlugin\Tests\Integration;
 
 use ProcessHelper\ProcessHelper as PH;
 
@@ -95,7 +95,11 @@ class IntegrationTestCase extends \PHPUnit\Framework\TestCase
      */
     protected static function cleanDir($dir)
     {
-        PH::runOk(['if [ -d @DIR ]; then rm -rf @DIR ; fi', 'DIR' => $dir]);
+        if (PHP_OS_FAMILY === 'Windows') {
+            PH::runOk(['if exist @DIR ( rm -rf @DIR )', 'DIR' => $dir]);
+        } else {
+            PH::runOk(['if [ -d @DIR ]; then rm -rf @DIR ; fi', 'DIR' => $dir]);
+        }
     }
 
     public function assertSameFileContent($expected, $actual)

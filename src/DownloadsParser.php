@@ -17,6 +17,7 @@ use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\PharHandler;
 use Le\SMPLang\SMPLang;
+use Closure;
 
 class DownloadsParser
 {
@@ -82,12 +83,12 @@ class DownloadsParser
         ];
         if (!empty($extraFile['variables'])) {
             $smpl = new SMPLang([
-                'strtolower' => strtolower(...),
-                'php_uname' => php_uname(...),
-                'in_array' => in_array(...),
-                'str_contains' => str_contains(...),
-                'str_starts_with' => str_starts_with(...),
-                'str_ends_with' => str_ends_with(...),
+                'strtolower' => Closure::fromCallable('strtolower'),
+                'php_uname' => Closure::fromCallable('php_uname'),
+                'in_array' => Closure::fromCallable('in_array'),
+                'str_contains' => Closure::fromCallable('str_contains'),
+                'str_starts_with' => Closure::fromCallable('str_starts_with'),
+                'str_ends_with' => Closure::fromCallable('str_ends_with'),
                 'matches' => fn (string $pattern, string $subject) => preg_match($pattern, $subject) === 1,
                 'PHP_OS' => PHP_OS,
                 'PHP_OS_FAMILY' => PHP_OS_FAMILY,

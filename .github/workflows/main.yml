@@ -25,8 +25,8 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
             php-version: ${{ matrix.php }}
-            extensions: dom, curl, libxml, mbstring, zip, pdo, mysql, pdo_mysql, bcmath, soap, intl, gd, exif, iconv
-            coverage: none
+            extensions: curl, zip
+            coverage: pcov
             tools: composer:${{ matrix.composer }}
       - name: Validate composer.json
         run: composer validate
@@ -36,3 +36,10 @@ jobs:
         run: ./vendor/bin/php-cs-fixer fix --diff --dry-run
       - name: Run tests
         run: ./vendor/bin/phpunit
+      - name: Upload coverage results to Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          composer global require php-coveralls/php-coveralls
+          php-coveralls --coverage_clover=clover.xml -v
+        if: ${{ github.event_name == 'push' && matrix.php == '8.1' }}

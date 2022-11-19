@@ -6,15 +6,10 @@ use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Util\Platform;
 
-
 class PharHandler extends FileHandler
 {
-
-    /**
-     * @param Composer $composer
-     * @param IOInterface $io
-     */
-    public function download(Composer $composer, IOInterface $io) {
+    public function download(Composer $composer, IOInterface $io)
+    {
         parent::download($composer, $io);
 
         if (Platform::isWindows()) {
@@ -23,6 +18,4 @@ class PharHandler extends FileHandler
             chmod($this->getTargetPath(), 0777 ^ umask());
         }
     }
-
-
 }

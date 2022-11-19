@@ -26,8 +26,9 @@
     "require-dev": {
         "composer/composer": "~1.0 || ~2.0",
         "phpunit/phpunit": "^9.5",
-        "friendsofphp/php-cs-fixer": "^2.3",
-        "totten/process-helper": "^1.0.1"
+        "friendsofphp/php-cs-fixer": "^3.4",
+        "symfony/filesystem": "^5.4 || ^6.1",
+        "symfony/process": "^5.4 || ^6.1"
     },
     "autoload": {
         "psr-4": {

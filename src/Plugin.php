@@ -16,7 +16,6 @@ use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Installer\PackageEvent;
 use Composer\Installer\PackageEvents;
 use Composer\IO\IOInterface;
-use Composer\Package\Package;
 use Composer\Package\PackageInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
@@ -25,7 +24,6 @@ use LastCall\DownloadsPlugin\Handler\BaseHandler;
 
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
-
     /** @var Composer */
     private $composer;
     /** @var IOInterface */
@@ -48,7 +46,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         ];
     }
 
-    public function installDownloadsRoot(Event $event) {
+    public function installDownloadsRoot(Event $event)
+    {
         $rootPackage = $this->composer->getPackage();
         $this->installUpdateDownloads(getcwd(), $rootPackage);
 
@@ -62,6 +61,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             }
         }
     }
+
     public function installDownloads(PackageEvent $event)
     {
         /** @var \Composer\Package\PackageInterface $package */
@@ -95,12 +95,12 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     }
 
     /**
-     * @param string $basePath
+     * @param string           $basePath
      * @param PackageInterface $package
      */
     protected function installUpdateDownloads($basePath, $package)
     {
-        $first = TRUE;
+        $first = true;
         foreach ($this->parser->parse($package, $basePath) as $extraFileHandler) {
             /** @var BaseHandler $extraFileHandler */
             $extraFilePkg = $extraFileHandler->getSubpackage();
@@ -108,34 +108,33 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             $trackingFile = $extraFileHandler->getTrackingFile();
 
             if (file_exists($targetPath) && !file_exists($trackingFile)) {
-                $this->io->write(sprintf("<info>Extra file <comment>%s</comment> has been locally overriden in <comment>%s</comment>. To reset it, delete and reinstall.</info>", $extraFilePkg->getName(), $extraFilePkg->getTargetDir()), TRUE);
+                $this->io->write(sprintf('<info>Extra file <comment>%s</comment> has been locally overriden in <comment>%s</comment>. To reset it, delete and reinstall.</info>', $extraFilePkg->getName(), $extraFilePkg->getTargetDir()), true);
                 continue;
             }
 
             if (file_exists($targetPath) && file_exists($trackingFile)) {
                 $meta = @json_decode(file_get_contents($trackingFile), 1);
                 if (isset($meta['checksum']) && $meta['checksum'] === $extraFileHandler->getChecksum()) {
-                    $this->io->write(sprintf("<info>Skip extra file <comment>%s</comment></info>", $extraFilePkg->getName()), TRUE, IOInterface::VERY_VERBOSE);
+                    $this->io->write(sprintf('<info>Skip extra file <comment>%s</comment></info>', $extraFilePkg->getName()), true, IOInterface::VERY_VERBOSE);
                     continue;
                 }
             }
 
             if ($first) {
-                $this->io->write(sprintf("<info>Download extra files for <comment>%s</comment></info>", $package->getName()));
-                $first = FALSE;
+                $this->io->write(sprintf('<info>Download extra files for <comment>%s</comment></info>', $package->getName()));
+                $first = false;
             }
 
-            $this->io->write(sprintf("<info>Download extra file <comment>%s</comment></info>", $extraFilePkg->getName()), TRUE, IOInterface::VERBOSE);
+            $this->io->write(sprintf('<info>Download extra file <comment>%s</comment></info>', $extraFilePkg->getName()), true, IOInterface::VERBOSE);
             $extraFileHandler->download($this->composer, $this->io);
 
-            if (!file_exists(dirname($trackingFile))) {
-                mkdir(dirname($trackingFile), 0777, TRUE);
+            if (!file_exists(\dirname($trackingFile))) {
+                mkdir(\dirname($trackingFile), 0777, true);
             }
             file_put_contents($trackingFile, json_encode(
                 $extraFileHandler->createTrackingData(),
-                JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES
+                \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES
             ));
         }
     }
-
 }

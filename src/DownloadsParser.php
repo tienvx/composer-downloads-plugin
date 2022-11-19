@@ -83,6 +83,7 @@ class DownloadsParser
         ];
         if (!empty($extraFile['variables'])) {
             $smpl = new SMPLang([
+                'range' => Closure::fromCallable('range'),
                 'strtolower' => Closure::fromCallable('strtolower'),
                 'php_uname' => Closure::fromCallable('php_uname'),
                 'in_array' => Closure::fromCallable('in_array'),

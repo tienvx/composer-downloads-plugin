@@ -1,4 +1,4 @@
-Composer Downloads Plugin
+Composer Downloads Plugin [![Build Status][actions_badge]][actions_link] [![Coverage Status][coveralls_badge]][coveralls_link] [![PHP Version][php-version-image]][php-version-url]
 ===========================
 
 This plugin allows you to download extra files and extract them within your package.
@@ -146,3 +146,12 @@ If you found any bug, please [report issues](https://github.com/tienvx/composer-
 ## License
 
 This package is available under the [MIT license](LICENSE).
+
+[actions_badge]: https://github.com/tienvx/composer-downloads-plugin/workflows/main/badge.svg
+[actions_link]: https://github.com/tienvx/composer-downloads-plugin/actions
+
+[coveralls_badge]: https://coveralls.io/repos/tienvx/composer-downloads-plugin/badge.svg?branch=main&service=github
+[coveralls_link]: https://coveralls.io/github/tienvx/composer-downloads-plugin?branch=main
+
+[php-version-url]: https://packagist.org/packages/composer-downloads-plugin/parts-index
+[php-version-image]: http://img.shields.io/badge/php-8.0.0+-ff69b4.svg

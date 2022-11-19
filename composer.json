@@ -1,5 +1,5 @@
 {
-    "name": "civicrm/composer-downloads-plugin",
+    "name": "tienvx/composer-downloads-plugin",
     "description": "Composer plugin for downloading additional files within any composer package.",
     "type": "composer-plugin",
     "license": "MIT",

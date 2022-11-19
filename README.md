@@ -153,5 +153,5 @@ This package is available under the [MIT license](LICENSE).
 [coveralls_badge]: https://coveralls.io/repos/tienvx/composer-downloads-plugin/badge.svg?branch=main&service=github
 [coveralls_link]: https://coveralls.io/github/tienvx/composer-downloads-plugin?branch=main
 
-[php-version-url]: https://packagist.org/packages/composer-downloads-plugin/parts-index
+[php-version-url]: https://packagist.org/packages/tienvx/composer-downloads-plugin
 [php-version-image]: http://img.shields.io/badge/php-8.0.0+-ff69b4.svg

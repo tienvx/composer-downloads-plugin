@@ -85,6 +85,7 @@ Only following configuration support variables:
 #### Methods
 
 Custom variable support these methods:
+* `range`
 * `strtolower`
 * `php_uname`
 * `in_array`

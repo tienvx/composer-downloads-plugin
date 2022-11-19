@@ -82,6 +82,24 @@ Only following configuration support variables:
 * More about the syntax at [Expression Syntax](https://github.com/leongrdic/php-smplang#expression-syntax).
 * The syntax must be evaluated into a `string`.
 
+#### Methods
+
+Custom variable support these methods:
+* `strtolower`
+* `php_uname`
+* `in_array`
+* `str_contains`
+* `str_starts_with`
+* `str_ends_with`
+* `matches`
+
+#### Constants
+
+Custom variable support these constants:
+* `PHP_OS`
+* `PHP_OS_FAMILY`
+* `PHP_SHLIB_SUFFIX`
+
 ## Defaults Configuration
 
 You may set default properties for all downloads. Place them under `*`, as in:

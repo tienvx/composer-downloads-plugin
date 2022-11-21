@@ -12,6 +12,8 @@
 namespace LastCall\DownloadsPlugin;
 
 use Composer\Composer;
+use Composer\DependencyResolver\Operation\InstallOperation;
+use Composer\DependencyResolver\Operation\UpdateOperation;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Installer\PackageEvent;
 use Composer\Installer\PackageEvents;
@@ -24,19 +26,17 @@ use LastCall\DownloadsPlugin\Handler\BaseHandler;
 
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
-    /** @var Composer */
-    private $composer;
-    /** @var IOInterface */
-    private $io;
+    private ?Composer $composer = null;
+    private ?IOInterface $io = null;
 
-    private $parser;
+    private DownloadsParser $parser;
 
     public function __construct()
     {
         $this->parser = new DownloadsParser();
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             PackageEvents::POST_PACKAGE_INSTALL => ['installDownloads', 10],
@@ -46,10 +46,15 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         ];
     }
 
-    public function installDownloadsRoot(Event $event)
+    public function installDownloadsRoot(Event $event): void
     {
+        $cwd = getcwd();
+        if (!\is_string($cwd)) {
+            throw new \RuntimeException('Failed to get current working directory');
+        }
+
         $rootPackage = $this->composer->getPackage();
-        $this->installUpdateDownloads(getcwd(), $rootPackage);
+        $this->installUpdateDownloads($cwd, $rootPackage);
 
         // Ensure that any other packages are properly reconciled.
         $localRepo = $this->composer->getRepositoryManager()->getLocalRepository();
@@ -62,19 +67,21 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         }
     }
 
-    public function installDownloads(PackageEvent $event)
+    public function installDownloads(PackageEvent $event): void
     {
-        /** @var \Composer\Package\PackageInterface $package */
-        $package = $event->getOperation()->getPackage();
-        $installationManager = $event->getComposer()->getInstallationManager();
+        /** @var InstallOperation $operation */
+        $operation = $event->getOperation();
+        $package = $operation->getPackage();
+        $installationManager = $this->composer->getInstallationManager();
         $this->installUpdateDownloads($installationManager->getInstallPath($package), $package);
     }
 
-    public function updateDownloads(PackageEvent $event)
+    public function updateDownloads(PackageEvent $event): void
     {
-        /** @var \Composer\Package\PackageInterface $package */
-        $package = $event->getOperation()->getTargetPackage();
-        $installationManager = $event->getComposer()->getInstallationManager();
+        /** @var UpdateOperation $operation */
+        $operation = $event->getOperation();
+        $package = $operation->getTargetPackage();
+        $installationManager = $this->composer->getInstallationManager();
         $this->installUpdateDownloads($installationManager->getInstallPath($package), $package);
     }
 
@@ -94,11 +101,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         // @todo determine if any operation required.
     }
 
-    /**
-     * @param string           $basePath
-     * @param PackageInterface $package
-     */
-    protected function installUpdateDownloads($basePath, $package)
+    protected function installUpdateDownloads(string $basePath, PackageInterface $package): void
     {
         $first = true;
         foreach ($this->parser->parse($package, $basePath) as $extraFileHandler) {
@@ -113,7 +116,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             }
 
             if (file_exists($targetPath) && file_exists($trackingFile)) {
-                $meta = @json_decode(file_get_contents($trackingFile), 1);
+                $meta = @json_decode(file_get_contents($trackingFile), 1, 512, \JSON_THROW_ON_ERROR);
                 if (isset($meta['checksum']) && $meta['checksum'] === $extraFileHandler->getChecksum()) {
                     $this->io->write(sprintf('<info>Skip extra file <comment>%s</comment></info>', $extraFilePkg->getName()), true, IOInterface::VERY_VERBOSE);
                     continue;

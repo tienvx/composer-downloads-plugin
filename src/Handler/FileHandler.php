@@ -5,12 +5,13 @@ namespace LastCall\DownloadsPlugin\Handler;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Util\Filesystem;
+use LastCall\DownloadsPlugin\Subpackage;
 
 class FileHandler extends BaseHandler
 {
     public const TMP_PREFIX = '.composer-extra-tmp-';
 
-    public function createSubpackage()
+    protected function createSubpackage(): Subpackage
     {
         $pkg = parent::createSubpackage();
         $pkg->setDistType('file');
@@ -18,7 +19,7 @@ class FileHandler extends BaseHandler
         return $pkg;
     }
 
-    public function getTrackingFile()
+    public function getTrackingFile(): string
     {
         $file = basename($this->extraFile['id']).'-'.md5($this->extraFile['id']).'.json';
 
@@ -28,7 +29,7 @@ class FileHandler extends BaseHandler
             \DIRECTORY_SEPARATOR.$file;
     }
 
-    public function download(Composer $composer, IOInterface $io)
+    public function download(Composer $composer, IOInterface $io): void
     {
         // We want to take advantage of the cache in composer's downloader, but it
         // doesn't put the file the spot we want, so we shuffle a bit.

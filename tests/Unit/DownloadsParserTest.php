@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 
 class DownloadsParserTest extends TestCase
 {
-    private function getPackage(array $extra = [])
+    private function getPackage(array $extra = []): Package
     {
         $package = new Package('foo', '1.0.0', '1.0.0');
         $package->setExtra([
@@ -28,14 +28,14 @@ class DownloadsParserTest extends TestCase
         return $package;
     }
 
-    public function testIgnoresPackagesWithoutDownloads()
+    public function testIgnoresPackagesWithoutDownloads(): void
     {
         $package = new Package('foo', '1.0.0', '1.0.0');
         $parser = new DownloadsParser();
         $this->assertEquals([], $parser->parse($package, '/EXAMPLE'));
     }
 
-    public function testAddsFiles()
+    public function testAddsFiles(): void
     {
         $package = $this->getPackage([
             'bar' => ['url' => 'foo', 'path' => 'bar'],
@@ -45,7 +45,7 @@ class DownloadsParserTest extends TestCase
         $this->assertEquals([$expectSubpackage], [$actualSubpackage]);
     }
 
-    public function getDownloadTypeTests()
+    public function getDownloadTypeTests(): array
     {
         return [
             ['zip', 'foo.zip'],
@@ -66,7 +66,7 @@ class DownloadsParserTest extends TestCase
     /**
      * @dataProvider getDownloadTypeTests
      */
-    public function testSetsDownloadType($expectedType, $url)
+    public function testSetsDownloadType(string $expectedType, string $url): void
     {
         $package = $this->getPackage([
             'bar' => ['url' => $url, 'path' => 'bar'],
@@ -75,7 +75,7 @@ class DownloadsParserTest extends TestCase
         $this->assertEquals($expectedType, $parsed[0]->getSubpackage()->getDistType());
     }
 
-    public function getInvalidVariableKeyTests()
+    public function getInvalidVariableKeyTests(): array
     {
         return [
             ['baz'],
@@ -90,7 +90,7 @@ class DownloadsParserTest extends TestCase
     /**
      * @dataProvider getInvalidVariableKeyTests
      */
-    public function testInvalidVariableKey(string $invalidVariableKey)
+    public function testInvalidVariableKey(string $invalidVariableKey): void
     {
         $package = $this->getPackage([
             'bar' => [
@@ -106,7 +106,7 @@ class DownloadsParserTest extends TestCase
         (new DownloadsParser())->parse($package, '/EXAMPLE');
     }
 
-    public function getInvalidVariableValueTests()
+    public function getInvalidVariableValueTests(): array
     {
         return [
             ["{ foo: 'bar' }", 'stdClass'],
@@ -123,7 +123,7 @@ class DownloadsParserTest extends TestCase
     /**
      * @dataProvider getInvalidVariableValueTests
      */
-    public function testInvalidVariableValue(string $invalidVariableValue, string $type)
+    public function testInvalidVariableValue(string $invalidVariableValue, string $type): void
     {
         $package = $this->getPackage([
             'bar' => [
@@ -139,7 +139,7 @@ class DownloadsParserTest extends TestCase
         (new DownloadsParser())->parse($package, '/EXAMPLE');
     }
 
-    public function getVariableTests()
+    public function getVariableTests(): array
     {
         return [
             ['http://example.com/foo.zip', 'http://example.com/foo.zip', ['{$foo}' => '"foo"']],
@@ -154,7 +154,7 @@ class DownloadsParserTest extends TestCase
     /**
      * @dataProvider getVariableTests
      */
-    public function testReplacesVariables($expectedUrl, $url, $variables)
+    public function testReplacesVariables(string $expectedUrl, string $url, array $variables): void
     {
         $package = $this->getPackage([
             'bar' => ['url' => $url, 'path' => 'bar', 'variables' => $variables, 'version' => '1.2.3'],

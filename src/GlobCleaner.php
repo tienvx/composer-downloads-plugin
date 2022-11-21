@@ -7,12 +7,9 @@ use Composer\IO\IOInterface;
 class GlobCleaner
 {
     /**
-     * @param string   $baseDir
      * @param string[] $ignores
-     *
-     * @return \Generator|void
      */
-    public static function clean(IOInterface $io, $baseDir, $ignores)
+    public static function clean(IOInterface $io, string $baseDir, array $ignores): void
     {
         if (empty($ignores)) {
             return;
@@ -39,9 +36,7 @@ class GlobCleaner
 
         // Cleanup any empy directories
         $dirNames = array_keys($dirs);
-        $byLength = function ($a, $b) {
-            return \strlen($b) - \strlen($a);
-        };
+        $byLength = fn ($a, $b) => \strlen($b) - \strlen($a);
         usort($dirNames, $byLength);
 
         while ($dirName = array_shift($dirNames)) {

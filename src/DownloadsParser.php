@@ -23,12 +23,12 @@ class DownloadsParser
     /**
      * @return baseHandler[] Each item is a specification of an extra file, with defaults and variables evaluated
      */
-    public function parse(PackageInterface $package, $basePath)
+    public function parse(PackageInterface $package, string $basePath): array
     {
         $extraFiles = [];
         $extra = $package->getExtra();
 
-        $defaults = isset($extra['downloads']['*']) ? $extra['downloads']['*'] : [];
+        $defaults = $extra['downloads']['*'] ?? [];
 
         if (!empty($extra['downloads'])) {
             foreach ((array) $extra['downloads'] as $id => $extraFile) {
@@ -52,7 +52,7 @@ class DownloadsParser
         return $extraFiles;
     }
 
-    protected function pickClass(array $extraFile): string
+    private function pickClass(array $extraFile): string
     {
         $types = [
             'archive' => ArchiveHandler::class,
@@ -65,14 +65,14 @@ class DownloadsParser
 
         $parts = parse_url($extraFile['url']);
         $filename = pathinfo($parts['path'], \PATHINFO_BASENAME);
-        if (preg_match('/\.(zip|rar|tar|gz|tgz|bz2|xz)$/', $filename)) {
+        if (preg_match('/\.(tar\.bz2|tar\.xz|tar\.gz|zip|rar|tar|gz|tgz)$/', $filename)) {
             return $types['archive'];
         }
 
         return $types['file'];
     }
 
-    protected function getVariables(array $extraFile): array
+    private function getVariables(array $extraFile): array
     {
         $variables = [
             '{$id}' => $extraFile['id'],

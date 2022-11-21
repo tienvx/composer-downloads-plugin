@@ -20,42 +20,13 @@ abstract class BaseHandler
     public const FAKE_VERSION = 'dev-master';
     public const DOT_DIR = '.composer-downloads';
 
-    /**
-     * @var array
-     *            File specification from composer.json, with defaults/substitutions applied.
-     */
-    protected $extraFile;
+    protected ?Subpackage $subpackage = null;
 
-    /**
-     * @var PackageInterface
-     */
-    protected $parent;
-
-    /**
-     * @var string
-     *             Path to the parent package
-     */
-    protected $parentPath;
-
-    /**
-     * @var Subpackage
-     */
-    protected $subpackage;
-
-    /**
-     * BaseHandler constructor.
-     *
-     * @param string $parentPath
-     * @param array  $extraFile
-     */
-    public function __construct(PackageInterface $parent, $parentPath, $extraFile)
+    public function __construct(protected PackageInterface $parent, protected string $parentPath, protected array $extraFile)
     {
-        $this->parent = $parent;
-        $this->parentPath = $parentPath;
-        $this->extraFile = $extraFile;
     }
 
-    public function getSubpackage()
+    public function getSubpackage(): Subpackage
     {
         if (null === $this->subpackage) {
             $this->subpackage = $this->createSubpackage();
@@ -64,10 +35,7 @@ abstract class BaseHandler
         return $this->subpackage;
     }
 
-    /**
-     * @return Subpackage
-     */
-    public function createSubpackage()
+    protected function createSubpackage(): Subpackage
     {
         $versionParser = new VersionParser();
         $extraFile = $this->extraFile;
@@ -98,7 +66,7 @@ abstract class BaseHandler
         return $package;
     }
 
-    public function createTrackingData()
+    public function createTrackingData(): array
     {
         return [
             'name' => $this->getSubpackage()->getName(),
@@ -108,12 +76,11 @@ abstract class BaseHandler
     }
 
     /**
-     * @return string
-     *                A unique identifier for this configuration of this asset.
+     * @return string A unique identifier for this configuration of this asset.
      *                If the identifier changes, that implies that the asset should be
      *                replaced/redownloaded.
      */
-    public function getChecksum()
+    public function getChecksum(): string
     {
         $extraFile = $this->extraFile;
 
@@ -125,18 +92,12 @@ abstract class BaseHandler
         ]));
     }
 
-    /**
-     * @return string
-     */
-    public function getTargetPath()
+    public function getTargetPath(): string
     {
         return $this->parentPath.'/'.$this->extraFile['path'];
     }
 
-    abstract public function download(Composer $composer, IOInterface $io);
+    abstract public function download(Composer $composer, IOInterface $io): void;
 
-    /**
-     * @return string
-     */
-    abstract public function getTrackingFile();
+    abstract public function getTrackingFile(): string;
 }

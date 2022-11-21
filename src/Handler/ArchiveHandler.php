@@ -5,10 +5,19 @@ namespace LastCall\DownloadsPlugin\Handler;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use LastCall\DownloadsPlugin\GlobCleaner;
+use LastCall\DownloadsPlugin\Subpackage;
 
 class ArchiveHandler extends BaseHandler
 {
-    public function createSubpackage()
+    public const EXTENSION_TO_DIST_TYPE_MAP = [
+        'zip' => 'zip',
+        'rar' => 'rar',
+        'tgz' => 'tar',
+        'tar' => 'tar',
+        'gz' => 'gzip',
+    ];
+
+    protected function createSubpackage(): Subpackage
     {
         $pkg = parent::createSubpackage();
         $pkg->setDistType($this->parseDistType($this->extraFile['url']));
@@ -16,28 +25,25 @@ class ArchiveHandler extends BaseHandler
         return $pkg;
     }
 
-    protected function parseDistType($url)
+    private function parseDistType(string $url): string
     {
         $parts = parse_url($url);
         $filename = pathinfo($parts['path'], \PATHINFO_BASENAME);
-        if (preg_match('/\.zip$/', $filename)) {
-            return 'zip';
-        }
-        if (preg_match('/\.rar$/', $filename)) {
-            return 'rar';
+        if (preg_match('/\.(tar\.gz|tar\.bz2)$/', $filename)) {
+            return 'tar';
         }
         if (preg_match('/\.tar\.xz$/', $filename)) {
             return 'xz';
-        } elseif (preg_match('/\.(tar\.gz|tar\.bz2|tgz|tar)$/', $filename)) {
-            return 'tar';
-        } elseif (preg_match('/\.gz$/', $filename)) {
-            return 'gzip';
+        }
+        $extension = pathinfo($parts['path'], \PATHINFO_EXTENSION);
+        if (isset(self::EXTENSION_TO_DIST_TYPE_MAP[$extension])) {
+            return self::EXTENSION_TO_DIST_TYPE_MAP[$extension];
         } else {
             throw new \RuntimeException("Failed to determine archive type for $filename");
         }
     }
 
-    public function getTrackingFile()
+    public function getTrackingFile(): string
     {
         $file = basename($this->extraFile['id']).'-'.md5($this->extraFile['id']).'.json';
 
@@ -47,7 +53,7 @@ class ArchiveHandler extends BaseHandler
             \DIRECTORY_SEPARATOR.$file;
     }
 
-    public function createTrackingData()
+    public function createTrackingData(): array
     {
         $meta = parent::createTrackingData();
         $meta['ignore'] = $this->findIgnores();
@@ -55,27 +61,28 @@ class ArchiveHandler extends BaseHandler
         return $meta;
     }
 
-    public function getChecksum()
+    public function getChecksum(): string
     {
-        $ignore = empty($this->extraFile['ignore']) ? [] : array_values($this->extraFile['ignore']);
+        $ignore = array_values($this->findIgnores());
         sort($ignore);
 
         return hash('sha256', parent::getChecksum().serialize($ignore));
     }
 
     /**
-     * @return string[]|null
-     *                       List of files to exclude. Use '**' to match subdirectories.
-     *                       Ex: ['.gitignore', '*.md']
+     * @return string[] List of files to exclude. Use '**' to match subdirectories.
+     *                  Ex: ['.gitignore', '*.md']
      */
-    public function findIgnores()
+    private function findIgnores(): array
     {
-        return isset($this->extraFile['ignore'])
-            ? $this->extraFile['ignore']
-            : null;
+        if (isset($this->extraFile['ignore']) && !\is_array($this->extraFile['ignore'])) {
+            throw new \UnexpectedValueException(sprintf('Attribute "ignore" of extra file "%s" defined in package "%s" must be array, "%s" given.', $this->extraFile['id'], $this->parent->getId(), get_debug_type($this->extraFile['ignore'])));
+        }
+
+        return $this->extraFile['ignore'] ?? [];
     }
 
-    public function download(Composer $composer, IOInterface $io)
+    public function download(Composer $composer, IOInterface $io): void
     {
         $targetPath = $this->getTargetPath();
         $downloadManager = $composer->getDownloadManager();

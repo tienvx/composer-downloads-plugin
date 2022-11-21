@@ -19,20 +19,20 @@ use Composer\Package\PackageInterface;
  */
 class Subpackage extends Package
 {
-    /**
-     * @var PackageInterface
-     */
-    private $parent;
-
-    public function __construct(PackageInterface $parent, $id, $url, $type, $path, $version = null, $prettyVersion = null)
-    {
+    public function __construct(
+        private PackageInterface $parent,
+        string $name,
+        ?string $url,
+        ?string $type,
+        ?string $path,
+        ?string $version = null,
+        ?string $prettyVersion = null
+    ) {
         parent::__construct(
-            sprintf('%s:%s', $parent->getName(), $id),
+            sprintf('%s:%s', $parent->getName(), $name),
             $version ?: $parent->getVersion(),
             $prettyVersion ?: $parent->getPrettyVersion()
         );
-        $this->parent = $parent;
-        $this->id = $id;
         $this->setDistUrl($url);
         $this->setDistType($type);
         $this->setTargetDir($path);

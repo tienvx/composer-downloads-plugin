@@ -10,7 +10,7 @@ use Symfony\Component\Process\Process;
  */
 class SniffTest extends IntegrationTestCase
 {
-    public static function getComposerJson()
+    public static function getComposerJson(): array
     {
         return parent::getComposerJson() + [
             'name' => 'test/sniff-test',
@@ -71,11 +71,11 @@ class SniffTest extends IntegrationTestCase
     {
         parent::setUpBeforeClass();
         self::initTestProject(static::getComposerJson());
-        $composer_path = self::getComposerPath();
-        self::runOk([$composer_path, 'install', '-v']);
+        $composerPath = self::getComposerPath();
+        self::runOk([$composerPath, 'install', '-v']);
     }
 
-    public function getExampleChecksums()
+    public function getExampleChecksums(): array
     {
         $fileMap = [
             'Windows' => [
@@ -107,13 +107,11 @@ class SniffTest extends IntegrationTestCase
     /**
      * Ensure that the file checksums match expectations with both (a) original download and (b) re-download.
      *
-     * @param string      $file
-     * @param string|null $sha256
-     *                            The expected content of the file, or NULL if the file should not exist
+     * @param string|null $sha256 The expected content of the file, or NULL if the file should not exist
      *
-     * @dataProvider  getExampleChecksums
+     * @dataProvider getExampleChecksums
      */
-    public function testDownloadAndRedownload($path, $file, $sha256)
+    public function testDownloadAndRedownload(string $path, string $file, ?string $sha256): void
     {
         // Initial download
         $this->assertFileChecksum($file, $sha256, 'Initial');
@@ -125,14 +123,14 @@ class SniffTest extends IntegrationTestCase
             unlink($path);
         }
         $this->assertFileDoesNotExist($file);
-        $composer_path = self::getComposerPath();
-        self::runOk([$composer_path, 'install', '-v']);
+        $composerPath = self::getComposerPath();
+        self::runOk([$composerPath, 'install', '-v']);
 
         // And make sure it all worked out...
         $this->assertFileChecksum($file, $sha256, 'Redownload');
     }
 
-    public function assertFileChecksum($file, $sha256, $message = null)
+    public function assertFileChecksum($file, $sha256, $message = null): void
     {
         if (null === $sha256) {
             $this->assertFileDoesNotExist($file, "($message) File should not exist");
@@ -142,7 +140,7 @@ class SniffTest extends IntegrationTestCase
         }
     }
 
-    private static function getComposerPath()
+    private static function getComposerPath(): string
     {
         return realpath(__DIR__.'/../../vendor/bin/composer');
     }

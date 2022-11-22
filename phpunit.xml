@@ -16,5 +16,8 @@
             <clover outputFile="clover.xml"/>
         </report>
     </coverage>
+    <php>
+        <env name="DEBUG_COMPOSER" value="1"/>
+    </php>
 
 </phpunit>

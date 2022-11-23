@@ -54,6 +54,7 @@ When a downstream user of `foo/bar` runs `composer require foo/bar`, it will dow
       * `*.tgz`
     * `file`: The file `url` will be downloaded and placed at `path`.
     * `phar`: The PHP executable file `url` will be downloaded and placed at `path`.
+    * `gzip`: The gzip file `url` will be downloaded and extracted to a file and that file will be placed at `path`.
 
 * `ignore`: (*Optional*) A list of a files that should be omited from the extracted folder. (This supports a subset of `.gitignore` notation.)
 

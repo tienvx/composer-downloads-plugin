@@ -15,6 +15,7 @@ use Composer\Package\PackageInterface;
 use LastCall\DownloadsPlugin\Handler\ArchiveHandler;
 use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
+use LastCall\DownloadsPlugin\Handler\GzipHandler;
 use LastCall\DownloadsPlugin\Handler\PharHandler;
 use Le\SMPLang\SMPLang;
 
@@ -58,6 +59,7 @@ class DownloadsParser
             'archive' => ArchiveHandler::class,
             'file' => FileHandler::class,
             'phar' => PharHandler::class,
+            'gzip' => GzipHandler::class,
         ];
         if (isset($extraFile['type'], $types[$extraFile['type']])) {
             return $types[$extraFile['type']];

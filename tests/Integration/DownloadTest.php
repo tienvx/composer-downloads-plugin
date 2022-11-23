@@ -69,10 +69,14 @@ class DownloadTest extends TestCase
                         'url' => 'http://localhost:8000/archive/image.rar',
                     ],
                     'xml' => [
+                        'type' => 'gzip',
                         'url' => 'http://localhost:8000/archive/empty.xml.gz',
+                        'path' => 'files/markup/empty.xml',
                     ],
                     'html' => [
+                        'type' => 'gzip',
                         'url' => 'http://localhost:8000/archive/empty.html.gz',
+                        'path' => 'files/markup/empty.html',
                     ],
                 ],
             ],
@@ -124,8 +128,8 @@ class DownloadTest extends TestCase
             'files/image/empty.gif' => '84f7a1205ca382c044859ada51473fda5d972083f0ab5caf0e61309e2fbbc5d1',
             'files/image/empty.jpg' => 'dc0918fcf7dc57eaef1b0bb69bc1b88e1d10422a38e367565e001306407e41ac',
             'files/image/empty.png' => '2024896e28f508d6b695fffad2531a2718c1e46b6c2c924d9b77f10ac2688793',
-            'files/html/empty.html' => '5e2ab2f655e9378fd1e54a4bfd81cece72a3bdeb04c87be86041962fe5c3bd3c',
-            'files/xml/empty.xml' => '4be690ad5983b2a40f640481fdb27dcc43ac162e14fa9aab2ff45775521d9213',
+            'files/markup/empty.html' => '5e2ab2f655e9378fd1e54a4bfd81cece72a3bdeb04c87be86041962fe5c3bd3c',
+            'files/markup/empty.xml' => '4be690ad5983b2a40f640481fdb27dcc43ac162e14fa9aab2ff45775521d9213',
         ];
     }
 

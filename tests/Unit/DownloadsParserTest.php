@@ -13,12 +13,16 @@ namespace LastCall\DownloadsPlugin\Tests\Unit;
 
 use Composer\Package\Package;
 use LastCall\DownloadsPlugin\DownloadsParser;
+use LastCall\DownloadsPlugin\Handler\ArchiveHandler;
+use LastCall\DownloadsPlugin\Handler\FileHandler;
+use LastCall\DownloadsPlugin\Handler\GzipHandler;
+use LastCall\DownloadsPlugin\Handler\PharHandler;
 use LastCall\DownloadsPlugin\Subpackage;
 use PHPUnit\Framework\TestCase;
 
 class DownloadsParserTest extends TestCase
 {
-    private function getPackage(array $extra = []): Package
+    private function getPackageWithExtraDownloads(array $extra = []): Package
     {
         $package = new Package('foo', '1.0.0', '1.0.0');
         $package->setExtra([
@@ -28,51 +32,78 @@ class DownloadsParserTest extends TestCase
         return $package;
     }
 
-    public function testIgnoresPackagesWithoutDownloads(): void
+    public function testIgnoresPackagesWithoutExtraDownloads(): void
     {
         $package = new Package('foo', '1.0.0', '1.0.0');
         $parser = new DownloadsParser();
         $this->assertEquals([], $parser->parse($package, '/EXAMPLE'));
     }
 
-    public function testAddsFiles(): void
+    public function testIgnoresPackagesWithDefaultDownloads(): void
     {
-        $package = $this->getPackage([
-            'bar' => ['url' => 'foo', 'path' => 'bar'],
+        $package = $this->getPackageWithExtraDownloads([
+            '*' => ['url' => 'foo', 'path' => 'bar'],
         ]);
-        $expectSubpackage = new Subpackage($package, 'bar', 'foo', 'file', 'bar');
-        $actualSubpackage = (new DownloadsParser())->parse($package, '/EXAMPLE')[0]->getSubpackage();
-        $this->assertEquals([$expectSubpackage], [$actualSubpackage]);
+        $parser = new DownloadsParser();
+        $this->assertEquals([], $parser->parse($package, '/EXAMPLE'));
     }
 
-    public function getDownloadTypeTests(): array
+    public function getExplicitDownloadTypeTests(): array
     {
         return [
-            ['zip', 'foo.zip'],
-            ['zip', 'foo.zip?foo'],
-            ['zip', 'http://example.com/foo.zip?abc#def'],
-            ['rar', 'foo.rar'],
-            ['xz', 'foo.tar.xz'],
-            ['tar', 'foo.tar.gz'],
-            ['tar', 'http://example.com/foo.tar.gz?abc#def'],
-            ['tar', 'foo.tar.bz2'],
-            ['tar', 'foo.tgz'],
-            ['tar', 'foo.tar'],
-            ['gzip', 'foo.gz'],
-            ['file', 'foo'],
+            ['archive', 'foo.zip', 'zip', ArchiveHandler::class],
+            ['file', 'foo', 'file', FileHandler::class],
+            ['phar', 'foo', 'file', PharHandler::class],
+            ['gzip', 'foo', 'file', GzipHandler::class],
         ];
     }
 
     /**
-     * @dataProvider getDownloadTypeTests
+     * @dataProvider getExplicitDownloadTypeTests
      */
-    public function testSetsDownloadType(string $expectedType, string $url): void
+    public function testExplicitDownloadType(string $downloadType, string $url, string $expectedDistType, string $expectedHandlerClass): void
     {
-        $package = $this->getPackage([
+        $package = $this->getPackageWithExtraDownloads([
+            'bar' => ['type' => $downloadType, 'url' => $url, 'path' => 'baz'],
+        ]);
+        $expectSubpackage = new Subpackage($package, 'bar', $url, $expectedDistType, 'baz');
+        $parsed = (new DownloadsParser())->parse($package, '/EXAMPLE');
+        $this->assertCount(1, $parsed);
+        $this->assertInstanceOf($expectedHandlerClass, $parsed[0]);
+        $this->assertEquals($expectSubpackage, $parsed[0]->getSubpackage());
+    }
+
+    public function getMissingDownloadTypeTests(): array
+    {
+        return [
+            ['foo.zip', ArchiveHandler::class, 'zip'],
+            ['foo.zip?foo', ArchiveHandler::class, 'zip'],
+            ['http://example.com/foo.zip?abc#def', ArchiveHandler::class, 'zip'],
+            ['foo.rar', ArchiveHandler::class, 'rar'],
+            ['foo.tar.xz', ArchiveHandler::class, 'xz'],
+            ['foo.tar.gz', ArchiveHandler::class, 'tar'],
+            ['http://example.com/foo.tar.gz?abc#def', ArchiveHandler::class, 'tar'],
+            ['foo.tar.bz2', ArchiveHandler::class, 'tar'],
+            ['foo.tgz', ArchiveHandler::class, 'tar'],
+            ['foo.tar', ArchiveHandler::class, 'tar'],
+            ['foo.gz', ArchiveHandler::class, 'gzip'],
+            ['foo', FileHandler::class, 'file'],
+            ['foo.phar', FileHandler::class, 'file'],
+        ];
+    }
+
+    /**
+     * @dataProvider getMissingDownloadTypeTests
+     */
+    public function testMissingDownloadType(string $url, string $expectedHandlerClass, string $expectedDistType): void
+    {
+        $package = $this->getPackageWithExtraDownloads([
             'bar' => ['url' => $url, 'path' => 'bar'],
         ]);
         $parsed = (new DownloadsParser())->parse($package, '/EXAMPLE');
-        $this->assertEquals($expectedType, $parsed[0]->getSubpackage()->getDistType());
+        $this->assertCount(1, $parsed);
+        $this->assertInstanceOf($expectedHandlerClass, $parsed[0]);
+        $this->assertEquals($expectedDistType, $parsed[0]->getSubpackage()->getDistType());
     }
 
     public function getInvalidVariableKeyTests(): array
@@ -92,7 +123,7 @@ class DownloadsParserTest extends TestCase
      */
     public function testInvalidVariableKey(string $invalidVariableKey): void
     {
-        $package = $this->getPackage([
+        $package = $this->getPackageWithExtraDownloads([
             'bar' => [
                 'url' => "http://example.com/foo-$invalidVariableKey.zip",
                 'path' => 'bar',
@@ -125,7 +156,7 @@ class DownloadsParserTest extends TestCase
      */
     public function testInvalidVariableValue(string $invalidVariableValue, string $type): void
     {
-        $package = $this->getPackage([
+        $package = $this->getPackageWithExtraDownloads([
             'bar' => [
                 'url' => 'http://example.com/foo-{$baz}.zip',
                 'path' => 'bar',
@@ -139,7 +170,7 @@ class DownloadsParserTest extends TestCase
         (new DownloadsParser())->parse($package, '/EXAMPLE');
     }
 
-    public function getVariableTests(): array
+    public function getReplacesVariableTests(): array
     {
         return [
             ['http://example.com/foo.zip', 'http://example.com/foo.zip', ['{$foo}' => '"foo"']],
@@ -152,11 +183,11 @@ class DownloadsParserTest extends TestCase
     }
 
     /**
-     * @dataProvider getVariableTests
+     * @dataProvider getReplacesVariableTests
      */
     public function testReplacesVariables(string $expectedUrl, string $url, array $variables): void
     {
-        $package = $this->getPackage([
+        $package = $this->getPackageWithExtraDownloads([
             'bar' => ['url' => $url, 'path' => 'bar', 'variables' => $variables, 'version' => '1.2.3'],
         ]);
         $expectSubpackage = new Subpackage($package, 'bar', $expectedUrl, 'zip', 'bar', 'dev-master', '1.2.3');

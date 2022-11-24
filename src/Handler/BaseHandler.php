@@ -100,4 +100,11 @@ abstract class BaseHandler
     abstract public function download(Composer $composer, IOInterface $io): void;
 
     abstract public function getTrackingFile(): string;
+
+    protected function isComposerV2(): bool
+    {
+        $version = method_exists(Composer::class, 'getVersion') ? Composer::getVersion() : Composer::VERSION;
+
+        return version_compare($version, '2.0.0') >= 0;
+    }
 }

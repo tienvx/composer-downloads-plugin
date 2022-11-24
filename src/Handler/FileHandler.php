@@ -49,8 +49,7 @@ class FileHandler extends BaseHandler
         $pkg->setTargetDir($tmpDir);
         $downloadManager = $composer->getDownloadManager();
         // composer:v2
-        $version = method_exists(Composer::class, 'getVersion') ? Composer::getVersion() : Composer::VERSION;
-        if (version_compare($version, '2.0.0') >= 0) {
+        if ($this->isComposerV2()) {
             $file = '';
             $promise = $downloadManager->download($pkg, $tmpDir);
             $promise->then(static function ($res) use (&$file) {

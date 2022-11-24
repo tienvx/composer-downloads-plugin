@@ -110,7 +110,7 @@ class DownloadTest extends TestCase
     {
         return [
             'files/phar/hello' => '047d6ea435e107c214073c58794efc2e6ca1ec8ebcf9b68de21735e5460224c5',
-            'files/file/ipsum' => 'dd14cbbf0e74909aac7f248a85d190afd8da98265cef95fc90dfddabea7c2e66',
+            'files/file/ipsum' => \PHP_OS_FAMILY === 'Windows' ? '77559b8e3cf8082554f5cb314729363017de998b63f0ab9cb751246c167d7bdd' : '77bdfb1d37ee5a5e6d08d0bd8f2d4abfde6b673422364ba9ad432deb2d9c6e4d',
             'files/doc/v1.2.3/empty.doc' => '60b5e45db3b51c38a5b762e771ee2f19692f52186c42c3930d56bbdf04d21f4e',
             'files/doc/v1.2.3/empty.docx' => '61cdb4b8b9067ab1f4eaa5ba782007c81bdd04283a228b5076aeeb4c9362020b',
             'files/doc/v1.3.0/empty.doc' => '60b5e45db3b51c38a5b762e771ee2f19692f52186c42c3930d56bbdf04d21f4e',

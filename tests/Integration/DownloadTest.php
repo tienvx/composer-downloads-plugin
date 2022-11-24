@@ -142,9 +142,10 @@ class DownloadTest extends TestCase
         $this->assertFiles(false);
         self::runComposer($command);
         $this->assertFiles(true);
+        $this->assertPharExecutable();
     }
 
-    public function assertFiles(bool $exist = true): void
+    private function assertFiles(bool $exist = true): void
     {
         foreach ($this->getFileChecksums() as $file => $sha256) {
             if ($exist && $sha256) {
@@ -154,6 +155,14 @@ class DownloadTest extends TestCase
                 $this->assertFileDoesNotExist($file);
             }
         }
+    }
+
+    private function assertPharExecutable(): void
+    {
+        $process = new Process([\PHP_OS_FAMILY === 'Windows' ? 'files/phar/hello.bat' : 'files/phar/hello']);
+        $process->run();
+        $this->assertSame('Hello', $process->getOutput());
+        $this->assertSame(0, $process->getExitCode());
     }
 
     /**

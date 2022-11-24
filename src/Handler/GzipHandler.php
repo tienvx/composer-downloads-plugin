@@ -13,7 +13,7 @@ class GzipHandler extends FileHandler
     {
         parent::download($composer, $io);
         // Target file is still gzip file, need to be decompressed.
-        $target = $this->getSubpackage()->getTargetDir();
+        $target = $this->getTargetPath();
         $gzip = $target.'.gz';
         $cfs = new Filesystem();
         $cfs->rename($target, $gzip);

@@ -13,10 +13,13 @@ namespace LastCall\DownloadsPlugin\Tests\Unit;
 
 use Composer\Package\Package;
 use LastCall\DownloadsPlugin\DownloadsParser;
-use LastCall\DownloadsPlugin\Handler\ArchiveHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\GzipHandler;
 use LastCall\DownloadsPlugin\Handler\PharHandler;
+use LastCall\DownloadsPlugin\Handler\RarHandler;
+use LastCall\DownloadsPlugin\Handler\TarHandler;
+use LastCall\DownloadsPlugin\Handler\XzHandler;
+use LastCall\DownloadsPlugin\Handler\ZipHandler;
 use LastCall\DownloadsPlugin\Subpackage;
 use PHPUnit\Framework\TestCase;
 
@@ -51,22 +54,25 @@ class DownloadsParserTest extends TestCase
     public function getExplicitDownloadTypeTests(): array
     {
         return [
-            ['archive', 'foo.zip', 'zip', ArchiveHandler::class],
-            ['file', 'foo', 'file', FileHandler::class],
-            ['phar', 'foo', 'file', PharHandler::class],
-            ['gzip', 'foo', 'file', GzipHandler::class],
+            ['zip', ZipHandler::class, 'zip'],
+            ['rar', RarHandler::class, 'rar'],
+            ['tar', TarHandler::class, 'tar'],
+            ['xz', XzHandler::class, 'xz'],
+            ['file', FileHandler::class, 'file'],
+            ['phar', PharHandler::class, 'file'],
+            ['gzip', GzipHandler::class, 'file'],
         ];
     }
 
     /**
      * @dataProvider getExplicitDownloadTypeTests
      */
-    public function testExplicitDownloadType(string $downloadType, string $url, string $expectedDistType, string $expectedHandlerClass): void
+    public function testExplicitDownloadType(string $downloadType, string $expectedHandlerClass, string $expectedDistType): void
     {
         $package = $this->getPackageWithExtraDownloads([
-            'bar' => ['type' => $downloadType, 'url' => $url, 'path' => 'baz'],
+            'bar' => ['type' => $downloadType, 'url' => 'foo', 'path' => 'baz'],
         ]);
-        $expectSubpackage = new Subpackage($package, 'bar', $url, $expectedDistType, 'baz');
+        $expectSubpackage = new Subpackage($package, 'bar', 'foo', $expectedDistType, 'baz');
         $parsed = (new DownloadsParser())->parse($package, '/EXAMPLE');
         $this->assertCount(1, $parsed);
         $this->assertInstanceOf($expectedHandlerClass, $parsed[0]);
@@ -76,19 +82,19 @@ class DownloadsParserTest extends TestCase
     public function getMissingDownloadTypeTests(): array
     {
         return [
-            ['foo.zip', ArchiveHandler::class, 'zip'],
-            ['foo.zip?foo', ArchiveHandler::class, 'zip'],
-            ['http://example.com/foo.zip?abc#def', ArchiveHandler::class, 'zip'],
-            ['foo.rar', ArchiveHandler::class, 'rar'],
-            ['foo.tar.xz', ArchiveHandler::class, 'xz'],
-            ['foo.tar.gz', ArchiveHandler::class, 'tar'],
-            ['http://example.com/foo.tar.gz?abc#def', ArchiveHandler::class, 'tar'],
-            ['foo.tar.bz2', ArchiveHandler::class, 'tar'],
-            ['foo.tgz', ArchiveHandler::class, 'tar'],
-            ['foo.tar', ArchiveHandler::class, 'tar'],
-            ['foo.gz', ArchiveHandler::class, 'gzip'],
+            ['foo.zip', ZipHandler::class, 'zip'],
+            ['foo.zip?foo', ZipHandler::class, 'zip'],
+            ['http://example.com/foo.zip?abc#def', ZipHandler::class, 'zip'],
+            ['foo.rar', RarHandler::class, 'rar'],
+            ['foo.tar.xz', XzHandler::class, 'xz'],
+            ['foo.tar.gz', TarHandler::class, 'tar'],
+            ['http://example.com/foo.tar.gz?abc#def', TarHandler::class, 'tar'],
+            ['foo.tar.bz2', TarHandler::class, 'tar'],
+            ['foo.tgz', TarHandler::class, 'tar'],
+            ['foo.tar', TarHandler::class, 'tar'],
+            ['foo.gz', GzipHandler::class, 'file'],
             ['foo', FileHandler::class, 'file'],
-            ['foo.phar', FileHandler::class, 'file'],
+            ['foo.phar', PharHandler::class, 'file'],
         ];
     }
 

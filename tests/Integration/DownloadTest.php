@@ -29,7 +29,6 @@ class DownloadTest extends TestCase
             'extra' => [
                 'downloads' => [
                     '*' => [
-                        'type' => 'archive',
                         'path' => 'files/{$id}',
                     ],
                     'file' => [
@@ -69,12 +68,10 @@ class DownloadTest extends TestCase
                         'url' => 'http://localhost:8000/archive/image.rar',
                     ],
                     'xml' => [
-                        'type' => 'gzip',
                         'url' => 'http://localhost:8000/archive/empty.xml.gz',
                         'path' => 'files/markup/empty.xml',
                     ],
                     'html' => [
-                        'type' => 'gzip',
                         'url' => 'http://localhost:8000/archive/empty.html.gz',
                         'path' => 'files/markup/empty.html',
                     ],

@@ -19,6 +19,9 @@ class GzipHandler extends FileHandler
         $cfs->rename($target, $gzip);
         $process = new ProcessExecutor($io);
         $command = 'gzip -d '.ProcessExecutor::escape($gzip);
-        $process->execute($command);
+        if (0 !== $process->execute($command)) {
+            $processError = 'Failed to execute '.$command."\n\n".$process->getErrorOutput();
+            throw new \RuntimeException($processError);
+        }
     }
 }

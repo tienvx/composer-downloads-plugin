@@ -43,18 +43,15 @@ When a downstream user of `foo/bar` runs `composer require foo/bar`, it will dow
 * `path`: The releative path where content will be extracted.
 
 * `type`: (*Optional*) Determines how the download is handled. If omit, the extension in `url` will be used to detect.
-    * `archive`: The archive file `url` will be downloaded and extracted to `path`. Supported extensions:
-      * `*.zip`
-      * `*.rar`
-      * `*.tar.xz`
-      * `*.tar.gz`
-      * `*.tar.bz2`
-      * `*.tar`
-      * `*.gz`
-      * `*.tgz`
-    * `file`: The file `url` will be downloaded and placed at `path`.
-    * `phar`: The PHP executable file `url` will be downloaded and placed at `path`.
-    * `gzip`: The gzip file `url` will be downloaded and extracted to a file and that file will be placed at `path`.
+    * Archive types (The archive file `url` will be downloaded and extracted to `path`):
+      * `zip`: . Support extension `*.zip`
+      * `rar`: Support extension `*.rar`
+      * `xz`: Support extension `*.tar.xz`
+      * `tar`: Support extensions `*.tar.gz`, `*.tar.bz2`, `*.tar`, `*.tgz`
+    * File types (The file `url` will be downloaded and placed at `path`):
+      * `file`
+      * `phar`: The file will be mark as executable.
+      * `gzip`: The `*.gz` file will be extracted to a file that will be placed at `path`.
 
 * `ignore`: (*Optional*) A list of a files that should be omited from the extracted folder. (This supports a subset of `.gitignore` notation.)
 

@@ -12,15 +12,36 @@
 namespace LastCall\DownloadsPlugin;
 
 use Composer\Package\PackageInterface;
-use LastCall\DownloadsPlugin\Handler\ArchiveHandler;
 use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\GzipHandler;
 use LastCall\DownloadsPlugin\Handler\PharHandler;
+use LastCall\DownloadsPlugin\Handler\RarHandler;
+use LastCall\DownloadsPlugin\Handler\TarHandler;
+use LastCall\DownloadsPlugin\Handler\XzHandler;
+use LastCall\DownloadsPlugin\Handler\ZipHandler;
 use Le\SMPLang\SMPLang;
 
 class DownloadsParser
 {
+    public const EXTENSION_TO_TYPE_MAP = [
+        'zip' => 'zip',
+        'rar' => 'rar',
+        'tgz' => 'tar',
+        'tar' => 'tar',
+        'gz' => 'gzip',
+        'phar' => 'phar',
+    ];
+    public const TYPE_TO_HANDLER_CLASS_MAP = [
+        'zip' => ZipHandler::class,
+        'rar' => RarHandler::class,
+        'tar' => TarHandler::class,
+        'xz' => XzHandler::class,
+        'file' => FileHandler::class,
+        'phar' => PharHandler::class,
+        'gzip' => GzipHandler::class,
+    ];
+
     /**
      * @return baseHandler[] Each item is a specification of an extra file, with defaults and variables evaluated
      */
@@ -55,23 +76,26 @@ class DownloadsParser
 
     private function pickClass(array $extraFile): string
     {
-        $types = [
-            'archive' => ArchiveHandler::class,
-            'file' => FileHandler::class,
-            'phar' => PharHandler::class,
-            'gzip' => GzipHandler::class,
-        ];
-        if (isset($extraFile['type'], $types[$extraFile['type']])) {
-            return $types[$extraFile['type']];
+        if (isset($extraFile['type'], self::TYPE_TO_HANDLER_CLASS_MAP[$extraFile['type']])) {
+            return self::TYPE_TO_HANDLER_CLASS_MAP[$extraFile['type']];
         }
 
-        $parts = parse_url($extraFile['url']);
+        return self::TYPE_TO_HANDLER_CLASS_MAP[$this->parseType($extraFile['url'])];
+    }
+
+    private function parseType(string $url): string
+    {
+        $parts = parse_url($url);
         $filename = pathinfo($parts['path'], \PATHINFO_BASENAME);
-        if (preg_match('/\.(tar\.bz2|tar\.xz|tar\.gz|zip|rar|tar|gz|tgz)$/', $filename)) {
-            return $types['archive'];
+        if (preg_match('/\.(tar\.gz|tar\.bz2)$/', $filename)) {
+            return 'tar';
         }
+        if (preg_match('/\.tar\.xz$/', $filename)) {
+            return 'xz';
+        }
+        $extension = pathinfo($parts['path'], \PATHINFO_EXTENSION);
 
-        return $types['file'];
+        return self::EXTENSION_TO_TYPE_MAP[$extension] ?? 'file';
     }
 
     private function getVariables(array $extraFile): array

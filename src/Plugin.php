@@ -130,14 +130,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
             $this->io->write(sprintf('<info>Download extra file <comment>%s</comment></info>', $extraFilePkg->getName()), true, IOInterface::VERBOSE);
             $extraFileHandler->download($this->composer, $this->io);
-
-            if (!file_exists(\dirname($trackingFile))) {
-                mkdir(\dirname($trackingFile), 0777, true);
-            }
-            file_put_contents($trackingFile, json_encode(
-                $extraFileHandler->createTrackingData(),
-                \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES
-            ));
+            $extraFileHandler->install($this->io);
         }
     }
 }

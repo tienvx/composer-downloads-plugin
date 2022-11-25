@@ -73,6 +73,9 @@ class DownloadsParserTest extends TestCase
             'bar' => ['type' => $downloadType, 'url' => 'foo', 'path' => 'baz'],
         ]);
         $expectSubpackage = new Subpackage($package, 'bar', 'foo', $expectedDistType, 'baz');
+        if ('phar' === $downloadType) {
+            $expectSubpackage->setBinaries(['baz']);
+        }
         $parsed = (new DownloadsParser())->parse($package, '/EXAMPLE');
         $this->assertCount(1, $parsed);
         $this->assertInstanceOf($expectedHandlerClass, $parsed[0]);

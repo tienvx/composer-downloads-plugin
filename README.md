@@ -53,10 +53,14 @@ When a downstream user of `foo/bar` runs `composer require foo/bar`, it will dow
       * `phar`: The file will be mark as executable.
       * `gzip`: The `*.gz` file will be extracted to a file that will be placed at `path`.
 
-* `ignore`: (*Optional*) A list of a files that should be omited from the extracted folder. (This supports a subset of `.gitignore` notation.)
+* `ignore`: (*Optional*) A list of a files that should be omited from the extracted folder.
+  * This supports a subset of `.gitignore` notation.
+  * Only useful with archive types.
 
-* `version`: (*Optional*) A version number for the downloaded artifact. This has no functional impact on the lifecycle of the artifact, but
-   it can affect the console output, and it can be used as a variable.
+* `version`: (*Optional*) A version number for the downloaded artifact.
+  * This has no functional impact on the lifecycle of the artifact.
+  * It can affect the console output.
+  * It can be used as a variable.
 
 * `variables`: (*Optional*) List of custom variables.
 
@@ -98,6 +102,7 @@ Custom variable support these constants:
 * `PHP_OS`
 * `PHP_OS_FAMILY`
 * `PHP_SHLIB_SUFFIX`
+* `DIRECTORY_SEPARATOR`
 
 ## Defaults Configuration
 

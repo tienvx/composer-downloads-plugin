@@ -117,6 +117,7 @@ class DownloadsParser
                 'PHP_OS' => \PHP_OS,
                 'PHP_OS_FAMILY' => \PHP_OS_FAMILY,
                 'PHP_SHLIB_SUFFIX' => \PHP_SHLIB_SUFFIX,
+                'DIRECTORY_SEPARATOR' => \DIRECTORY_SEPARATOR,
             ]);
             foreach ((array) $extraFile['variables'] as $key => $value) {
                 if (!preg_match('/^{\$[^}]+}$/', $key)) {

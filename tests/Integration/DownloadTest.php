@@ -82,6 +82,7 @@ class DownloadTest extends TestCase
                     ],
                 ],
             ],
+            // Bin defined in root package does not have any affects.
             'bin' => [
                 'files/phar/hello',
             ],
@@ -154,6 +155,8 @@ class DownloadTest extends TestCase
             'vendor/test/library/files/mix/bin/hello-python.bat' => \PHP_OS_FAMILY === 'Windows' ? 'a7aa9456fc544940335014397365a6bc1eb1822983036468116517f3a9e7061c' : null,
             'vendor/test/library/files/mix/doc/empty.epub' => 'cae703a1c8173e65efae5accada6ce92a40dddf5fd3761b6ca7bd51c77eea29a',
             'vendor/test/library/files/mix/img/empty.svg' => 'c276389006b7ab53a33cacc4a04a62bcfa050d9cc34fd90f1aefc119fa1803fe',
+            'vendor/bin/hello' => null,
+            'vendor/bin/hello.bat' => null,
             'vendor/bin/hello-php' => \PHP_OS_FAMILY === 'Windows'
                 ? true // Contains random text in file
                 : '7b16a282e37df8eb95baa8650457f9d84175152eed09c1663fbcdde89fd14b17',

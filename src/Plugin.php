@@ -104,6 +104,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     protected function installUpdateDownloads(string $basePath, PackageInterface $package): void
     {
         $first = true;
+        $exist = false;
         foreach ($this->parser->parse($package, $basePath) as $extraFileHandler) {
             /** @var BaseHandler $extraFileHandler */
             $extraFilePkg = $extraFileHandler->getSubpackage();
@@ -127,10 +128,17 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 $this->io->write(sprintf('<info>Download extra files for <comment>%s</comment></info>', $package->getName()));
                 $first = false;
             }
+            if (!$exist) {
+                $exist = true;
+            }
 
             $this->io->write(sprintf('<info>Download extra file <comment>%s</comment></info>', $extraFilePkg->getName()), true, IOInterface::VERBOSE);
             $extraFileHandler->download($this->composer, $this->io);
             $extraFileHandler->install($this->io);
+        }
+
+        if ($exist) {
+            $this->composer->getInstallationManager()->ensureBinariesPresence($package);
         }
     }
 }

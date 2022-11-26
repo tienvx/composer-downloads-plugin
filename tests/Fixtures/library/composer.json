@@ -11,10 +11,10 @@
                 "path": "files/php/hello-php",
                 "executable": true
             },
-            "shell": {
+            "ruby": {
                 "type": "file",
-                "url": "http://localhost:8000/shell/hello.sh",
-                "path": "files/shell/hello-shell",
+                "url": "http://localhost:8000/ruby/hello.ruby",
+                "path": "files/ruby/hello-ruby",
                 "executable": true
             },
             "mix": {
@@ -29,7 +29,7 @@
     },
     "bin": [
         "files/php/hello-php",
-        "files/shell/hello-shell",
+        "files/ruby/hello-ruby",
         "files/mix/bin/hello-python"
     ]
 }

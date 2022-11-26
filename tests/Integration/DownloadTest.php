@@ -146,10 +146,10 @@ class DownloadTest extends TestCase
                 ? '6094c815897bac5498a356d6c93272b16cc2745ac643129aba55fe429cb0622f'
                 : '27e82fb9cc729a9f535e7ad26364f108aabaafa783617d5bce51ba986ad85adb', // New line chars are replaced in Windows
             'vendor/test/library/files/php/hello-php.bat' => \PHP_OS_FAMILY === 'Windows' ? '05562a89efd76b910f24a8d035acdc3b399ce9f1ae5d742561a6439da404618b' : null,
-            'vendor/test/library/files/shell/hello-shell' => \PHP_OS_FAMILY === 'Windows'
-                ? '18450bccd516be70d04b0047c5828ab4fedaea1052a49d14c8ce8b29fabcebc1'
-                : '870dda236cf4ead7342f401a00071f19fea9712c289f5c4cd0c4e4f1f9d5c7f7', // New line chars are replaced in Windows
-            'vendor/test/library/files/shell/hello-shell.bat' => \PHP_OS_FAMILY === 'Windows' ? 'bf5332bf69b3ed2fe59f9f205f800b6c1d30bd79d17c68053ef29864f108ef2c' : null,
+            'vendor/test/library/files/ruby/hello-ruby' => \PHP_OS_FAMILY === 'Windows'
+                ? '5f53359b554adb060f9592541494f46f0947f27d0c07962b4b559f1d548a32f2'
+                : 'df6261c52e25ad8bc5db62bbfb335631b554a99e8842535bf69b96d08ad37939', // New line chars are replaced in Windows
+            'vendor/test/library/files/ruby/hello-ruby.bat' => \PHP_OS_FAMILY === 'Windows' ? 'a99eb607d801dc854f9760bec2c4d7e7a905c4eafc36d2adc9966a914661ee06' : null,
             'vendor/test/library/files/mix/bin/hello-python' => '5e2820a0a75ec820e57de0ac2fc56a5ed409153f68915eef02f4373decb5df73',
             'vendor/test/library/files/mix/bin/hello-python.bat' => \PHP_OS_FAMILY === 'Windows' ? 'a7aa9456fc544940335014397365a6bc1eb1822983036468116517f3a9e7061c' : null,
             'vendor/test/library/files/mix/doc/empty.epub' => 'cae703a1c8173e65efae5accada6ce92a40dddf5fd3761b6ca7bd51c77eea29a',
@@ -158,10 +158,10 @@ class DownloadTest extends TestCase
                 ? true // Contains random text in file
                 : '7b16a282e37df8eb95baa8650457f9d84175152eed09c1663fbcdde89fd14b17',
             'vendor/bin/hello-php.bat' => \PHP_OS_FAMILY === 'Windows' ? 'e12c1c24de3ee89b037d63fc43ae930f60ab8dcdd850d1d02dd43c4043dfe8a9' : null,
-            'vendor/bin/hello-shell' => \PHP_OS_FAMILY === 'Windows'
+            'vendor/bin/hello-ruby' => \PHP_OS_FAMILY === 'Windows'
                 ? true // Contains random text in file
-                : 'ddddd8492857eae2d6348b6b6e60b72e16e7d6bf74ce2be5f3eeb23a4efc47fc',
-            'vendor/bin/hello-shell.bat' => \PHP_OS_FAMILY === 'Windows' ? 'c81226b3368dc7fd4d26ac2893b1356248255e4e9661bbb62bca3599a143075a' : null,
+                : '8799625cbcbb9eef120737382888bbfc6f34c6a1fec7f18a985aa99e4c7e25c8',
+            'vendor/bin/hello-ruby.bat' => \PHP_OS_FAMILY === 'Windows' ? '6173a39e276c49daa668eb715e1b5934c735412fba858a47a27c7b7c3b160561' : null,
             'vendor/bin/hello-python' => \PHP_OS_FAMILY === 'Windows'
                 ? true // Contains random text in file
                 : 'bb59a813fa074386ba217a31fb31996c8255ce63df165fcacfb397b429c5e057',
@@ -200,19 +200,16 @@ class DownloadTest extends TestCase
         return [
             'files/phar/hello' => 'Hello from phar file!',
             'vendor/test/library/files/php/hello-php' => 'Hello from php file!',
-            'vendor/test/library/files/shell/hello-shell' => "Hello from shell file!\n",
-            'vendor/test/library/files/mix/bin/hello-python' => "Hello from python file!\n",
+            'vendor/test/library/files/ruby/hello-ruby' => 'Hello from ruby file!'.(\PHP_OS_FAMILY === 'Windows' ? "\r\n" : "\n"),
+            'vendor/test/library/files/mix/bin/hello-python' => 'Hello from python file!'.(\PHP_OS_FAMILY === 'Windows' ? "\r\n" : "\n"),
             'vendor/bin/hello-php' => 'Hello from php file!',
-            'vendor/bin/hello-shell' => "Hello from shell file!\n",
-            'vendor/bin/hello-python' => "Hello from python file!\n",
+            'vendor/bin/hello-ruby' => 'Hello from ruby file!'.(\PHP_OS_FAMILY === 'Windows' ? "\r\n" : "\n"),
+            'vendor/bin/hello-python' => 'Hello from python file!'.(\PHP_OS_FAMILY === 'Windows' ? "\r\n" : "\n"),
         ];
     }
 
     private function assertExecutable(): void
     {
-        if (\PHP_OS_FAMILY === 'Windows') {
-            echo file_get_contents('vendor/bin/hello-shell');
-        }
         foreach ($this->getExecutableFiles() as $file => $output) {
             $process = new Process([$file]);
             $process->run();

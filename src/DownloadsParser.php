@@ -12,7 +12,6 @@
 namespace LastCall\DownloadsPlugin;
 
 use Composer\Package\PackageInterface;
-use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\GzipHandler;
 use LastCall\DownloadsPlugin\Handler\PharHandler;
@@ -42,12 +41,8 @@ class DownloadsParser
         'gzip' => GzipHandler::class,
     ];
 
-    /**
-     * @return baseHandler[] Each item is a specification of an extra file, with defaults and variables evaluated
-     */
-    public function parse(PackageInterface $package, string $basePath): array
+    public function parse(PackageInterface $package, string $basePath): \Generator
     {
-        $extraFiles = [];
         $extra = $package->getExtra();
 
         $defaults = $extra['downloads']['*'] ?? [];
@@ -67,11 +62,9 @@ class DownloadsParser
                 }
 
                 $class = $this->pickClass($extraFile);
-                $extraFiles[] = new $class($package, $basePath, $extraFile);
+                yield new $class($package, $basePath, $extraFile);
             }
         }
-
-        return $extraFiles;
     }
 
     private function pickClass(array $extraFile): string
@@ -117,6 +110,7 @@ class DownloadsParser
                 'PHP_OS' => \PHP_OS,
                 'PHP_OS_FAMILY' => \PHP_OS_FAMILY,
                 'PHP_SHLIB_SUFFIX' => \PHP_SHLIB_SUFFIX,
+                'DIRECTORY_SEPARATOR' => \DIRECTORY_SEPARATOR,
             ]);
             foreach ((array) $extraFile['variables'] as $key => $value) {
                 if (!preg_match('/^{\$[^}]+}$/', $key)) {

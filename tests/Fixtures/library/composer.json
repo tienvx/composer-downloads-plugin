@@ -1,0 +1,35 @@
+{
+    "name": "test/library",
+    "require": {
+        "tienvx/composer-downloads-plugin": "@dev"
+    },
+    "extra": {
+        "downloads": {
+            "php": {
+                "type": "file",
+                "url": "http://localhost:8000/php/hello",
+                "path": "files/php/hello-php",
+                "executable": true
+            },
+            "ruby": {
+                "type": "file",
+                "url": "http://localhost:8000/ruby/hello.ruby",
+                "path": "files/ruby/hello-ruby",
+                "executable": true
+            },
+            "mix": {
+                "type": "zip",
+                "url": "http://localhost:8000/archive/mix.jar",
+                "path": "files/mix",
+                "executable": [
+                    "files/mix/bin/hello-python"
+                ]
+            }
+        }
+    },
+    "bin": [
+        "files/php/hello-php",
+        "files/ruby/hello-ruby",
+        "files/mix/bin/hello-python"
+    ]
+}

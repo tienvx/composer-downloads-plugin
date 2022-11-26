@@ -5,19 +5,10 @@ namespace LastCall\DownloadsPlugin\Handler;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Util\Filesystem;
-use LastCall\DownloadsPlugin\Subpackage;
 
 class FileHandler extends BaseHandler
 {
     public const TMP_PREFIX = '.composer-extra-tmp-';
-
-    protected function createSubpackage(): Subpackage
-    {
-        $pkg = parent::createSubpackage();
-        $pkg->setDistType('file');
-
-        return $pkg;
-    }
 
     public function getTrackingFile(): string
     {
@@ -70,5 +61,19 @@ class FileHandler extends BaseHandler
                 }
             }
         }
+    }
+
+    protected function getDistType(): string
+    {
+        return 'file';
+    }
+
+    protected function getBinaries(): array
+    {
+        if (isset($this->extraFile['executable']) && !\is_bool($this->extraFile['executable'])) {
+            throw new \UnexpectedValueException(sprintf('Attribute "executable" of extra file "%s" defined in package "%s" must be boolean, "%s" given.', $this->extraFile['id'], $this->parent->getId(), get_debug_type($this->extraFile['executable'])));
+        }
+
+        return empty($this->extraFile['executable']) ? [] : [$this->extraFile['path']];
     }
 }

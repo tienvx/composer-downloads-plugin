@@ -5,18 +5,9 @@ namespace LastCall\DownloadsPlugin\Handler;
 use Composer\Composer;
 use Composer\IO\IOInterface;
 use LastCall\DownloadsPlugin\GlobCleaner;
-use LastCall\DownloadsPlugin\Subpackage;
 
 abstract class ArchiveHandler extends BaseHandler
 {
-    protected function createSubpackage(): Subpackage
-    {
-        $pkg = parent::createSubpackage();
-        $pkg->setDistType($this->getDistType());
-
-        return $pkg;
-    }
-
     public function getTrackingFile(): string
     {
         $file = basename($this->extraFile['id']).'-'.md5($this->extraFile['id']).'.json';
@@ -27,20 +18,17 @@ abstract class ArchiveHandler extends BaseHandler
             \DIRECTORY_SEPARATOR.$file;
     }
 
-    public function createTrackingData(): array
+    protected function getTrackingData(): array
     {
-        $meta = parent::createTrackingData();
-        $meta['ignore'] = $this->findIgnores();
-
-        return $meta;
+        return ['ignore' => $this->findIgnores()] + parent::getTrackingData();
     }
 
-    public function getChecksum(): string
+    protected function getChecksumData(): array
     {
         $ignore = array_values($this->findIgnores());
         sort($ignore);
 
-        return hash('sha256', parent::getChecksum().serialize($ignore));
+        return ['ignore' => $ignore] + parent::getChecksumData();
     }
 
     /**
@@ -73,5 +61,12 @@ abstract class ArchiveHandler extends BaseHandler
         GlobCleaner::clean($io, $targetPath, $this->findIgnores());
     }
 
-    abstract protected function getDistType(): string;
+    protected function getBinaries(): array
+    {
+        if (isset($this->extraFile['executable']) && !\is_array($this->extraFile['executable'])) {
+            throw new \UnexpectedValueException(sprintf('Attribute "executable" of extra file "%s" defined in package "%s" must be array, "%s" given.', $this->extraFile['id'], $this->parent->getId(), get_debug_type($this->extraFile['executable'])));
+        }
+
+        return $this->extraFile['executable'] ?? [];
+    }
 }

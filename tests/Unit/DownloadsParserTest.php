@@ -38,8 +38,7 @@ class DownloadsParserTest extends TestCase
     public function testIgnoresPackagesWithoutExtraDownloads(): void
     {
         $package = new Package('foo', '1.0.0', '1.0.0');
-        $parser = new DownloadsParser();
-        $this->assertEquals([], $parser->parse($package, '/EXAMPLE'));
+        $this->assertEquals([], $this->parse($package));
     }
 
     public function testIgnoresPackagesWithDefaultDownloads(): void
@@ -47,8 +46,7 @@ class DownloadsParserTest extends TestCase
         $package = $this->getPackageWithExtraDownloads([
             '*' => ['url' => 'foo', 'path' => 'bar'],
         ]);
-        $parser = new DownloadsParser();
-        $this->assertEquals([], $parser->parse($package, '/EXAMPLE'));
+        $this->assertEquals([], $this->parse($package));
     }
 
     public function getExplicitDownloadTypeTests(): array
@@ -76,7 +74,7 @@ class DownloadsParserTest extends TestCase
         if ('phar' === $downloadType) {
             $expectSubpackage->setBinaries(['baz']);
         }
-        $parsed = (new DownloadsParser())->parse($package, '/EXAMPLE');
+        $parsed = $this->parse($package);
         $this->assertCount(1, $parsed);
         $this->assertInstanceOf($expectedHandlerClass, $parsed[0]);
         $this->assertEquals($expectSubpackage, $parsed[0]->getSubpackage());
@@ -109,7 +107,7 @@ class DownloadsParserTest extends TestCase
         $package = $this->getPackageWithExtraDownloads([
             'bar' => ['url' => $url, 'path' => 'bar'],
         ]);
-        $parsed = (new DownloadsParser())->parse($package, '/EXAMPLE');
+        $parsed = $this->parse($package);
         $this->assertCount(1, $parsed);
         $this->assertInstanceOf($expectedHandlerClass, $parsed[0]);
         $this->assertEquals($expectedDistType, $parsed[0]->getSubpackage()->getDistType());
@@ -143,7 +141,7 @@ class DownloadsParserTest extends TestCase
         ]);
         $this->expectException(\UnexpectedValueException::class);
         $this->expectDeprecationMessage(sprintf('Expected variable key in this format "{$variable-name}", "%s" given.', $invalidVariableKey));
-        (new DownloadsParser())->parse($package, '/EXAMPLE');
+        $this->parse($package);
     }
 
     public function getInvalidVariableValueTests(): array
@@ -176,7 +174,7 @@ class DownloadsParserTest extends TestCase
         ]);
         $this->expectException(\UnexpectedValueException::class);
         $this->expectDeprecationMessage(sprintf('Expected the the result of expression "%s" to be a string, "%s" given.', $invalidVariableValue, $type));
-        (new DownloadsParser())->parse($package, '/EXAMPLE');
+        $this->parse($package);
     }
 
     public function getReplacesVariableTests(): array
@@ -200,7 +198,12 @@ class DownloadsParserTest extends TestCase
             'bar' => ['url' => $url, 'path' => 'bar', 'variables' => $variables, 'version' => '1.2.3'],
         ]);
         $expectSubpackage = new Subpackage($package, 'bar', $expectedUrl, 'zip', 'bar', 'dev-master', '1.2.3');
-        $actualSubpackage = (new DownloadsParser())->parse($package, '/EXAMPLE')[0]->getSubpackage();
+        $actualSubpackage = $this->parse($package)[0]->getSubpackage();
         $this->assertEquals($expectSubpackage, $actualSubpackage);
+    }
+
+    private function parse(Package $package): array
+    {
+        return iterator_to_array((new DownloadsParser())->parse($package, '/EXAMPLE'));
     }
 }

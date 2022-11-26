@@ -12,6 +12,7 @@
 namespace LastCall\DownloadsPlugin;
 
 use Composer\Package\PackageInterface;
+use Generator;
 use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\GzipHandler;
@@ -42,12 +43,8 @@ class DownloadsParser
         'gzip' => GzipHandler::class,
     ];
 
-    /**
-     * @return baseHandler[] Each item is a specification of an extra file, with defaults and variables evaluated
-     */
-    public function parse(PackageInterface $package, string $basePath): array
+    public function parse(PackageInterface $package, string $basePath): Generator
     {
-        $extraFiles = [];
         $extra = $package->getExtra();
 
         $defaults = $extra['downloads']['*'] ?? [];
@@ -67,11 +64,9 @@ class DownloadsParser
                 }
 
                 $class = $this->pickClass($extraFile);
-                $extraFiles[] = new $class($package, $basePath, $extraFile);
+                yield new $class($package, $basePath, $extraFile);
             }
         }
-
-        return $extraFiles;
     }
 
     private function pickClass(array $extraFile): string

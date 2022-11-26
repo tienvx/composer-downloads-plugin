@@ -57,6 +57,10 @@ When a downstream user of `foo/bar` runs `composer require foo/bar`, it will dow
   * This supports a subset of `.gitignore` notation.
   * Only useful with archive types.
 
+* `executable`: (*Optional*) Indicate list of files should be mark as executable.
+  * For archive types: the value should be a list of extracted files
+  * For file types: the value should be boolean (true/false)
+
 * `version`: (*Optional*) A version number for the downloaded artifact.
   * This has no functional impact on the lifecycle of the artifact.
   * It can affect the console output.

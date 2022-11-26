@@ -17,7 +17,7 @@ class GzipHandler extends FileHandler
 
     public function download(Composer $composer, IOInterface $io): void
     {
-        $this->target = $gzip = $this->getTargetPath() . '.gz';
+        $this->target = $gzip = $this->getTargetPath().'.gz';
         parent::download($composer, $io);
         $this->target = null;
         // Target file is still gzip file, need to be decompressed.

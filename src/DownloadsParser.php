@@ -12,8 +12,6 @@
 namespace LastCall\DownloadsPlugin;
 
 use Composer\Package\PackageInterface;
-use Generator;
-use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\GzipHandler;
 use LastCall\DownloadsPlugin\Handler\PharHandler;
@@ -43,7 +41,7 @@ class DownloadsParser
         'gzip' => GzipHandler::class,
     ];
 
-    public function parse(PackageInterface $package, string $basePath): Generator
+    public function parse(PackageInterface $package, string $basePath): \Generator
     {
         $extra = $package->getExtra();
 

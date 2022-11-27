@@ -58,7 +58,7 @@ abstract class ArchiveHandler extends BaseHandler
         } else {
             $downloadManager->download($this->getSubpackage(), $targetPath);
         }
-        GlobCleaner::clean($io, $targetPath, $this->findIgnores());
+        GlobCleaner::clean($targetPath, $this->findIgnores());
     }
 
     protected function getBinaries(): array

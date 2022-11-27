@@ -11,6 +11,7 @@
 
 namespace LastCall\DownloadsPlugin\Tests\Unit;
 
+use Composer\Composer;
 use Composer\Package\Package;
 use LastCall\DownloadsPlugin\DownloadsParser;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
@@ -197,7 +198,8 @@ class DownloadsParserTest extends TestCase
         $package = $this->getPackageWithExtraDownloads([
             'bar' => ['url' => $url, 'path' => 'bar', 'variables' => $variables, 'version' => '1.2.3'],
         ]);
-        $expectSubpackage = new Subpackage($package, 'bar', $expectedUrl, 'zip', 'bar', 'dev-master', '1.2.3');
+        $version = version_compare(Composer::RUNTIME_API_VERSION, '2.0.0') >= 0 ? 'dev-master' : '9999999-dev';
+        $expectSubpackage = new Subpackage($package, 'bar', $expectedUrl, 'zip', 'bar', $version, '1.2.3');
         $actualSubpackage = $this->parse($package)[0]->getSubpackage();
         $this->assertEquals($expectSubpackage, $actualSubpackage);
     }

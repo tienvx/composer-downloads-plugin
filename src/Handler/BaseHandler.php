@@ -115,9 +115,7 @@ abstract class BaseHandler
 
     protected function isComposerV2(): bool
     {
-        $version = method_exists(Composer::class, 'getVersion') ? Composer::getVersion() : Composer::VERSION;
-
-        return version_compare($version, '2.0.0') >= 0;
+        return version_compare(Composer::RUNTIME_API_VERSION, '2.0.0') >= 0;
     }
 
     public function install(IOInterface $io): void
@@ -145,7 +143,7 @@ abstract class BaseHandler
         $package = $this->getSubpackage();
         foreach ($package->getBinaries() as $bin) {
             $path = $this->parentPath.\DIRECTORY_SEPARATOR.$bin;
-            if (Platform::isWindows() || Platform::isWindowsSubsystemForLinux()) {
+            if (Platform::isWindows() || (method_exists(Platform::class, 'isWindowsSubsystemForLinux') ? Platform::isWindowsSubsystemForLinux() : false)) {
                 $proxy = $path.'.bat';
                 if (file_exists($proxy)) {
                     $io->writeError('    Skipped installation of bin '.$bin.'.bat proxy for package '.$package->getName().': a .bat proxy was already installed');

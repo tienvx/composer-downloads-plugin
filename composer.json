@@ -21,13 +21,13 @@
         "composer-plugin-api": "^1.1 || ^2.0",
         "php": "^8.0",
         "leongrdic/smplang": "^1.0",
-        "symfony/finder": "^4.4 || ^5.4 || ^6.0"
+        "symfony/finder": "^4.4.23 || ^5.4 || ^6.0"
     },
     "require-dev": {
-        "composer/composer": "~1.0 || ~2.0",
-        "phpunit/phpunit": "^9.5",
+        "composer/composer": "^1.6 || ^2.2",
+        "phpunit/phpunit": "^9.5.10",
         "friendsofphp/php-cs-fixer": "^3.4",
-        "symfony/process": "^5.4 || ^6.1",
+        "symfony/process": "^4.4 || ^5.4 || ^6.0",
         "php-vfs/php-vfs": "^1.4"
     },
     "autoload": {

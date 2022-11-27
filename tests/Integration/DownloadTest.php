@@ -119,7 +119,7 @@ class DownloadTest extends TestCase
         return [
             // From project
             'files/phar/hello' => '66ef5d9bd7854d96e0c3b05e8c169a5fbd398ece5299032c132387edb87cf491',
-            'files/phar/hello.bat' => \PHP_OS_FAMILY === 'Windows' ? 'e353132da82b8973ca2ae3f248057ee8591b7a19d43a8b3f2585dc169d6ea4d0' : null,
+            'files/phar/hello.bat' => \PHP_OS_FAMILY === 'Windows',
             'files/file/ipsum' => \PHP_OS_FAMILY === 'Windows'
                 ? '77559b8e3cf8082554f5cb314729363017de998b63f0ab9cb751246c167d7bdd'
                 : '77bdfb1d37ee5a5e6d08d0bd8f2d4abfde6b673422364ba9ad432deb2d9c6e4d', // New line chars are replaced in Windows
@@ -128,7 +128,7 @@ class DownloadTest extends TestCase
             'files/doc/v1.3.0/empty.doc' => '60b5e45db3b51c38a5b762e771ee2f19692f52186c42c3930d56bbdf04d21f4e',
             'files/doc/v1.3.0/empty.docx' => '61cdb4b8b9067ab1f4eaa5ba782007c81bdd04283a228b5076aeeb4c9362020b',
             'files/doc/v1.3.0/empty.pdf' => 'c9a7a7f01b8909dbc5405a6c37372610b853bc76464f167e964c217d8ffdcc3c',
-            'files/doc/v1.3.0/empty.txt' => null,
+            'files/doc/v1.3.0/empty.txt' => false,
             'files/spreadsheet/empty.xls' => '6ed659132105ff18df7946a66ac1853f693ac93504d1f21b82d0b0514d1f7ed0',
             'files/spreadsheet/empty.xlsx' => '4eb8bea601f7673e25c11ecf8cd18e2535a194f06f3df09ea238e89bf16cd7d7',
             'files/presentation/empty.odp' => 'c663570ba816d2ec8813ae02e5a78257a3a56a8f60e7ad657119e6f0052a26fe',
@@ -146,29 +146,23 @@ class DownloadTest extends TestCase
             'vendor/test/library/files/php/hello-php' => \PHP_OS_FAMILY === 'Windows'
                 ? '6094c815897bac5498a356d6c93272b16cc2745ac643129aba55fe429cb0622f'
                 : '27e82fb9cc729a9f535e7ad26364f108aabaafa783617d5bce51ba986ad85adb', // New line chars are replaced in Windows
-            'vendor/test/library/files/php/hello-php.bat' => \PHP_OS_FAMILY === 'Windows' ? '05562a89efd76b910f24a8d035acdc3b399ce9f1ae5d742561a6439da404618b' : null,
+            'vendor/test/library/files/php/hello-php.bat' => \PHP_OS_FAMILY === 'Windows',
             'vendor/test/library/files/ruby/hello-ruby' => \PHP_OS_FAMILY === 'Windows'
                 ? '5f53359b554adb060f9592541494f46f0947f27d0c07962b4b559f1d548a32f2'
                 : 'df6261c52e25ad8bc5db62bbfb335631b554a99e8842535bf69b96d08ad37939', // New line chars are replaced in Windows
-            'vendor/test/library/files/ruby/hello-ruby.bat' => \PHP_OS_FAMILY === 'Windows' ? 'a99eb607d801dc854f9760bec2c4d7e7a905c4eafc36d2adc9966a914661ee06' : null,
+            'vendor/test/library/files/ruby/hello-ruby.bat' => \PHP_OS_FAMILY === 'Windows',
             'vendor/test/library/files/mix/bin/hello-python' => '5e2820a0a75ec820e57de0ac2fc56a5ed409153f68915eef02f4373decb5df73',
-            'vendor/test/library/files/mix/bin/hello-python.bat' => \PHP_OS_FAMILY === 'Windows' ? 'a7aa9456fc544940335014397365a6bc1eb1822983036468116517f3a9e7061c' : null,
+            'vendor/test/library/files/mix/bin/hello-python.bat' => \PHP_OS_FAMILY === 'Windows',
             'vendor/test/library/files/mix/doc/empty.epub' => 'cae703a1c8173e65efae5accada6ce92a40dddf5fd3761b6ca7bd51c77eea29a',
             'vendor/test/library/files/mix/img/empty.svg' => 'c276389006b7ab53a33cacc4a04a62bcfa050d9cc34fd90f1aefc119fa1803fe',
-            'vendor/bin/hello' => null,
-            'vendor/bin/hello.bat' => null,
-            'vendor/bin/hello-php' => \PHP_OS_FAMILY === 'Windows'
-                ? true // Contains random text in file
-                : '7b16a282e37df8eb95baa8650457f9d84175152eed09c1663fbcdde89fd14b17',
-            'vendor/bin/hello-php.bat' => \PHP_OS_FAMILY === 'Windows' ? 'e12c1c24de3ee89b037d63fc43ae930f60ab8dcdd850d1d02dd43c4043dfe8a9' : null,
-            'vendor/bin/hello-ruby' => \PHP_OS_FAMILY === 'Windows'
-                ? true // Contains random text in file
-                : '8799625cbcbb9eef120737382888bbfc6f34c6a1fec7f18a985aa99e4c7e25c8',
-            'vendor/bin/hello-ruby.bat' => \PHP_OS_FAMILY === 'Windows' ? '6173a39e276c49daa668eb715e1b5934c735412fba858a47a27c7b7c3b160561' : null,
-            'vendor/bin/hello-python' => \PHP_OS_FAMILY === 'Windows'
-                ? true // Contains random text in file
-                : 'bb59a813fa074386ba217a31fb31996c8255ce63df165fcacfb397b429c5e057',
-            'vendor/bin/hello-python.bat' => \PHP_OS_FAMILY === 'Windows' ? 'db981ceeb392e6b2fc933ce7c8de28df9b3185c8388f88abac83c395758cf735' : null,
+            'vendor/bin/hello' => false,
+            'vendor/bin/hello.bat' => false,
+            'vendor/bin/hello-php' => true,
+            'vendor/bin/hello-php.bat' => \PHP_OS_FAMILY === 'Windows',
+            'vendor/bin/hello-ruby' => true,
+            'vendor/bin/hello-ruby.bat' => \PHP_OS_FAMILY === 'Windows',
+            'vendor/bin/hello-python' => true,
+            'vendor/bin/hello-python.bat' => \PHP_OS_FAMILY === 'Windows',
         ];
     }
 

@@ -13,15 +13,10 @@ jobs:
         php: [8.0, 8.1]
         os: [ubuntu-latest, macos-latest, windows-latest]
         composer: [v1, v2]
-    name: PHP ${{ matrix.php }} - OS ${{ matrix.os }} - Composer ${{ matrix.composer }}
+        dependencies: [ 'lowest', 'highest' ]
+    name: PHP ${{ matrix.php }} - OS ${{ matrix.os }} - Composer ${{ matrix.composer }} - Dependencies ${{ matrix.dependencies }}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-            path: |
-              ~/.composer/cache/files
-              ~/.composer/cache/repo
-            key: dependencies-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
       - uses: shivammathur/setup-php@v2
         with:
             php-version: ${{ matrix.php }}
@@ -36,8 +31,10 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' && matrix.php == '8.1' }}
       - name: Validate composer.json
         run: composer validate
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+      - uses: ramsey/composer-install@v2
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+          composer-options: "--no-progress --no-suggest"
       - name: Run PHP CS Fixer
         run: ./vendor/bin/php-cs-fixer fix --diff --dry-run
       - name: Run tests
@@ -48,4 +45,4 @@ jobs:
         run: |
           composer global require php-coveralls/php-coveralls
           php-coveralls --coverage_clover=clover.xml -v
-        if: ${{ github.event_name == 'push' && matrix.os == 'ubuntu-latest' && matrix.composer == 'v2' && matrix.php == '8.1' }}
+        if: ${{ github.event_name == 'push' && matrix.os == 'ubuntu-latest' && matrix.composer == 'v2' && matrix.php == '8.1' && matrix.dependencies == 'highest' }}

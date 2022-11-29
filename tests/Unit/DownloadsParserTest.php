@@ -213,7 +213,9 @@ class DownloadsParserTest extends TestCase
     private function getSubpackage(BaseHandler $handler): Subpackage
     {
         $reflection = new \ReflectionObject($handler);
+        $method = $reflection->getMethod('getSubpackage');
+        $method->setAccessible(true);
 
-        return $reflection->getMethod('getSubpackage')->invoke($handler);
+        return $method->invoke($handler);
     }
 }

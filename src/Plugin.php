@@ -43,11 +43,6 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
     public function installDownloadsRoot(Event $event): void
     {
-        $cwd = getcwd();
-        if (!\is_string($cwd)) {
-            throw new \RuntimeException('Failed to get current working directory');
-        }
-
         $rootPackage = $event->getComposer()->getPackage();
         $this->handler->handle($rootPackage, $event->getComposer(), $event->getIO());
 

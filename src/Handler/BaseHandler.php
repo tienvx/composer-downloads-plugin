@@ -29,7 +29,7 @@ abstract class BaseHandler
     {
     }
 
-    public function getSubpackage(): Subpackage
+    protected function getSubpackage(): Subpackage
     {
         if (null === $this->subpackage) {
             $this->subpackage = $this->createSubpackage();
@@ -85,7 +85,7 @@ abstract class BaseHandler
      *                If the identifier changes, that implies that the asset should be
      *                replaced/redownloaded.
      */
-    public function getChecksum(): string
+    private function getChecksum(): string
     {
         return hash('sha256', serialize($this->getChecksumData()));
     }
@@ -100,14 +100,12 @@ abstract class BaseHandler
         ];
     }
 
-    public function getTargetPath(): string
+    protected function getTargetPath(): string
     {
         return $this->parentPath.'/'.$this->extraFile['path'];
     }
 
-    abstract public function download(Composer $composer, IOInterface $io): void;
-
-    abstract public function getTrackingFile(): string;
+    abstract protected function getTrackingFile(): string;
 
     abstract protected function getDistType(): string;
 
@@ -118,16 +116,43 @@ abstract class BaseHandler
         return version_compare(Composer::RUNTIME_API_VERSION, '2.0.0') >= 0;
     }
 
-    public function install(IOInterface $io): void
+    public function isInstalled(IOInterface $io): bool
     {
+        $package = $this->getSubpackage();
+        $targetPath = $this->getTargetPath();
+        $trackingFile = $this->getTrackingFile();
+
+        if (file_exists($targetPath) && !file_exists($trackingFile)) {
+            $io->write(sprintf('<info>Extra file <comment>%s</comment> has been locally overriden in <comment>%s</comment>. To reset it, delete and reinstall.</info>', $package->getName(), $package->getTargetDir()), true);
+
+            return true;
+        }
+
+        if (file_exists($targetPath) && file_exists($trackingFile)) {
+            $meta = @json_decode(file_get_contents($trackingFile), 1, 512, \JSON_THROW_ON_ERROR);
+            if (isset($meta['checksum']) && $meta['checksum'] === $this->getChecksum()) {
+                $io->write(sprintf('<info>Skip extra file <comment>%s</comment></info>', $package->getName()), true, IOInterface::VERY_VERBOSE);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function install(Composer $composer, IOInterface $io): void
+    {
+        $io->write(sprintf('<info>Download extra file <comment>%s</comment></info>', $this->getSubpackage()->getName()), true, IOInterface::VERBOSE);
+        $this->download($composer, $io);
         $this->createTrackingFile($io);
         $this->markExecutable($io);
     }
 
+    abstract protected function download(Composer $composer, IOInterface $io): void;
+
     private function createTrackingFile(IOInterface $io): void
     {
-        $package = $this->getSubpackage();
-        $io->write(sprintf('<info>Create tracking file for <comment>%s</comment></info>', $package->getName()), true, IOInterface::VERY_VERBOSE);
+        $io->write(sprintf('<info>Create tracking file for <comment>%s</comment></info>', $this->getSubpackage()->getName()), true, IOInterface::VERY_VERBOSE);
         $trackingFile = $this->getTrackingFile();
         if (!file_exists(\dirname($trackingFile))) {
             mkdir(\dirname($trackingFile), 0777, true);

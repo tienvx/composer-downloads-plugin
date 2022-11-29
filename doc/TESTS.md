@@ -24,5 +24,5 @@ Generating code coverage report in Clover XML format ... done [00:00.035]
 To debug, set project dir so it will not be removed after running:
 
 ```
-env USE_TEST_PROJECT=$HOME/my-project DEBUG_COMPOSER=1 phpunit tests/Integration/DownloadTest.php
+env USE_TEST_PROJECT=$HOME/my-project DEBUG_COMPOSER=1 phpunit tests/Integration/InstallTest.php
 ```

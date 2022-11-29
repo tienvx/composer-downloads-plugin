@@ -6,11 +6,13 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
-class DownloadTest extends TestCase
+abstract class CommandTestCase extends TestCase
 {
     private static ?string $origDir;
     private static ?string $testDir;
     private static ?Process $server;
+    protected static bool $needChangeDir = true;
+    protected static bool $requireLibrary = true;
 
     private static function getComposerJson(): array
     {
@@ -24,12 +26,14 @@ class DownloadTest extends TestCase
                 'library' => [
                     'type' => 'path',
                     'url' => self::getLibraryPath(),
+                    'options' => [
+                        'symlink' => false,
+                    ],
                 ],
             ],
             'require' => [
                 'tienvx/composer-downloads-plugin' => '@dev',
-                'test/library' => '@dev',
-            ],
+            ] + (static::$requireLibrary ? ['test/library' => '@dev'] : []),
             'minimum-stability' => 'dev',
             'extra' => [
                 'downloads' => [
@@ -109,12 +113,17 @@ class DownloadTest extends TestCase
 
     protected function setUp(): void
     {
-        self::cleanDir(self::$testDir.'/files');
-        self::cleanDir(self::$testDir.'/vendor/test/library/files');
-        self::cleanDir(self::$testDir.'/vendor/bin');
+        self::cleanDir(self::getPathToTestDir('files'));
+        self::cleanDir(self::getPathToTestDir('vendor/test/library/files'));
+        self::cleanDir(self::getPathToTestDir('vendor/bin'));
     }
 
-    private function getFiles(): array
+    protected static function getPathToTestDir(string $path = ''): string
+    {
+        return self::$testDir.\DIRECTORY_SEPARATOR.$path;
+    }
+
+    protected function getFiles(): array
     {
         return [
             // From project
@@ -142,6 +151,8 @@ class DownloadTest extends TestCase
             'files/image/empty.png' => '2024896e28f508d6b695fffad2531a2718c1e46b6c2c924d9b77f10ac2688793',
             'files/markup/empty.html' => '5e2ab2f655e9378fd1e54a4bfd81cece72a3bdeb04c87be86041962fe5c3bd3c',
             'files/markup/empty.xml' => '4be690ad5983b2a40f640481fdb27dcc43ac162e14fa9aab2ff45775521d9213',
+            'vendor/bin/hello' => false,
+            'vendor/bin/hello.bat' => false,
             // From library
             'vendor/test/library/files/php/hello-php' => \PHP_OS_FAMILY === 'Windows'
                 ? '6094c815897bac5498a356d6c93272b16cc2745ac643129aba55fe429cb0622f'
@@ -155,8 +166,6 @@ class DownloadTest extends TestCase
             'vendor/test/library/files/mix/bin/hello-python.bat' => \PHP_OS_FAMILY === 'Windows',
             'vendor/test/library/files/mix/doc/empty.epub' => 'cae703a1c8173e65efae5accada6ce92a40dddf5fd3761b6ca7bd51c77eea29a',
             'vendor/test/library/files/mix/img/empty.svg' => 'c276389006b7ab53a33cacc4a04a62bcfa050d9cc34fd90f1aefc119fa1803fe',
-            'vendor/bin/hello' => false,
-            'vendor/bin/hello.bat' => false,
             'vendor/bin/hello-php' => true,
             'vendor/bin/hello-php.bat' => \PHP_OS_FAMILY === 'Windows',
             'vendor/bin/hello-ruby' => true,
@@ -166,11 +175,7 @@ class DownloadTest extends TestCase
         ];
     }
 
-    /**
-     * @testWith ["install"]
-     *           ["update"]
-     */
-    public function testDownload(string $command): void
+    protected function runComposerCommandAndAssert(array $command): void
     {
         $this->assertFiles(false);
         self::runComposer($command);
@@ -178,21 +183,21 @@ class DownloadTest extends TestCase
         $this->assertExecutable();
     }
 
-    private function assertFiles(bool $exist = true): void
+    protected function assertFiles(bool $exist = true): void
     {
         foreach ($this->getFiles() as $file => $sha256) {
             if ($exist && $sha256) {
-                $this->assertFileExists($file);
+                $this->assertFileExists(self::getPathToTestDir($file));
                 if (\is_string($sha256)) {
-                    $this->assertEquals($sha256, hash('sha256', file_get_contents($file)));
+                    $this->assertEquals($sha256, hash('sha256', file_get_contents(self::getPathToTestDir($file))));
                 }
             } else {
-                $this->assertFileDoesNotExist($file);
+                $this->assertFileDoesNotExist(self::getPathToTestDir($file));
             }
         }
     }
 
-    private function getExecutableFiles(): array
+    protected function getExecutableFiles(): array
     {
         return [
             'files/phar/hello' => 'Hello from phar file!',
@@ -205,10 +210,10 @@ class DownloadTest extends TestCase
         ];
     }
 
-    private function assertExecutable(): void
+    protected function assertExecutable(): void
     {
         foreach ($this->getExecutableFiles() as $file => $output) {
-            $process = new Process([$file]);
+            $process = new Process([self::getPathToTestDir($file)]);
             $process->run();
             $this->assertSame($output, $process->getOutput());
             $this->assertSame(0, $process->getExitCode());
@@ -216,7 +221,7 @@ class DownloadTest extends TestCase
     }
 
     /**
-     * Create a temp folder with a "composer.json" file and chdir() into it.
+     * Create a temp folder with a "composer.json" file and chdir() into it if needed.
      */
     private static function initTestProject(): string
     {
@@ -224,7 +229,7 @@ class DownloadTest extends TestCase
         $testDir = getenv('USE_TEST_PROJECT');
         if (\is_string($testDir)) {
             self::$testDir = $testDir;
-            @unlink(self::$testDir.\DIRECTORY_SEPARATOR.'composer.lock');
+            @unlink(self::getPathToTestDir('composer.lock'));
         } else {
             self::$testDir = sys_get_temp_dir().\DIRECTORY_SEPARATOR.'assetplg-'.md5(__DIR__.time().random_int(0, 10000));
             self::cleanDir(self::$testDir);
@@ -233,8 +238,8 @@ class DownloadTest extends TestCase
         if (!is_dir(self::$testDir)) {
             mkdir(self::$testDir);
         }
-        file_put_contents(self::$testDir.\DIRECTORY_SEPARATOR.'composer.json', json_encode(static::getComposerJson(), \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES));
-        chdir(self::$testDir);
+        file_put_contents(self::getPathToTestDir('composer.json'), json_encode(static::getComposerJson(), \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES));
+        static::$needChangeDir && chdir(self::$testDir);
 
         return self::$testDir;
     }
@@ -242,7 +247,7 @@ class DownloadTest extends TestCase
     private static function cleanTestProjectDir(): void
     {
         if (self::$testDir) {
-            chdir(self::$origDir);
+            static::$needChangeDir && chdir(self::$origDir);
             self::$origDir = null;
 
             if (getenv('USE_TEST_PROJECT')) {
@@ -271,9 +276,9 @@ class DownloadTest extends TestCase
         }
     }
 
-    private static function runComposer(string $command = 'install'): void
+    private static function runComposer(array $command): void
     {
-        $process = new Process([self::getComposerPath(), $command, '-v']);
+        $process = new Process([self::getComposerPath(), ...$command, '-v']);
         $process->run(getenv('DEBUG_COMPOSER') ? function ($type, $buffer) {
             echo $buffer;
         } : null);

@@ -10,7 +10,7 @@ class FileHandler extends BaseHandler
 {
     public const TMP_PREFIX = '.composer-extra-tmp-';
 
-    public function getTrackingFile(): string
+    protected function getTrackingFile(): string
     {
         $file = basename($this->extraFile['id']).'-'.md5($this->extraFile['id']).'.json';
 
@@ -20,7 +20,7 @@ class FileHandler extends BaseHandler
             \DIRECTORY_SEPARATOR.$file;
     }
 
-    public function download(Composer $composer, IOInterface $io): void
+    protected function download(Composer $composer, IOInterface $io): void
     {
         // We want to take advantage of the cache in composer's downloader, but it
         // doesn't put the file the spot we want, so we shuffle a bit.

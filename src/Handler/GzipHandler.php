@@ -10,12 +10,12 @@ class GzipHandler extends FileHandler
 {
     private ?string $target = null;
 
-    public function getTargetPath(): string
+    protected function getTargetPath(): string
     {
         return $this->target ?? parent::getTargetPath();
     }
 
-    public function download(Composer $composer, IOInterface $io): void
+    protected function download(Composer $composer, IOInterface $io): void
     {
         $this->target = $gzip = $this->getTargetPath().'.gz';
         parent::download($composer, $io);

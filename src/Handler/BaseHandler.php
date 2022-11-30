@@ -18,7 +18,7 @@ use Composer\Util\Platform;
 use Composer\Util\ProcessExecutor;
 use LastCall\DownloadsPlugin\Subpackage;
 
-abstract class BaseHandler
+abstract class BaseHandler implements HandlerInterface
 {
     public const FAKE_VERSION = 'dev-master';
     public const DOT_DIR = '.composer-downloads';
@@ -29,7 +29,7 @@ abstract class BaseHandler
     {
     }
 
-    protected function getSubpackage(): Subpackage
+    public function getSubpackage(): Subpackage
     {
         if (null === $this->subpackage) {
             $this->subpackage = $this->createSubpackage();
@@ -38,7 +38,7 @@ abstract class BaseHandler
         return $this->subpackage;
     }
 
-    protected function createSubpackage(): Subpackage
+    private function createSubpackage(): Subpackage
     {
         $versionParser = new VersionParser();
         $extraFile = $this->extraFile;
@@ -71,7 +71,7 @@ abstract class BaseHandler
         return $package;
     }
 
-    protected function getTrackingData(): array
+    public function getTrackingData(): array
     {
         return [
             'name' => $this->getSubpackage()->getName(),
@@ -85,7 +85,7 @@ abstract class BaseHandler
      *                If the identifier changes, that implies that the asset should be
      *                replaced/redownloaded.
      */
-    private function getChecksum(): string
+    public function getChecksum(): string
     {
         return hash('sha256', serialize($this->getChecksumData()));
     }
@@ -100,12 +100,10 @@ abstract class BaseHandler
         ];
     }
 
-    protected function getTargetPath(): string
+    public function getTargetPath(): string
     {
-        return $this->parentPath.'/'.$this->extraFile['path'];
+        return $this->parentPath.\DIRECTORY_SEPARATOR.$this->extraFile['path'];
     }
-
-    abstract protected function getTrackingFile(): string;
 
     abstract protected function getDistType(): string;
 
@@ -116,62 +114,23 @@ abstract class BaseHandler
         return version_compare(Composer::RUNTIME_API_VERSION, '2.0.0') >= 0;
     }
 
-    public function isInstalled(IOInterface $io): bool
-    {
-        $package = $this->getSubpackage();
-        $targetPath = $this->getTargetPath();
-        $trackingFile = $this->getTrackingFile();
-
-        if (file_exists($targetPath) && !file_exists($trackingFile)) {
-            $io->write(sprintf('<info>Extra file <comment>%s</comment> has been locally overriden in <comment>%s</comment>. To reset it, delete and reinstall.</info>', $package->getName(), $package->getTargetDir()), true);
-
-            return true;
-        }
-
-        if (file_exists($targetPath) && file_exists($trackingFile)) {
-            $meta = @json_decode(file_get_contents($trackingFile), 1, 512, \JSON_THROW_ON_ERROR);
-            if (isset($meta['checksum']) && $meta['checksum'] === $this->getChecksum()) {
-                $io->write(sprintf('<info>Skip extra file <comment>%s</comment></info>', $package->getName()), true, IOInterface::VERY_VERBOSE);
-
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public function install(Composer $composer, IOInterface $io): void
     {
-        $io->write(sprintf('<info>Download extra file <comment>%s</comment></info>', $this->getSubpackage()->getName()), true, IOInterface::VERBOSE);
         $this->download($composer, $io);
-        $this->createTrackingFile($io);
         $this->markExecutable($io);
     }
 
     abstract protected function download(Composer $composer, IOInterface $io): void;
 
-    private function createTrackingFile(IOInterface $io): void
-    {
-        $io->write(sprintf('<info>Create tracking file for <comment>%s</comment></info>', $this->getSubpackage()->getName()), true, IOInterface::VERY_VERBOSE);
-        $trackingFile = $this->getTrackingFile();
-        if (!file_exists(\dirname($trackingFile))) {
-            mkdir(\dirname($trackingFile), 0777, true);
-        }
-        file_put_contents($trackingFile, json_encode(
-            $this->getTrackingData(),
-            \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES
-        ));
-    }
-
     private function markExecutable(IOInterface $io): void
     {
-        $package = $this->getSubpackage();
-        foreach ($package->getBinaries() as $bin) {
+        $subpackage = $this->getSubpackage();
+        foreach ($subpackage->getBinaries() as $bin) {
             $path = $this->parentPath.\DIRECTORY_SEPARATOR.$bin;
             if (Platform::isWindows() || (method_exists(Platform::class, 'isWindowsSubsystemForLinux') ? Platform::isWindowsSubsystemForLinux() : false)) {
                 $proxy = $path.'.bat';
                 if (file_exists($proxy)) {
-                    $io->writeError('    Skipped installation of bin '.$bin.'.bat proxy for package '.$package->getName().': a .bat proxy was already installed');
+                    $io->writeError('    Skipped installation of bin '.$bin.'.bat proxy for package '.$subpackage->getName().': a .bat proxy was already installed');
                 } else {
                     $caller = BinaryInstaller::determineBinaryCaller($path);
                     file_put_contents($proxy, '@'.$caller.' "%~dp0'.ProcessExecutor::escape(basename($proxy, '.bat')).'" %*');

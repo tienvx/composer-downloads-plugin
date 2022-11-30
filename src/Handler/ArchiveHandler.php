@@ -8,7 +8,7 @@ use LastCall\DownloadsPlugin\GlobCleaner;
 
 abstract class ArchiveHandler extends BaseHandler
 {
-    protected function getTrackingFile(): string
+    public function getTrackingFile(): string
     {
         $file = basename($this->extraFile['id']).'-'.md5($this->extraFile['id']).'.json';
 
@@ -18,7 +18,7 @@ abstract class ArchiveHandler extends BaseHandler
             \DIRECTORY_SEPARATOR.$file;
     }
 
-    protected function getTrackingData(): array
+    public function getTrackingData(): array
     {
         return ['ignore' => $this->findIgnores()] + parent::getTrackingData();
     }

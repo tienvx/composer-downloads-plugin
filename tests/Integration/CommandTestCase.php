@@ -202,11 +202,11 @@ abstract class CommandTestCase extends TestCase
         return [
             'files/phar/hello' => 'Hello from phar file!',
             'vendor/test/library/files/php/hello-php' => 'Hello from php file!',
-            'vendor/test/library/files/ruby/hello-ruby' => 'Hello from ruby file!'.(\PHP_OS_FAMILY === 'Windows' ? "\r\n" : "\n"),
-            'vendor/test/library/files/mix/bin/hello-python' => 'Hello from python file!'.(\PHP_OS_FAMILY === 'Windows' ? "\r\n" : "\n"),
+            'vendor/test/library/files/ruby/hello-ruby' => 'Hello from ruby file!'.$this->eol(),
+            'vendor/test/library/files/mix/bin/hello-python' => 'Hello from python file!'.$this->eol(),
             'vendor/bin/hello-php' => 'Hello from php file!',
-            'vendor/bin/hello-ruby' => 'Hello from ruby file!'.(\PHP_OS_FAMILY === 'Windows' ? "\r\n" : "\n"),
-            'vendor/bin/hello-python' => 'Hello from python file!'.(\PHP_OS_FAMILY === 'Windows' ? "\r\n" : "\n"),
+            'vendor/bin/hello-ruby' => 'Hello from ruby file!'.$this->eol(),
+            'vendor/bin/hello-python' => 'Hello from python file!'.$this->eol(),
         ];
     }
 
@@ -325,5 +325,10 @@ abstract class CommandTestCase extends TestCase
     private static function getLibraryPath(): string
     {
         return realpath(self::getFixturesPath().'/library');
+    }
+
+    private function eol(): string
+    {
+        return \PHP_OS_FAMILY === 'Windows' ? "\r\n" : "\n";
     }
 }

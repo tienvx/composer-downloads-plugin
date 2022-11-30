@@ -14,7 +14,6 @@ namespace LastCall\DownloadsPlugin\Tests\Unit;
 use Composer\Composer;
 use Composer\Package\Package;
 use LastCall\DownloadsPlugin\DownloadsParser;
-use LastCall\DownloadsPlugin\Handler\BaseHandler;
 use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\GzipHandler;
 use LastCall\DownloadsPlugin\Handler\PharHandler;
@@ -79,7 +78,7 @@ class DownloadsParserTest extends TestCase
         $parsed = $this->parse($package);
         $this->assertCount(1, $parsed);
         $this->assertInstanceOf($expectedHandlerClass, $parsed[0]);
-        $this->assertEquals($expectSubpackage, $this->getSubpackage($parsed[0]));
+        $this->assertEquals($expectSubpackage, $parsed[0]->getSubpackage());
     }
 
     public function getMissingDownloadTypeTests(): array
@@ -112,7 +111,7 @@ class DownloadsParserTest extends TestCase
         $parsed = $this->parse($package);
         $this->assertCount(1, $parsed);
         $this->assertInstanceOf($expectedHandlerClass, $parsed[0]);
-        $this->assertEquals($expectedDistType, $this->getSubpackage($parsed[0])->getDistType());
+        $this->assertEquals($expectedDistType, $parsed[0]->getSubpackage()->getDistType());
     }
 
     public function getInvalidVariableKeyTests(): array
@@ -201,21 +200,12 @@ class DownloadsParserTest extends TestCase
         ]);
         $version = version_compare(Composer::RUNTIME_API_VERSION, '2.0.0') >= 0 ? 'dev-master' : '9999999-dev';
         $expectSubpackage = new Subpackage($package, 'bar', $expectedUrl, 'zip', 'bar', $version, '1.2.3');
-        $actualSubpackage = $this->getSubpackage($this->parse($package)[0]);
+        $actualSubpackage = $this->parse($package)[0]->getSubpackage();
         $this->assertEquals($expectSubpackage, $actualSubpackage);
     }
 
     private function parse(Package $package): array
     {
         return iterator_to_array((new DownloadsParser())->parse($package, '/EXAMPLE'));
-    }
-
-    private function getSubpackage(BaseHandler $handler): Subpackage
-    {
-        $reflection = new \ReflectionObject($handler);
-        $method = $reflection->getMethod('getSubpackage');
-        $method->setAccessible(true);
-
-        return $method->invoke($handler);
     }
 }

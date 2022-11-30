@@ -8,15 +8,17 @@ use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Package\RootPackageInterface;
 use LastCall\DownloadsPlugin\DownloadsParser;
-use LastCall\DownloadsPlugin\Handler\BaseHandler;
-use LastCall\DownloadsPlugin\PackageHandler;
+use LastCall\DownloadsPlugin\Handler\HandlerInterface;
+use LastCall\DownloadsPlugin\PackageInstaller;
+use LastCall\DownloadsPlugin\SubpackageInstaller;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-class PackageHandlerTest extends TestCase
+class PackageInstallerTest extends TestCase
 {
     private DownloadsParser|MockObject $parser;
-    private PackageHandler $handler;
+    private SubpackageInstaller|MockObject $subInstaller;
+    private PackageInstaller $installer;
     private Composer|MockObject $composer;
     private IOInterface|MockObject $io;
     private PackageInterface|MockObject $package;
@@ -27,15 +29,16 @@ class PackageHandlerTest extends TestCase
     protected function setUp(): void
     {
         $this->parser = $this->createMock(DownloadsParser::class);
-        $this->handler = new PackageHandler($this->parser);
+        $this->subInstaller = $this->createMock(SubpackageInstaller::class);
+        $this->installer = new PackageInstaller($this->parser, $this->subInstaller);
         $this->composer = $this->createMock(Composer::class);
         $this->io = $this->createMock(IOInterface::class);
         $this->package = $this->createMock(PackageInterface::class);
         $this->installationManager = $this->createMock(InstallationManager::class);
         $this->handlers = [
-            $this->createMock(BaseHandler::class),
-            $this->createMock(BaseHandler::class),
-            $this->createMock(BaseHandler::class),
+            $this->createMock(HandlerInterface::class),
+            $this->createMock(HandlerInterface::class),
+            $this->createMock(HandlerInterface::class),
         ];
     }
 
@@ -44,14 +47,14 @@ class PackageHandlerTest extends TestCase
      *           [{"key": "value"}]
      *           [{"downloads": []}]
      */
-    public function testHandlePackageWithoutExtraFiles(array $extra): void
+    public function testInstallPackageWithoutExtraFiles(array $extra): void
     {
         $this->composer->expects($this->never())->method('getInstallationManager');
         $this->package->expects($this->once())->method('getExtra')->willReturn($extra);
-        $this->handler->handle($this->package, $this->composer, $this->io);
+        $this->installer->install($this->package, $this->composer, $this->io);
     }
 
-    public function testHandleRootPackage(): void
+    public function testInstallRootPackage(): void
     {
         $rootPackage = $this->createMock(RootPackageInterface::class);
         $rootPackage->expects($this->once())->method('getExtra')->willReturn($this->extra);
@@ -64,17 +67,12 @@ class PackageHandlerTest extends TestCase
             ->method('parse')
             ->with($rootPackage, getcwd())
             ->willReturnCallback(fn () => yield from $this->handlers);
-        $this->handlers[0]->expects($this->once())->method('isInstalled')->willReturn(true);
-        $this->handlers[0]->expects($this->never())->method('install');
-        $this->handlers[1]->expects($this->once())->method('isInstalled')->willReturn(false);
-        $this->handlers[1]->expects($this->once())->method('install')->with($this->composer, $this->io);
-        $this->handlers[2]->expects($this->once())->method('isInstalled')->willReturn(false);
-        $this->handlers[2]->expects($this->once())->method('install')->with($this->composer, $this->io);
+        $this->assertSubInstaller();
         $this->io->expects($this->once())->method('write')->with('<info>Download extra files for <comment>root/package-name</comment></info>');
-        $this->handler->handle($rootPackage, $this->composer, $this->io);
+        $this->installer->install($rootPackage, $this->composer, $this->io);
     }
 
-    public function testHandleNormalPackage(): void
+    public function testInstallNormalPackage(): void
     {
         $basePath = '/path/to/install/path';
         $this->package->expects($this->once())->method('getExtra')->willReturn($this->extra);
@@ -87,13 +85,29 @@ class PackageHandlerTest extends TestCase
             ->method('parse')
             ->with($this->package, $basePath)
             ->willReturnCallback(fn () => yield from $this->handlers);
-        $this->handlers[0]->expects($this->once())->method('isInstalled')->willReturn(true);
-        $this->handlers[0]->expects($this->never())->method('install');
-        $this->handlers[1]->expects($this->once())->method('isInstalled')->willReturn(false);
-        $this->handlers[1]->expects($this->once())->method('install')->with($this->composer, $this->io);
-        $this->handlers[2]->expects($this->once())->method('isInstalled')->willReturn(false);
-        $this->handlers[2]->expects($this->once())->method('install')->with($this->composer, $this->io);
+        $this->assertSubInstaller();
         $this->io->expects($this->once())->method('write')->with('<info>Download extra files for <comment>normal/package-name</comment></info>');
-        $this->handler->handle($this->package, $this->composer, $this->io);
+        $this->installer->install($this->package, $this->composer, $this->io);
+    }
+
+    private function assertSubInstaller(): void
+    {
+        $this->subInstaller
+            ->expects($this->exactly(\count($this->handlers)))
+            ->method('isInstalled')
+            ->withConsecutive(
+                ...array_map(
+                    fn (HandlerInterface $handler) => [$handler, $this->io],
+                    $this->handlers
+                )
+            )
+            ->willReturnOnConsecutiveCalls(true, false, false);
+        $this->subInstaller
+            ->expects($this->exactly(2))
+            ->method('install')
+            ->withConsecutive(
+                [$this->handlers[1], $this->composer, $this->io],
+                [$this->handlers[2], $this->composer, $this->io]
+            );
     }
 }

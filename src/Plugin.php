@@ -24,11 +24,11 @@ use Composer\Script\ScriptEvents;
 
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
-    private PackageHandler $handler;
+    private PackageInstaller $installer;
 
-    public function __construct(?PackageHandler $handler = null)
+    public function __construct(?PackageInstaller $installer = null)
     {
-        $this->handler = $handler ?? new PackageHandler();
+        $this->installer = $installer ?? new PackageInstaller();
     }
 
     public static function getSubscribedEvents(): array
@@ -43,18 +43,13 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
     public function installDownloadsRoot(Event $event): void
     {
-        $cwd = getcwd();
-        if (!\is_string($cwd)) {
-            throw new \RuntimeException('Failed to get current working directory');
-        }
-
         $rootPackage = $event->getComposer()->getPackage();
-        $this->handler->handle($rootPackage, $event->getComposer(), $event->getIO());
+        $this->installer->install($rootPackage, $event->getComposer(), $event->getIO());
 
         // Ensure that any other packages are properly reconciled.
         $localRepo = $event->getComposer()->getRepositoryManager()->getLocalRepository();
         foreach ($localRepo->getCanonicalPackages() as $package) {
-            $this->handler->handle($package, $event->getComposer(), $event->getIO());
+            $this->installer->install($package, $event->getComposer(), $event->getIO());
         }
     }
 
@@ -63,7 +58,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         /** @var InstallOperation $operation */
         $operation = $event->getOperation();
         $package = $operation->getPackage();
-        $this->handler->handle($package, $event->getComposer(), $event->getIO());
+        $this->installer->install($package, $event->getComposer(), $event->getIO());
     }
 
     public function updateDownloads(PackageEvent $event): void
@@ -71,7 +66,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         /** @var UpdateOperation $operation */
         $operation = $event->getOperation();
         $package = $operation->getTargetPackage();
-        $this->handler->handle($package, $event->getComposer(), $event->getIO());
+        $this->installer->install($package, $event->getComposer(), $event->getIO());
     }
 
     public function activate(Composer $composer, IOInterface $io): void

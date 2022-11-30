@@ -10,12 +10,12 @@ class FileHandler extends BaseHandler
 {
     public const TMP_PREFIX = '.composer-extra-tmp-';
 
-    protected function getTrackingFile(): string
+    public function getTrackingFile(): string
     {
         $file = basename($this->extraFile['id']).'-'.md5($this->extraFile['id']).'.json';
 
         return
-            \dirname($this->getTargetPath()).
+            \dirname($this->getTargetFilePath()).
             \DIRECTORY_SEPARATOR.self::DOT_DIR.
             \DIRECTORY_SEPARATOR.$file;
     }
@@ -26,7 +26,7 @@ class FileHandler extends BaseHandler
         // doesn't put the file the spot we want, so we shuffle a bit.
 
         $cfs = new Filesystem();
-        $target = $this->getTargetPath();
+        $target = $this->getTargetFilePath();
         $tmpDir = \dirname($target).\DIRECTORY_SEPARATOR.self::TMP_PREFIX.basename($target);
 
         if (file_exists($tmpDir)) {
@@ -75,5 +75,10 @@ class FileHandler extends BaseHandler
         }
 
         return empty($this->extraFile['executable']) ? [] : [$this->extraFile['path']];
+    }
+
+    protected function getTargetFilePath(): string
+    {
+        return $this->getTargetPath();
     }
 }

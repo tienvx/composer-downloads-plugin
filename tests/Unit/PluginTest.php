@@ -15,14 +15,14 @@ use Composer\Repository\RepositoryInterface;
 use Composer\Repository\RepositoryManager;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
-use LastCall\DownloadsPlugin\PackageHandler;
+use LastCall\DownloadsPlugin\PackageInstaller;
 use LastCall\DownloadsPlugin\Plugin;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class PluginTest extends TestCase
 {
-    private PackageHandler|MockObject $handler;
+    private PackageInstaller|MockObject $installer;
     private Plugin $plugin;
     private Composer|MockObject $composer;
     private IOInterface|MockObject $io;
@@ -30,8 +30,8 @@ class PluginTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->handler = $this->createMock(PackageHandler::class);
-        $this->plugin = new Plugin($this->handler);
+        $this->installer = $this->createMock(PackageInstaller::class);
+        $this->plugin = new Plugin($this->installer);
         $this->composer = $this->createMock(Composer::class);
         $this->io = $this->createMock(IOInterface::class);
         $this->repository = $this->createMock(RepositoryInterface::class);
@@ -79,9 +79,9 @@ class PluginTest extends TestCase
             $this->createMock(PackageInterface::class),
         ];
         $localRepository->expects($this->once())->method('getCanonicalPackages')->willReturn($packages);
-        $this->handler
+        $this->installer
             ->expects($this->exactly(\count($packages) + 1))
-            ->method('handle')
+            ->method('install')
             ->withConsecutive(
                 [$rootPackage, $this->composer, $this->io],
                 ...array_map(fn (PackageInterface $package) => [$package, $this->composer, $this->io], $packages),
@@ -93,9 +93,9 @@ class PluginTest extends TestCase
     public function testInstallDownloads(): void
     {
         $package = $this->createMock(PackageInterface::class);
-        $this->handler
+        $this->installer
             ->expects($this->once())
-            ->method('handle')
+            ->method('install')
             ->with($package, $this->composer, $this->io);
         $event = new PackageEvent('name', $this->composer, $this->io, false, $this->repository, [], new InstallOperation($package));
         $this->plugin->installDownloads($event);
@@ -105,9 +105,9 @@ class PluginTest extends TestCase
     {
         $initial = $this->createMock(PackageInterface::class);
         $target = $this->createMock(PackageInterface::class);
-        $this->handler
+        $this->installer
             ->expects($this->once())
-            ->method('handle')
+            ->method('install')
             ->with($target, $this->composer, $this->io);
         $event = new PackageEvent('name', $this->composer, $this->io, false, $this->repository, [], new UpdateOperation($initial, $target));
         $this->plugin->updateDownloads($event);

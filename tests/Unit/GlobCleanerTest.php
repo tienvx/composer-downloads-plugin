@@ -33,10 +33,12 @@ class GlobCleanerTest extends TestCase
         '/file2.bat' => self::FILE,
     ];
 
-    protected ?FileSystem $fs = null;
+    private GlobCleaner $cleaner;
+    private ?FileSystem $fs = null;
 
     protected function setUp(): void
     {
+        $this->cleaner = new GlobCleaner();
         $this->fs = new FileSystem(); // Keep virtual file system alive during test
         $this->createFilesAndDirectories();
     }
@@ -48,25 +50,25 @@ class GlobCleanerTest extends TestCase
 
     public function testEmptyIgnore(): void
     {
-        GlobCleaner::clean($this->fs->path('/dir1'), []);
+        $this->cleaner->clean($this->fs->path('/dir1'), []);
         $this->assertRemaining(array_keys(self::FILES_AND_DIRECTORIES));
     }
 
     public function testNotEmptyIgnores(): void
     {
-        GlobCleaner::clean($this->fs->path('/dir1'), [
+        $this->cleaner->clean($this->fs->path('/dir1'), [
             'file*',
             '!/dir11/file2.xls',
             '/dir12',
         ]);
-        GlobCleaner::clean($this->fs->path('/dir2'), [
+        $this->cleaner->clean($this->fs->path('/dir2'), [
             '/dir21',
             '/dir22',
             '/dir22/.composer-downloads',
             '/dir22/.composer-downloads/*',
             '/dir22/.composer-downloads/file1.json',
         ]);
-        GlobCleaner::clean($this->fs->path('/dir3'), [
+        $this->cleaner->clean($this->fs->path('/dir3'), [
             '*',
         ]);
         $this->assertRemaining([

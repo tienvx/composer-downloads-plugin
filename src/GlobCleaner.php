@@ -8,7 +8,7 @@ use Symfony\Component\Finder\Gitignore;
 
 class GlobCleaner
 {
-    public static function clean(string $baseDir, array $ignores): void
+    public function clean(string $baseDir, array $ignores): void
     {
         if (empty($ignores)) {
             return;

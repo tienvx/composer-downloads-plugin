@@ -71,7 +71,7 @@ class FileHandler extends BaseHandler
     protected function getBinaries(): array
     {
         if (isset($this->extraFile['executable']) && !\is_bool($this->extraFile['executable'])) {
-            throw new \UnexpectedValueException(sprintf('Attribute "executable" of extra file "%s" defined in package "%s" must be boolean, "%s" given.', $this->extraFile['id'], $this->parent->getId(), get_debug_type($this->extraFile['executable'])));
+            throw new \UnexpectedValueException(sprintf('Attribute "executable" of extra file "%s" defined in package "%s" must be boolean, "%s" given.', $this->extraFile['id'], $this->parent->getName(), get_debug_type($this->extraFile['executable'])));
         }
 
         return empty($this->extraFile['executable']) ? [] : [$this->extraFile['path']];

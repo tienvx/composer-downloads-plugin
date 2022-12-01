@@ -9,13 +9,11 @@
 namespace LastCall\DownloadsPlugin\Handler;
 
 use Composer\Composer;
-use Composer\Installer\BinaryInstaller;
 use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Package\RootPackageInterface;
 use Composer\Package\Version\VersionParser;
-use Composer\Util\Platform;
-use Composer\Util\ProcessExecutor;
+use LastCall\DownloadsPlugin\BinariesInstaller;
 use LastCall\DownloadsPlugin\Subpackage;
 
 abstract class BaseHandler implements HandlerInterface
@@ -23,10 +21,16 @@ abstract class BaseHandler implements HandlerInterface
     public const FAKE_VERSION = 'dev-master';
     public const DOT_DIR = '.composer-downloads';
 
-    protected ?Subpackage $subpackage = null;
+    private ?Subpackage $subpackage = null;
+    private BinariesInstaller $binariesInstaller;
 
-    public function __construct(protected PackageInterface $parent, protected string $parentPath, protected array $extraFile)
-    {
+    public function __construct(
+        protected PackageInterface $parent,
+        protected string $parentPath,
+        protected array $extraFile,
+        ?BinariesInstaller $binariesInstaller = null
+    ) {
+        $this->binariesInstaller = $binariesInstaller ?? new BinariesInstaller();
     }
 
     public function getSubpackage(): Subpackage
@@ -60,12 +64,11 @@ abstract class BaseHandler implements HandlerInterface
             $parent,
             $extraFile['id'],
             $extraFile['url'],
-            null,
+            $this->getDistType(),
             $extraFile['path'],
             $version,
             $prettyVersion
         );
-        $package->setDistType($this->getDistType());
         $package->setBinaries($this->getBinaries());
 
         return $package;
@@ -117,27 +120,8 @@ abstract class BaseHandler implements HandlerInterface
     public function install(Composer $composer, IOInterface $io): void
     {
         $this->download($composer, $io);
-        $this->markExecutable($io);
+        $this->binariesInstaller->install($this->getSubpackage(), $this->parentPath, $io);
     }
 
     abstract protected function download(Composer $composer, IOInterface $io): void;
-
-    private function markExecutable(IOInterface $io): void
-    {
-        $subpackage = $this->getSubpackage();
-        foreach ($subpackage->getBinaries() as $bin) {
-            $path = $this->parentPath.\DIRECTORY_SEPARATOR.$bin;
-            if (Platform::isWindows() || (method_exists(Platform::class, 'isWindowsSubsystemForLinux') ? Platform::isWindowsSubsystemForLinux() : false)) {
-                $proxy = $path.'.bat';
-                if (file_exists($proxy)) {
-                    $io->writeError('    Skipped installation of bin '.$bin.'.bat proxy for package '.$subpackage->getName().': a .bat proxy was already installed');
-                } else {
-                    $caller = BinaryInstaller::determineBinaryCaller($path);
-                    file_put_contents($proxy, '@'.$caller.' "%~dp0'.ProcessExecutor::escape(basename($proxy, '.bat')).'" %*');
-                }
-            } else {
-                chmod($path, 0777 ^ umask());
-            }
-        }
-    }
 }

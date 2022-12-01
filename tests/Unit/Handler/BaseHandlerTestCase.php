@@ -128,6 +128,12 @@ abstract class BaseHandlerTestCase extends TestCase
         $this->assertSame($this->targetPath, $handler->getTargetPath());
     }
 
+    public function testGetTrackingFile(): void
+    {
+        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile);
+        $this->assertSame($this->getTrackingFile(), $handler->getTrackingFile());
+    }
+
     public function testInstall(): void
     {
         $this->composer->expects($this->once())->method('getDownloadManager')->willReturn($this->downloadManager);
@@ -170,6 +176,8 @@ abstract class BaseHandlerTestCase extends TestCase
     }
 
     abstract protected function getHandlerClass(): string;
+
+    abstract protected function getTrackingFile(): string;
 
     protected function getDistType(): string
     {

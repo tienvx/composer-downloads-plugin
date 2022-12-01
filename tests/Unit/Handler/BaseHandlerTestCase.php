@@ -23,14 +23,15 @@ abstract class BaseHandlerTestCase extends TestCase
     private DownloadManager|MockObject $downloadManager;
     private GlobCleaner|MockObject $cleaner;
     private BinariesInstaller|MockObject $binariesInstaller;
-    private PackageInterface|MockObject $parent;
-    private string $parentPath = '/path/to/package';
-    private string $id = 'sub-package-name';
+    protected PackageInterface|MockObject $parent;
+    protected string $parentPath = '/path/to/package';
+    protected string $id = 'sub-package-name';
     private string $url = 'http://example.com/file.ext';
     private string $path = 'files/file';
     protected array $extraFile;
     protected string $targetPath;
     private array $ignore = ['file.*', '!file.ext'];
+    protected string $parentName = 'vendor/parent-package';
 
     protected function setUp(): void
     {
@@ -95,22 +96,20 @@ abstract class BaseHandlerTestCase extends TestCase
      */
     public function testSubpackageInvalidBinaries(mixed $executable, string $type): void
     {
-        $parentName = 'vendor/parent-package';
-        $this->parent->expects($this->exactly(2))->method('getName')->willReturn($parentName);
+        $this->parent->expects($this->exactly(2))->method('getName')->willReturn($this->parentName);
         $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile + ['executable' => $executable]);
         $this->expectException(\UnexpectedValueException::class);
-        $this->expectExceptionMessage(sprintf('Attribute "executable" of extra file "%s" defined in package "%s" must be array, "%s" given.', $this->id, $parentName, $type));
+        $this->expectExceptionMessage(sprintf('Attribute "executable" of extra file "%s" defined in package "%s" must be array, "%s" given.', $this->id, $this->parentName, $type));
         $handler->getSubpackage();
     }
 
     public function testGetTrackingData(): void
     {
-        $parentName = 'vendor/parent-package';
-        $this->parent->expects($this->once())->method('getName')->willReturn($parentName);
+        $this->parent->expects($this->once())->method('getName')->willReturn($this->parentName);
         $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile + ['ignore' => $this->ignore]);
         $this->assertSame([
             'ignore' => $this->ignore,
-            'name' => "{$parentName}:{$this->id}",
+            'name' => "{$this->parentName}:{$this->id}",
             'url' => $this->url,
             'checksum' => $this->getChecksum(),
         ], $handler->getTrackingData());
@@ -186,7 +185,7 @@ abstract class BaseHandlerTestCase extends TestCase
 
     abstract protected function getChecksum(): string;
 
-    private function createHandler(PackageInterface $parent, string $parentPath, array $extraFile): HandlerInterface
+    protected function createHandler(PackageInterface $parent, string $parentPath, array $extraFile): HandlerInterface
     {
         $class = $this->getHandlerClass();
 

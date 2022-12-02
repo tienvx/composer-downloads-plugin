@@ -10,7 +10,7 @@ use LastCall\DownloadsPlugin\GlobCleaner;
 
 abstract class ArchiveHandler extends BaseHandler
 {
-    protected ?GlobCleaner $cleaner = null;
+    protected GlobCleaner $cleaner;
 
     public function __construct(
         PackageInterface $parent,

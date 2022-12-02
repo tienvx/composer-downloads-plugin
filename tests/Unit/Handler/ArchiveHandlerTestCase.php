@@ -16,6 +16,9 @@ abstract class ArchiveHandlerTestCase extends BaseHandlerTestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->extraFile += [
+            'ignore' => $this->ignore,
+        ];
         $this->cleaner = $this->createMock(GlobCleaner::class);
     }
 
@@ -104,7 +107,7 @@ abstract class ArchiveHandlerTestCase extends BaseHandlerTestCase
     public function testInvalidIgnore(mixed $ignore, string $type): void
     {
         $this->parent->expects($this->once())->method('getName')->willReturn($this->parentName);
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile + ['ignore' => $ignore]);
+        $handler = $this->createHandler($this->parent, $this->parentPath, ['ignore' => $ignore] + $this->extraFile);
         $this->expectException(\UnexpectedValueException::class);
         $this->expectExceptionMessage(sprintf('Attribute "ignore" of extra file "%s" defined in package "%s" must be array, "%s" given.', $this->id, $this->parentName, $type));
         $handler->getTrackingData();

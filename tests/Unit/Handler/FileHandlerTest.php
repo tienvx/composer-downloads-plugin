@@ -49,7 +49,7 @@ class FileHandlerTest extends BaseHandlerTestCase
 
     protected function getTrackingFile(): string
     {
-        return \dirname($this->targetPath).\DIRECTORY_SEPARATOR.'.composer-downloads'.\DIRECTORY_SEPARATOR.'sub-package-name-4fcb9a7a2ac376c89d1d147894dca87b.json';
+        return \dirname($this->getTargetFilePath()).\DIRECTORY_SEPARATOR.'.composer-downloads'.\DIRECTORY_SEPARATOR.'sub-package-name-4fcb9a7a2ac376c89d1d147894dca87b.json';
     }
 
     protected function getHandlerClass(): string
@@ -81,7 +81,7 @@ class FileHandlerTest extends BaseHandlerTestCase
             $this->downloadManager
                 ->expects($this->once())
                 ->method('download')
-                ->with($this->isInstanceOf(Subpackage::class), \dirname($this->targetPath))
+                ->with($this->isInstanceOf(Subpackage::class), \dirname($this->getTargetFilePath()))
                 ->willReturn($downloadPromise);
             $loop = $this->createMock(Loop::class);
             $loop
@@ -89,7 +89,7 @@ class FileHandlerTest extends BaseHandlerTestCase
                 ->method('wait')
                 ->with([$downloadPromise]);
             $this->composer->expects($this->once())->method('getLoop')->willReturn($loop);
-            $this->filesystem->expects($this->once())->method('rename')->with($tmpFile, $this->targetPath);
+            $this->filesystem->expects($this->once())->method('rename')->with($tmpFile, $this->getTargetFilePath());
         } else {
             $tmpDir = null;
             $tmpFile = $tmpDir.\DIRECTORY_SEPARATOR.'/file';
@@ -97,7 +97,7 @@ class FileHandlerTest extends BaseHandlerTestCase
                 ->expects($this->once())
                 ->method('ensureDirectoryExists')
                 ->with($this->callback(function (string $dir) use (&$tmpDir): bool {
-                    $this->assertStringContainsString(\dirname($this->targetPath), $dir);
+                    $this->assertStringContainsString(\dirname($this->getTargetFilePath()), $dir);
                     $this->assertStringContainsString(FileHandler::TMP_PREFIX, $dir);
                     $tmpDir = $dir;
 
@@ -114,7 +114,7 @@ class FileHandlerTest extends BaseHandlerTestCase
                 ->method('getDownloader')
                 ->with('file')
                 ->willReturn($downloader);
-            $this->filesystem->expects($this->once())->method('rename')->with($tmpFile, $this->targetPath);
+            $this->filesystem->expects($this->once())->method('rename')->with($tmpFile, $this->getTargetFilePath());
             $this->filesystem->expects($this->once())->method('remove')->with($tmpDir);
         }
     }
@@ -131,5 +131,10 @@ class FileHandlerTest extends BaseHandlerTestCase
             'url' => $this->url,
             'checksum' => $this->getChecksum(),
         ];
+    }
+
+    protected function getTargetFilePath(): string
+    {
+        return $this->targetPath;
     }
 }

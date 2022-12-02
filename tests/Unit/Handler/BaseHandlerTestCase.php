@@ -16,9 +16,9 @@ use PHPUnit\Framework\TestCase;
 abstract class BaseHandlerTestCase extends TestCase
 {
     protected Composer|MockObject $composer;
-    private IOInterface|MockObject $io;
+    protected IOInterface|MockObject $io;
     protected DownloadManager|MockObject $downloadManager;
-    private BinariesInstaller|MockObject $binariesInstaller;
+    protected BinariesInstaller|MockObject $binariesInstaller;
     protected PackageInterface|MockObject $parent;
     protected string $parentPath = '/path/to/package';
     protected string $id = 'sub-package-name';
@@ -101,13 +101,13 @@ abstract class BaseHandlerTestCase extends TestCase
     public function testGetTrackingData(): void
     {
         $this->parent->expects($this->once())->method('getName')->willReturn($this->parentName);
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile + ['ignore' => $this->ignore]);
+        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile);
         $this->assertSame($this->getTrackingData(), $handler->getTrackingData());
     }
 
     public function testGetChecksum(): void
     {
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile + ['ignore' => $this->ignore]);
+        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile);
         $this->assertSame($this->getChecksum(), $handler->getChecksum());
     }
 
@@ -126,12 +126,17 @@ abstract class BaseHandlerTestCase extends TestCase
     public function testInstall(): void
     {
         $this->assertDownload();
+        $this->assertBinariesInstaller();
+        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile);
+        $handler->install($this->composer, $this->io);
+    }
+
+    protected function assertBinariesInstaller(): void
+    {
         $this->binariesInstaller
             ->expects($this->once())
             ->method('install')
             ->with($this->isInstanceOf(Subpackage::class), $this->parentPath, $this->io);
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile + ['ignore' => $this->ignore]);
-        $handler->install($this->composer, $this->io);
     }
 
     abstract protected function assertDownload(): void;

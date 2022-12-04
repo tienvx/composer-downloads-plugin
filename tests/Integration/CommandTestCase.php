@@ -9,12 +9,12 @@ use Symfony\Component\Process\Process;
 abstract class CommandTestCase extends TestCase
 {
     private static ?string $origDir;
-    private static ?string $testDir;
+    protected static ?string $testDir;
     private static ?Process $server;
     protected static bool $needChangeDir = true;
     protected static bool $requireLibrary = true;
 
-    private static function getComposerJson(): array
+    protected static function getComposerJson(): array
     {
         return [
             'name' => 'test/project',
@@ -223,7 +223,7 @@ abstract class CommandTestCase extends TestCase
     /**
      * Create a temp folder with a "composer.json" file and chdir() into it if needed.
      */
-    private static function initTestProject(): string
+    protected static function initTestProject(): void
     {
         self::$origDir = getcwd();
         $testDir = getenv('USE_TEST_PROJECT');
@@ -240,11 +240,9 @@ abstract class CommandTestCase extends TestCase
         }
         file_put_contents(self::getPathToTestDir('composer.json'), json_encode(static::getComposerJson(), \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES));
         static::$needChangeDir && chdir(self::$testDir);
-
-        return self::$testDir;
     }
 
-    private static function cleanTestProjectDir(): void
+    protected static function cleanTestProjectDir(): void
     {
         if (self::$testDir) {
             static::$needChangeDir && chdir(self::$origDir);
@@ -259,7 +257,7 @@ abstract class CommandTestCase extends TestCase
         }
     }
 
-    private static function startLocalServer(): void
+    protected static function startLocalServer(): void
     {
         self::$server = new Process(['php', '-S', 'localhost:8000', '-t', static::getFilesPath()]);
         self::$server->start();
@@ -268,7 +266,7 @@ abstract class CommandTestCase extends TestCase
         });
     }
 
-    private static function stopLocalServer(): void
+    protected static function stopLocalServer(): void
     {
         if (self::$server) {
             self::$server->stop();
@@ -288,7 +286,7 @@ abstract class CommandTestCase extends TestCase
         }
     }
 
-    private static function cleanDir(string $dir): void
+    protected static function cleanDir(string $dir): void
     {
         $process = Process::fromShellCommandline(
             \PHP_OS_FAMILY === 'Windows'

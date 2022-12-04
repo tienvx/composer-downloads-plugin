@@ -91,31 +91,30 @@ class FileHandlerTest extends BaseHandlerTestCase
             $this->composer->expects($this->once())->method('getLoop')->willReturn($loop);
             $this->filesystem->expects($this->once())->method('rename')->with($tmpFile, $this->getTargetFilePath());
         } else {
-            $tmpDir = null;
-            $tmpFile = $tmpDir.\DIRECTORY_SEPARATOR.'/file';
+            $downloader = $this->createMock(FileDownloader::class);
             $this->filesystem
                 ->expects($this->once())
                 ->method('ensureDirectoryExists')
-                ->with($this->callback(function (string $dir) use (&$tmpDir): bool {
+                ->with($this->callback(function (string $dir) use ($downloader): bool {
                     $this->assertStringContainsString(\dirname($this->getTargetFilePath()), $dir);
                     $this->assertStringContainsString(FileHandler::TMP_PREFIX, $dir);
                     $tmpDir = $dir;
+                    $tmpFile = $tmpDir.\DIRECTORY_SEPARATOR.'/file';
+                    $downloader
+                        ->expects($this->once())
+                        ->method('download')
+                        ->with($this->isInstanceOf(Subpackage::class), $tmpDir)
+                        ->willReturn($tmpFile);
+                    $this->filesystem->expects($this->once())->method('rename')->with($tmpFile, $this->getTargetFilePath());
+                    $this->filesystem->expects($this->once())->method('remove')->with($tmpDir);
 
                     return true;
                 }));
-            $downloader = $this->createMock(FileDownloader::class);
-            $downloader
-                ->expects($this->once())
-                ->method('download')
-                ->with($this->isInstanceOf(Subpackage::class), $tmpDir)
-                ->willReturn($tmpFile);
             $this->downloadManager
                 ->expects($this->once())
                 ->method('getDownloader')
                 ->with('file')
                 ->willReturn($downloader);
-            $this->filesystem->expects($this->once())->method('rename')->with($tmpFile, $this->getTargetFilePath());
-            $this->filesystem->expects($this->once())->method('remove')->with($tmpDir);
         }
     }
 

@@ -35,8 +35,8 @@ class GzipHandlerTest extends FileHandlerTest
     {
         parent::assertDownload();
         $command = \PHP_OS_FAMILY === 'Windows'
-            ? "gzip -d {$this->getTargetFilePath()}"
-            : "gzip -d '{$this->getTargetFilePath()}'";
+            ? "gzip -df {$this->getTargetFilePath()}"
+            : "gzip -df '{$this->getTargetFilePath()}'";
         $this->process
             ->expects($this->once())
             ->method('execute')

@@ -34,7 +34,7 @@ class GzipHandler extends FileHandler
     {
         parent::download($composer, $io);
         // Target file is still gzip file, need to be decompressed.
-        $command = 'gzip -d '.ProcessExecutor::escape($this->getTargetFilePath());
+        $command = 'gzip -df '.ProcessExecutor::escape($this->getTargetFilePath());
         if (0 !== $this->process->execute($command)) {
             $processError = 'Failed to execute '.$command."\n\n".$this->process->getErrorOutput();
             throw new \RuntimeException($processError);

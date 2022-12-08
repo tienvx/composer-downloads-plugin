@@ -19,6 +19,6 @@ class XzHandlerTest extends ArchiveHandlerTestCase
 
     protected function getChecksum(): string
     {
-        return 'cbc8a1dcb56f869d991ed5cdb589ab46d7cb483af75067b50611d875f03bdbeb';
+        return 'e186c7bff32c734880a6a5d0559fe06321b00c5ed91063fea30219a630e03589';
     }
 }

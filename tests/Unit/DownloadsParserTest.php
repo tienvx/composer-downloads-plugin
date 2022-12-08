@@ -59,7 +59,7 @@ class DownloadsParserTest extends TestCase
             ['xz', XzHandler::class, 'xz'],
             ['file', FileHandler::class, 'file'],
             ['phar', PharHandler::class, 'file'],
-            ['gzip', GzipHandler::class, 'file'],
+            ['gzip', GzipHandler::class, 'gzip'],
         ];
     }
 
@@ -94,7 +94,7 @@ class DownloadsParserTest extends TestCase
             ['foo.tar.bz2', TarHandler::class, 'tar'],
             ['foo.tgz', TarHandler::class, 'tar'],
             ['foo.tar', TarHandler::class, 'tar'],
-            ['foo.gz', GzipHandler::class, 'file'],
+            ['foo.gz', GzipHandler::class, 'gzip'],
             ['foo', FileHandler::class, 'file'],
             ['foo.phar', PharHandler::class, 'file'],
         ];

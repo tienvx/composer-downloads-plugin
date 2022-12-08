@@ -2,76 +2,69 @@
 
 namespace LastCall\DownloadsPlugin\Tests\Unit;
 
-use Composer\Util\ProcessExecutor;
+use LastCall\DownloadsPlugin\Handler\FileHandler;
 use LastCall\DownloadsPlugin\Handler\GzipHandler;
-use PHPUnit\Framework\MockObject\MockObject;
+use LastCall\DownloadsPlugin\Subpackage;
 
 class GzipHandlerTest extends FileHandlerTest
 {
-    protected ProcessExecutor|MockObject $process;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->process = $this->createMock(ProcessExecutor::class);
-    }
-
-    protected function getHandlerExtraArguments(): array
-    {
-        return [$this->filesystem, $this->process];
-    }
-
     protected function getHandlerClass(): string
     {
         return GzipHandler::class;
     }
 
+    protected function getDistType(): string
+    {
+        return 'gzip';
+    }
+
     protected function getChecksum(): string
     {
-        return '512bfc7e6ab3c4b2279e18ecb4a33a98ed3a5a0b98e67cc68973767081442f74';
+        return 'bb11858b3513500b4c3d234a17a8ea5f6790444cb93c457259a861d1682aec60';
     }
 
-    protected function assertDownload(bool $hasException = false): void
+    protected function assertDownload(): void
     {
-        parent::assertDownload();
-        $command = \PHP_OS_FAMILY === 'Windows'
-            ? "gzip -df {$this->getTargetFilePath()}"
-            : "gzip -df '{$this->getTargetFilePath()}'";
-        $this->process
+        $this->composer->expects($this->once())->method('getDownloadManager')->willReturn($this->downloadManager);
+        if ($this->isComposerV2) {
+            $this->loop
+                ->expects($this->exactly(2))
+                ->method('wait')
+                ->withConsecutive(
+                    [[$this->downloadPromise]],
+                    [[$this->installPromise]]
+                );
+            $this->composer->expects($this->exactly(2))->method('getLoop')->willReturn($this->loop);
+        }
+        $this->filesystem
             ->expects($this->once())
-            ->method('execute')
-            ->with($command)
-            ->willReturn((int) $hasException);
-        if ($hasException) {
-            $this->expectException(\RuntimeException::class);
-            $this->expectExceptionMessage("Failed to execute $command\n\nSomething wrong!");
-            $this->process
-                ->expects($this->once())
-                ->method('getErrorOutput')
-                ->willReturn('Something wrong!');
-        } else {
-            $this->process->expects($this->never())->method('getErrorOutput');
-        }
-    }
+            ->method('ensureDirectoryExists')
+            ->with($this->callback(function (string $dir): bool {
+                $this->assertStringContainsString(\dirname($this->targetPath), $dir);
+                $this->assertStringContainsString(FileHandler::TMP_PREFIX, $dir);
+                $tmpDir = $dir;
+                $tmpFile = $tmpDir.\DIRECTORY_SEPARATOR.'file';
+                if ($this->isComposerV2) {
+                    $this->downloadManager
+                        ->expects($this->once())
+                        ->method('download')
+                        ->with($this->isInstanceOf(Subpackage::class), $tmpDir)
+                        ->willReturn($this->downloadPromise);
+                    $this->downloadManager
+                        ->expects($this->once())
+                        ->method('install')
+                        ->with($this->isInstanceOf(Subpackage::class), $tmpDir)
+                        ->willReturn($this->installPromise);
+                } else {
+                    $this->downloadManager
+                        ->expects($this->once())
+                        ->method('download')
+                        ->with($this->isInstanceOf(Subpackage::class), $tmpDir);
+                }
+                $this->filesystem->expects($this->once())->method('rename')->with($tmpFile, $this->targetPath);
+                $this->filesystem->expects($this->once())->method('remove')->with($tmpDir);
 
-    /**
-     * @testWith [true]
-     *           [false]
-     */
-    public function testInstall(bool $hasException = false): void
-    {
-        $this->assertDownload($hasException);
-        if ($hasException) {
-            $this->binariesInstaller->expects($this->never())->method('install');
-        } else {
-            $this->assertBinariesInstaller();
-        }
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile);
-        $handler->install($this->composer, $this->io);
-    }
-
-    protected function getTargetFilePath(): string
-    {
-        return $this->targetPath.'.gz';
+                return true;
+            }));
     }
 }

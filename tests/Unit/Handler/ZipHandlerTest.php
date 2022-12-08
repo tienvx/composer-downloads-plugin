@@ -19,6 +19,6 @@ class ZipHandlerTest extends ArchiveHandlerTestCase
 
     protected function getChecksum(): string
     {
-        return 'f6ddc54e6b646d0dd6bd392b28ddf3e914b49b5ec650f8d8db58149f6e1ea231';
+        return 'dee14fc8dcfc413b334ff218be5732736b5f9c07c3988bb8742d80f74f40ff0a';
     }
 }

@@ -2,12 +2,9 @@
 
 namespace LastCall\DownloadsPlugin\Tests\Unit\Handler;
 
-use Composer\Composer;
-use Composer\Util\Loop;
 use LastCall\DownloadsPlugin\GlobCleaner;
 use LastCall\DownloadsPlugin\Subpackage;
 use PHPUnit\Framework\MockObject\MockObject;
-use React\Promise\PromiseInterface;
 
 abstract class ArchiveHandlerTestCase extends BaseHandlerTestCase
 {
@@ -30,29 +27,25 @@ abstract class ArchiveHandlerTestCase extends BaseHandlerTestCase
     protected function assertDownload(): void
     {
         $this->composer->expects($this->once())->method('getDownloadManager')->willReturn($this->downloadManager);
-        $isComposerV2 = version_compare(Composer::RUNTIME_API_VERSION, '2.0.0') >= 0;
-        if ($isComposerV2) {
-            $downloadPromise = $this->createMock(PromiseInterface::class);
-            $installPromise = $this->createMock(PromiseInterface::class);
+        if ($this->isComposerV2) {
             $this->downloadManager
                 ->expects($this->once())
                 ->method('download')
                 ->with($this->isInstanceOf(Subpackage::class), $this->targetPath)
-                ->willReturn($downloadPromise);
+                ->willReturn($this->downloadPromise);
             $this->downloadManager
                 ->expects($this->once())
                 ->method('install')
                 ->with($this->isInstanceOf(Subpackage::class), $this->targetPath)
-                ->willReturn($installPromise);
-            $loop = $this->createMock(Loop::class);
-            $loop
+                ->willReturn($this->installPromise);
+            $this->loop
                 ->expects($this->exactly(2))
                 ->method('wait')
                 ->withConsecutive(
-                    [[$downloadPromise]],
-                    [[$installPromise]]
+                    [[$this->downloadPromise]],
+                    [[$this->installPromise]]
                 );
-            $this->composer->expects($this->exactly(2))->method('getLoop')->willReturn($loop);
+            $this->composer->expects($this->exactly(2))->method('getLoop')->willReturn($this->loop);
         } else {
             $this->downloadManager
                 ->expects($this->once())

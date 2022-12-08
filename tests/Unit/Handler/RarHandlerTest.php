@@ -19,6 +19,6 @@ class RarHandlerTest extends ArchiveHandlerTestCase
 
     protected function getChecksum(): string
     {
-        return '509c645de46584bf368f2e93ce8fb9f599f22124e60559fa9b0c43619f7d1feb';
+        return 'c040d81f1f697b06cef6db7e915786b649dd7e2f9ae106e97889cf37bcbc613d';
     }
 }

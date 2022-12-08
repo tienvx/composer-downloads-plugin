@@ -19,6 +19,6 @@ class TarHandlerTest extends ArchiveHandlerTestCase
 
     protected function getChecksum(): string
     {
-        return '8edb7f661b55641bb6c4505f2bada397af779c3d76232bafe1d14b7fe4d5e527';
+        return '96cf608fbcfb78ac663ca97cd28ed7f2120630bd2fb87cfc1e95dd79a54d5052';
     }
 }

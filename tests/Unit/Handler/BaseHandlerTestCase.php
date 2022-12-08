@@ -7,23 +7,29 @@ use Composer\Downloader\DownloadManager;
 use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Package\RootPackage;
+use Composer\Util\Loop;
 use LastCall\DownloadsPlugin\BinariesInstaller;
 use LastCall\DownloadsPlugin\Handler\HandlerInterface;
 use LastCall\DownloadsPlugin\Subpackage;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use React\Promise\PromiseInterface;
 
 abstract class BaseHandlerTestCase extends TestCase
 {
     protected Composer|MockObject $composer;
-    protected IOInterface|MockObject $io;
+    private IOInterface|MockObject $io;
     protected DownloadManager|MockObject $downloadManager;
-    protected BinariesInstaller|MockObject $binariesInstaller;
+    private BinariesInstaller|MockObject $binariesInstaller;
     protected PackageInterface|MockObject $parent;
+    protected PromiseInterface|MockObject $downloadPromise;
+    protected PromiseInterface|MockObject $installPromise;
+    protected Loop|MockObject $loop;
+    protected bool $isComposerV2;
     protected string $parentPath = '/path/to/package';
     protected string $id = 'sub-package-name';
     protected string $url = 'http://example.com/file.ext';
-    protected string $path = 'files/file';
+    protected string $path = 'files/new-file';
     protected array $extraFile;
     protected string $targetPath;
     protected array $ignore = ['file.*', '!file.ext'];
@@ -36,6 +42,12 @@ abstract class BaseHandlerTestCase extends TestCase
         $this->downloadManager = $this->createMock(DownloadManager::class);
         $this->binariesInstaller = $this->createMock(BinariesInstaller::class);
         $this->parent = $this->createMock(PackageInterface::class);
+        $this->isComposerV2 = version_compare(Composer::RUNTIME_API_VERSION, '2.0.0') >= 0;
+        if ($this->isComposerV2) {
+            $this->downloadPromise = $this->createMock(PromiseInterface::class);
+            $this->installPromise = $this->createMock(PromiseInterface::class);
+            $this->loop = $this->createMock(Loop::class);
+        }
         $this->extraFile = [
             'id' => $this->id,
             'url' => $this->url,

@@ -30,7 +30,7 @@ class FileHandler extends BaseHandler
         $file = basename($this->extraFile['id']).'-'.md5($this->extraFile['id']).'.json';
 
         return
-            \dirname($this->getTargetFilePath()).
+            \dirname($this->getTargetPath()).
             \DIRECTORY_SEPARATOR.self::DOT_DIR.
             \DIRECTORY_SEPARATOR.$file;
     }
@@ -40,7 +40,7 @@ class FileHandler extends BaseHandler
         // We want to take advantage of the cache in composer's downloader, but it
         // doesn't put the file the spot we want, so we shuffle a bit.
 
-        $target = $this->getTargetFilePath();
+        $target = $this->getTargetPath();
         $downloadManager = $composer->getDownloadManager();
 
         // composer:v2
@@ -80,10 +80,5 @@ class FileHandler extends BaseHandler
         }
 
         return empty($this->extraFile['executable']) ? [] : [$this->extraFile['path']];
-    }
-
-    protected function getTargetFilePath(): string
-    {
-        return $this->getTargetPath();
     }
 }

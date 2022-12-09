@@ -4,7 +4,14 @@ namespace LastCall\DownloadsPlugin\Tests\Integration;
 
 class RequireTest extends CommandTestCase
 {
-    protected static bool $requireLibrary = false;
+    protected static function getComposerJson(): array
+    {
+        return [
+            'require' => [
+                'tienvx/composer-downloads-plugin' => '@dev',
+            ],
+        ] + parent::getComposerJson();
+    }
 
     public function testDownload(): void
     {

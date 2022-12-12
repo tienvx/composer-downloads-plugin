@@ -13,7 +13,7 @@ class GzipHandlerTest extends FileHandlerTest
         return GzipHandler::class;
     }
 
-    protected function getDistType(): string
+    protected function getSubpackageType(): string
     {
         return 'gzip';
     }

@@ -12,7 +12,7 @@ class RarHandlerTest extends ArchiveHandlerTestCase
         return RarHandler::class;
     }
 
-    protected function getDistType(): string
+    protected function getSubpackageType(): string
     {
         return 'rar';
     }

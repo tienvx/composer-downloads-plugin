@@ -12,7 +12,7 @@ class TarHandlerTest extends ArchiveHandlerTestCase
         return TarHandler::class;
     }
 
-    protected function getDistType(): string
+    protected function getSubpackageType(): string
     {
         return 'tar';
     }

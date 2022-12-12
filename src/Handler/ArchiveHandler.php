@@ -4,84 +4,61 @@ namespace LastCall\DownloadsPlugin\Handler;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
-use Composer\Package\PackageInterface;
 use LastCall\DownloadsPlugin\BinariesInstaller;
 use LastCall\DownloadsPlugin\GlobCleaner;
+use LastCall\DownloadsPlugin\Subpackage;
 
 abstract class ArchiveHandler extends BaseHandler
 {
     protected GlobCleaner $cleaner;
 
     public function __construct(
-        PackageInterface $parent,
-        string $parentPath,
-        array $extraFile,
+        Subpackage $subpackage,
         ?BinariesInstaller $binariesInstaller = null,
         ?GlobCleaner $cleaner = null
     ) {
-        parent::__construct($parent, $parentPath, $extraFile, $binariesInstaller);
+        parent::__construct($subpackage, $binariesInstaller);
         $this->cleaner = $cleaner ?? new GlobCleaner();
     }
 
     public function getTrackingFile(): string
     {
-        $file = basename($this->extraFile['id']).'-'.md5($this->extraFile['id']).'.json';
+        $id = $this->subpackage->getSubpackageName();
+        $file = basename($id).'-'.md5($id).'.json';
 
         return
-            $this->getTargetPath().
+            $this->subpackage->getTargetPath().
             \DIRECTORY_SEPARATOR.self::DOT_DIR.
             \DIRECTORY_SEPARATOR.$file;
     }
 
     public function getTrackingData(): array
     {
-        return ['ignore' => $this->findIgnores()] + parent::getTrackingData();
+        return ['ignore' => $this->subpackage->getIgnore()] + parent::getTrackingData();
     }
 
     protected function getChecksumData(): array
     {
-        $ignore = array_values($this->findIgnores());
+        $ignore = array_values($this->subpackage->getIgnore());
         sort($ignore);
 
         return ['ignore' => $ignore] + parent::getChecksumData();
     }
 
-    /**
-     * @return string[] List of files to exclude. Use '**' to match subdirectories.
-     *                  Ex: ['.gitignore', '*.md']
-     */
-    private function findIgnores(): array
-    {
-        if (isset($this->extraFile['ignore']) && !\is_array($this->extraFile['ignore'])) {
-            throw new \UnexpectedValueException(sprintf('Attribute "ignore" of extra file "%s" defined in package "%s" must be array, "%s" given.', $this->extraFile['id'], $this->parent->getName(), get_debug_type($this->extraFile['ignore'])));
-        }
-
-        return $this->extraFile['ignore'] ?? [];
-    }
-
     protected function download(Composer $composer, IOInterface $io): void
     {
-        $targetPath = $this->getTargetPath();
+        $targetPath = $this->subpackage->getTargetPath();
         $downloadManager = $composer->getDownloadManager();
 
         // In composer:v2, download and extract were separated.
         if ($this->isComposerV2()) {
-            $promise = $downloadManager->download($this->getSubpackage(), $targetPath);
+            $promise = $downloadManager->download($this->subpackage, $targetPath);
             $composer->getLoop()->wait([$promise]);
-            $promise = $downloadManager->install($this->getSubpackage(), $targetPath);
+            $promise = $downloadManager->install($this->subpackage, $targetPath);
             $composer->getLoop()->wait([$promise]);
         } else {
-            $downloadManager->download($this->getSubpackage(), $targetPath);
+            $downloadManager->download($this->subpackage, $targetPath);
         }
-        $this->cleaner->clean($targetPath, $this->findIgnores());
-    }
-
-    protected function getBinaries(): array
-    {
-        if (isset($this->extraFile['executable']) && !\is_array($this->extraFile['executable'])) {
-            throw new \UnexpectedValueException(sprintf('Attribute "executable" of extra file "%s" defined in package "%s" must be array, "%s" given.', $this->extraFile['id'], $this->parent->getName(), get_debug_type($this->extraFile['executable'])));
-        }
-
-        return $this->extraFile['executable'] ?? [];
+        $this->cleaner->clean($targetPath, $this->subpackage->getIgnore());
     }
 }

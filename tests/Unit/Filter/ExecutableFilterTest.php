@@ -71,6 +71,7 @@ class ExecutableFilterTest extends BaseFilterTestCase
     {
         $extraFile = [
             'executable' => [
+                ['not a string'],
                 '/root/path/to/file',
                 '../../outside/path/to/file',
             ],

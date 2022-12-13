@@ -12,7 +12,7 @@ class ZipHandlerTest extends ArchiveHandlerTestCase
         return ZipHandler::class;
     }
 
-    protected function getDistType(): string
+    protected function getSubpackageType(): string
     {
         return 'zip';
     }

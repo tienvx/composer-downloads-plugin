@@ -12,7 +12,7 @@ class XzHandlerTest extends ArchiveHandlerTestCase
         return XzHandler::class;
     }
 
-    protected function getDistType(): string
+    protected function getSubpackageType(): string
     {
         return 'xz';
     }

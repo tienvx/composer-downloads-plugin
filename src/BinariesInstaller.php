@@ -9,9 +9,10 @@ use Composer\Util\ProcessExecutor;
 
 class BinariesInstaller
 {
-    public function install(Subpackage $subpackage, string $baseDir, IOInterface $io): void
+    public function install(Subpackage $subpackage, IOInterface $io): void
     {
-        foreach ($subpackage->getBinaries() as $bin) {
+        $baseDir = $subpackage->getParentPath();
+        foreach ($subpackage->getExecutable() as $bin) {
             $path = $baseDir.\DIRECTORY_SEPARATOR.$bin;
             if (Platform::isWindows() || (method_exists(Platform::class, 'isWindowsSubsystemForLinux') ? Platform::isWindowsSubsystemForLinux() : false)) {
                 $proxy = $path.'.bat';

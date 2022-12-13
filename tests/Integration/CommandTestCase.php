@@ -12,7 +12,6 @@ abstract class CommandTestCase extends TestCase
     protected static ?string $testDir;
     private static ?Process $server;
     protected static bool $needChangeDir = true;
-    protected static bool $requireLibrary = true;
 
     protected static function getComposerJson(): array
     {
@@ -33,7 +32,8 @@ abstract class CommandTestCase extends TestCase
             ],
             'require' => [
                 'tienvx/composer-downloads-plugin' => '@dev',
-            ] + (static::$requireLibrary ? ['test/library' => '@dev'] : []),
+                'test/library' => '@dev',
+            ],
             'minimum-stability' => 'dev',
             'extra' => [
                 'downloads' => [

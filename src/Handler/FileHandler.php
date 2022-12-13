@@ -4,9 +4,9 @@ namespace LastCall\DownloadsPlugin\Handler;
 
 use Composer\Composer;
 use Composer\IO\IOInterface;
-use Composer\Package\PackageInterface;
 use Composer\Util\Filesystem;
 use LastCall\DownloadsPlugin\BinariesInstaller;
+use LastCall\DownloadsPlugin\Subpackage;
 
 class FileHandler extends BaseHandler
 {
@@ -15,22 +15,21 @@ class FileHandler extends BaseHandler
     protected Filesystem $filesystem;
 
     public function __construct(
-        PackageInterface $parent,
-        string $parentPath,
-        array $extraFile,
+        Subpackage $subpackage,
         ?BinariesInstaller $binariesInstaller = null,
         ?Filesystem $filesystem = null
     ) {
-        parent::__construct($parent, $parentPath, $extraFile, $binariesInstaller);
+        parent::__construct($subpackage, $binariesInstaller);
         $this->filesystem = $filesystem ?? new Filesystem();
     }
 
     public function getTrackingFile(): string
     {
-        $file = basename($this->extraFile['id']).'-'.md5($this->extraFile['id']).'.json';
+        $id = $this->subpackage->getSubpackageName();
+        $file = $id.'-'.md5($id).'.json';
 
         return
-            \dirname($this->getTargetPath()).
+            \dirname($this->subpackage->getTargetPath()).
             \DIRECTORY_SEPARATOR.self::DOT_DIR.
             \DIRECTORY_SEPARATOR.$file;
     }
@@ -40,13 +39,13 @@ class FileHandler extends BaseHandler
         // We want to take advantage of the cache in composer's downloader, but it
         // doesn't put the file the spot we want, so we shuffle a bit.
 
-        $target = $this->getTargetPath();
+        $target = $this->subpackage->getTargetPath();
         $downloadManager = $composer->getDownloadManager();
 
         // composer:v2
         if ($this->isComposerV2()) {
             $file = '';
-            $promise = $downloadManager->download($this->getSubpackage(), \dirname($target));
+            $promise = $downloadManager->download($this->subpackage, \dirname($target));
             $promise->then(static function ($res) use (&$file) {
                 $file = $res;
             });
@@ -62,23 +61,9 @@ class FileHandler extends BaseHandler
             $tmpDir = \dirname($target).\DIRECTORY_SEPARATOR.uniqid(self::TMP_PREFIX, true);
             $this->filesystem->ensureDirectoryExists($tmpDir);
             // Download manager doesn't return the file, so we ask file downloader to do it instead.
-            $file = $downloadManager->getDownloader('file')->download($this->getSubpackage(), $tmpDir);
+            $file = $downloadManager->getDownloader('file')->download($this->subpackage, $tmpDir);
             $this->filesystem->rename($file, $target);
             $this->filesystem->remove($tmpDir);
         }
-    }
-
-    protected function getDistType(): string
-    {
-        return 'file';
-    }
-
-    protected function getBinaries(): array
-    {
-        if (isset($this->extraFile['executable']) && !\is_bool($this->extraFile['executable'])) {
-            throw new \UnexpectedValueException(sprintf('Attribute "executable" of extra file "%s" defined in package "%s" must be boolean, "%s" given.', $this->extraFile['id'], $this->parent->getName(), get_debug_type($this->extraFile['executable'])));
-        }
-
-        return empty($this->extraFile['executable']) ? [] : [$this->extraFile['path']];
     }
 }

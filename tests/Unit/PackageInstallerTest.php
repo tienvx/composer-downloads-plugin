@@ -7,38 +7,38 @@ use Composer\Installer\InstallationManager;
 use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Package\RootPackageInterface;
-use LastCall\DownloadsPlugin\DownloadsParser;
-use LastCall\DownloadsPlugin\Handler\HandlerInterface;
 use LastCall\DownloadsPlugin\PackageInstaller;
+use LastCall\DownloadsPlugin\Subpackage;
+use LastCall\DownloadsPlugin\SubpackageFactory;
 use LastCall\DownloadsPlugin\SubpackageInstaller;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class PackageInstallerTest extends TestCase
 {
-    private DownloadsParser|MockObject $parser;
-    private SubpackageInstaller|MockObject $subInstaller;
+    private SubpackageFactory|MockObject $factory;
+    private SubpackageInstaller|MockObject $subpackageInstaller;
     private PackageInstaller $installer;
     private Composer|MockObject $composer;
     private IOInterface|MockObject $io;
     private PackageInterface|MockObject $package;
     private InstallationManager|MockObject $installationManager;
     private array $extra = ['downloads' => ['file1', 'file2', 'file3']];
-    private array $handlers;
+    private array $subpackages;
 
     protected function setUp(): void
     {
-        $this->parser = $this->createMock(DownloadsParser::class);
-        $this->subInstaller = $this->createMock(SubpackageInstaller::class);
-        $this->installer = new PackageInstaller($this->parser, $this->subInstaller);
+        $this->factory = $this->createMock(SubpackageFactory::class);
+        $this->subpackageInstaller = $this->createMock(SubpackageInstaller::class);
+        $this->installer = new PackageInstaller($this->factory, $this->subpackageInstaller);
         $this->composer = $this->createMock(Composer::class);
         $this->io = $this->createMock(IOInterface::class);
         $this->package = $this->createMock(PackageInterface::class);
         $this->installationManager = $this->createMock(InstallationManager::class);
-        $this->handlers = [
-            $this->createMock(HandlerInterface::class),
-            $this->createMock(HandlerInterface::class),
-            $this->createMock(HandlerInterface::class),
+        $this->subpackages = [
+            $this->createMock(Subpackage::class),
+            $this->createMock(Subpackage::class),
+            $this->createMock(Subpackage::class),
         ];
     }
 
@@ -62,12 +62,12 @@ class PackageInstallerTest extends TestCase
         $this->composer->expects($this->once())->method('getInstallationManager')->willReturn($this->installationManager);
         $this->installationManager->expects($this->never())->method('getInstallPath');
         $this->installationManager->expects($this->never())->method('ensureBinariesPresence');
-        $this->parser
+        $this->factory
             ->expects($this->once())
-            ->method('parse')
+            ->method('create')
             ->with($rootPackage, getcwd())
-            ->willReturnCallback(fn () => yield from $this->handlers);
-        $this->assertSubInstaller();
+            ->willReturn($this->subpackages);
+        $this->assertSubpackageInstaller();
         $this->io->expects($this->once())->method('write')->with('<info>Download extra files for <comment>root/package-name</comment></info>');
         $this->installer->install($rootPackage, $this->composer, $this->io);
     }
@@ -80,34 +80,26 @@ class PackageInstallerTest extends TestCase
         $this->composer->expects($this->once())->method('getInstallationManager')->willReturn($this->installationManager);
         $this->installationManager->expects($this->once())->method('getInstallPath')->with($this->package)->willReturn($basePath);
         $this->installationManager->expects($this->once())->method('ensureBinariesPresence')->with($this->package);
-        $this->parser
+        $this->factory
             ->expects($this->once())
-            ->method('parse')
+            ->method('create')
             ->with($this->package, $basePath)
-            ->willReturnCallback(fn () => yield from $this->handlers);
-        $this->assertSubInstaller();
+            ->willReturn($this->subpackages);
+        $this->assertSubpackageInstaller();
         $this->io->expects($this->once())->method('write')->with('<info>Download extra files for <comment>normal/package-name</comment></info>');
         $this->installer->install($this->package, $this->composer, $this->io);
     }
 
-    private function assertSubInstaller(): void
+    private function assertSubpackageInstaller(): void
     {
-        $this->subInstaller
-            ->expects($this->exactly(\count($this->handlers)))
+        $this->subpackageInstaller
+            ->expects($this->exactly(\count($this->subpackages)))
             ->method('isInstalled')
-            ->withConsecutive(
-                ...array_map(
-                    fn (HandlerInterface $handler) => [$handler, $this->io],
-                    $this->handlers
-                )
-            )
+            ->with($this->io)
             ->willReturnOnConsecutiveCalls(true, false, false);
-        $this->subInstaller
+        $this->subpackageInstaller
             ->expects($this->exactly(2))
             ->method('install')
-            ->withConsecutive(
-                [$this->handlers[1], $this->composer, $this->io],
-                [$this->handlers[2], $this->composer, $this->io]
-            );
+            ->with($this->composer, $this->io);
     }
 }

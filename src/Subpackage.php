@@ -20,22 +20,55 @@ use Composer\Package\PackageInterface;
 class Subpackage extends Package
 {
     public function __construct(
-        private PackageInterface $parent,
-        string $name,
-        ?string $url,
-        ?string $type,
-        ?string $path,
-        ?string $version = null,
-        ?string $prettyVersion = null
+        PackageInterface $parent,
+        private string $parentPath,
+        private string $subpackageName,
+        private string $subpackageType,
+        private array $executable,
+        private array $ignore,
+        string $url,
+        string $path,
+        string $version,
+        string $prettyVersion,
     ) {
         parent::__construct(
-            sprintf('%s:%s', $parent->getName(), $name),
-            $version ?: $parent->getVersion(),
-            $prettyVersion ?: $parent->getPrettyVersion()
+            sprintf('%s:%s', $parent->getName(), $subpackageName),
+            $version,
+            $prettyVersion
         );
         $this->setDistUrl($url);
-        $this->setDistType($type);
+        $this->setDistType(Types::mapTypeToDistType($subpackageType));
         $this->setTargetDir($path);
         $this->setInstallationSource('dist');
+    }
+
+    public function getParentPath(): string
+    {
+        return $this->parentPath;
+    }
+
+    public function getSubpackageName(): string
+    {
+        return $this->subpackageName;
+    }
+
+    public function getExecutable(): array
+    {
+        return $this->executable;
+    }
+
+    public function getIgnore(): array
+    {
+        return $this->ignore;
+    }
+
+    public function getTargetPath(): string
+    {
+        return $this->parentPath.\DIRECTORY_SEPARATOR.$this->getTargetDir();
+    }
+
+    public function getSubpackageType(): string
+    {
+        return $this->subpackageType;
     }
 }

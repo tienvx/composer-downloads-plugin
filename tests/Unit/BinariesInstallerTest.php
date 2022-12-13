@@ -11,13 +11,13 @@ use VirtualFileSystem\FileSystem;
 
 class BinariesInstallerTest extends TestCase
 {
-    protected ?FileSystem $fs = null;
+    private ?FileSystem $fs = null;
     private IOInterface|MockObject $io;
-    protected Subpackage|MockObject $subpackage;
-    protected BinariesInstaller $installer;
-    protected string $baseDir = '/path/to/files';
-    protected string $subpackageName = 'vendor/package-name:executable-file';
-    protected array $binaries = [
+    private Subpackage|MockObject $subpackage;
+    private BinariesInstaller $installer;
+    private string $baseDir = '/path/to/files';
+    private string $subpackageName = 'vendor/package-name:executable-file';
+    private array $binaries = [
         false => 'file1',
         true => 'file2',
     ];
@@ -37,7 +37,8 @@ class BinariesInstallerTest extends TestCase
 
     public function testInstall(): void
     {
-        $this->subpackage->expects($this->once())->method('getBinaries')->willReturn($this->binaries);
+        $this->subpackage->expects($this->once())->method('getExecutable')->willReturn($this->binaries);
+        $this->subpackage->expects($this->once())->method('getParentPath')->willReturn($this->fs->path($this->baseDir));
         $this->fs->createDirectory($this->baseDir, true);
         foreach ($this->binaries as $hasProxy => $binary) {
             $path = $this->baseDir.\DIRECTORY_SEPARATOR.$binary;
@@ -60,7 +61,7 @@ class BinariesInstallerTest extends TestCase
                 ->method('writeError')
                 ->with('    Skipped installation of bin '.$binary.'.bat proxy for package '.$this->subpackageName.': a .bat proxy was already installed');
         }
-        $this->installer->install($this->subpackage, $this->fs->path($this->baseDir), $this->io);
+        $this->installer->install($this->subpackage, $this->io);
         foreach ($this->binaries as $hasProxy => $binary) {
             $path = $this->baseDir.\DIRECTORY_SEPARATOR.$binary;
             if (\PHP_OS_FAMILY === 'Windows') {

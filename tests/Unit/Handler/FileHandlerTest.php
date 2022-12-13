@@ -15,33 +15,13 @@ class FileHandlerTest extends BaseHandlerTestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
         $this->filesystem = $this->createMock(Filesystem::class);
+        parent::setUp();
     }
 
     protected function getHandlerExtraArguments(): array
     {
         return [$this->filesystem];
-    }
-
-    public function getBinariesTests(): array
-    {
-        return [
-            [null, []],
-            [true, [$this->path]],
-            [false, []],
-        ];
-    }
-
-    public function getInvalidBinariesTests(): array
-    {
-        return [
-            [123, 'int'],
-            [12.3, 'float'],
-            ['test', 'string'],
-            [['key' => 'value'], 'array'],
-            [(object) ['key' => 'value'], 'stdClass'],
-        ];
     }
 
     protected function getTrackingFile(): string
@@ -54,7 +34,7 @@ class FileHandlerTest extends BaseHandlerTestCase
         return FileHandler::class;
     }
 
-    protected function getDistType(): string
+    protected function getSubpackageType(): string
     {
         return 'file';
     }

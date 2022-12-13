@@ -6,17 +6,13 @@ use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Package\RootPackageInterface;
-use LastCall\DownloadsPlugin\Handler\HandlerInterface;
 
 class PackageInstaller
 {
-    private DownloadsParser $parser;
-    private SubpackageInstaller $subInstaller;
-
-    public function __construct(?DownloadsParser $parser = null, ?SubpackageInstaller $subInstaller = null)
-    {
-        $this->parser = $parser ?? new DownloadsParser();
-        $this->subInstaller = $subInstaller ?? new SubpackageInstaller();
+    public function __construct(
+        private ?SubpackageFactory $factory = null,
+        private ?SubpackageInstaller $subpackageInstaller = null
+    ) {
     }
 
     public function install(PackageInterface $package, Composer $composer, IOInterface $io): void
@@ -36,9 +32,10 @@ class PackageInstaller
     private function downloadExtraFiles(string $basePath, PackageInterface $package, Composer $composer, IOInterface $io): void
     {
         $first = true;
-        foreach ($this->parser->parse($package, $basePath) as $handler) {
-            /** @var HandlerInterface $handler */
-            if ($this->subInstaller->isInstalled($handler, $io)) {
+        $factory = $this->factory ?? new SubpackageFactory();
+        foreach ($factory->create($package, $basePath) as $subpackage) {
+            $subpackageInstaller = $this->subpackageInstaller ?? new SubpackageInstaller($subpackage);
+            if ($subpackageInstaller->isInstalled($io)) {
                 continue;
             }
 
@@ -47,7 +44,7 @@ class PackageInstaller
                 $first = false;
             }
 
-            $this->subInstaller->install($handler, $composer, $io);
+            $subpackageInstaller->install($composer, $io);
         }
     }
 }

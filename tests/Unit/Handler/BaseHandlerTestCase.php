@@ -5,8 +5,7 @@ namespace LastCall\DownloadsPlugin\Tests\Unit\Handler;
 use Composer\Composer;
 use Composer\Downloader\DownloadManager;
 use Composer\IO\IOInterface;
-use Composer\Package\PackageInterface;
-use Composer\Package\RootPackage;
+use Composer\Package\Package;
 use Composer\Util\Loop;
 use LastCall\DownloadsPlugin\BinariesInstaller;
 use LastCall\DownloadsPlugin\Handler\HandlerInterface;
@@ -21,12 +20,13 @@ abstract class BaseHandlerTestCase extends TestCase
     private IOInterface|MockObject $io;
     protected DownloadManager|MockObject $downloadManager;
     private BinariesInstaller|MockObject $binariesInstaller;
-    protected PackageInterface|MockObject $parent;
     protected PromiseInterface|MockObject $downloadPromise;
     protected PromiseInterface|MockObject $installPromise;
     protected Loop|MockObject $loop;
+    private Subpackage $subpackage;
+    private HandlerInterface $handler;
     protected bool $isComposerV2;
-    protected string $parentPath = '/path/to/package';
+    private string $parentPath = '/path/to/package';
     protected string $id = 'sub-package-name';
     protected string $url = 'http://example.com/file.ext';
     protected string $path = 'files/new-file';
@@ -41,7 +41,6 @@ abstract class BaseHandlerTestCase extends TestCase
         $this->io = $this->createMock(IOInterface::class);
         $this->downloadManager = $this->createMock(DownloadManager::class);
         $this->binariesInstaller = $this->createMock(BinariesInstaller::class);
-        $this->parent = $this->createMock(PackageInterface::class);
         $this->isComposerV2 = version_compare(Composer::RUNTIME_API_VERSION, '2.0.0') >= 0;
         if ($this->isComposerV2) {
             $this->downloadPromise = $this->createMock(PromiseInterface::class);
@@ -54,93 +53,46 @@ abstract class BaseHandlerTestCase extends TestCase
             'path' => $this->path,
         ];
         $this->targetPath = $this->parentPath.\DIRECTORY_SEPARATOR.$this->path;
+        $this->subpackage = new Subpackage(
+            new Package($this->parentName, '1.0.0', 'v1.0.0'),
+            $this->parentPath,
+            $this->id,
+            $this->getSubpackageType(),
+            ['file1', 'dir/file2'],
+            $this->ignore,
+            $this->url,
+            $this->path,
+            '1.2.3.0',
+            'v1.2.3'
+        );
+        $this->handler = $this->createHandler();
     }
 
-    public function testGetSubpackageWithExplicitVersion(): void
+    public function testGetSubpackage(): void
     {
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile + ['version' => '1.2.3']);
-        $version = version_compare(Composer::RUNTIME_API_VERSION, '2.0.0') >= 0 ? 'dev-master' : '9999999-dev';
-        $expectSubpackage = new Subpackage($this->parent, $this->id, $this->url, $this->getDistType(), $this->path, $version, '1.2.3');
-        $this->assertEquals($expectSubpackage, $handler->getSubpackage());
-        $this->assertSame([], $handler->getSubpackage()->getBinaries());
-    }
-
-    public function testGetSubpackageFromRootPackage(): void
-    {
-        $rootPackage = $this->createMock(RootPackage::class);
-        $handler = $this->createHandler($rootPackage, $this->parentPath, $this->extraFile);
-        $version = version_compare(Composer::RUNTIME_API_VERSION, '2.0.0') >= 0 ? 'dev-master' : '9999999-dev';
-        $expectSubpackage = new Subpackage($rootPackage, $this->id, $this->url, $this->getDistType(), $this->path, $version, 'dev-master');
-        $this->assertEquals($expectSubpackage, $handler->getSubpackage());
-        $this->assertSame([], $handler->getSubpackage()->getBinaries());
-    }
-
-    public function testGetSubpackageFromNormalPackage(): void
-    {
-        $this->parent->expects($this->once())->method('getVersion')->willReturn('1.2.3.0');
-        $this->parent->expects($this->once())->method('getPrettyVersion')->willReturn('v1.2.3');
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile);
-        $expectSubpackage = new Subpackage($this->parent, $this->id, $this->url, $this->getDistType(), $this->path, '1.2.3.0', 'v1.2.3');
-        $this->assertEquals($expectSubpackage, $handler->getSubpackage());
-        $this->assertSame([], $handler->getSubpackage()->getBinaries());
-    }
-
-    abstract public function getBinariesTests(): array;
-
-    /**
-     * @dataProvider getBinariesTests
-     */
-    public function testSubpackageBinaries(mixed $executable, array $expectedBinaries): void
-    {
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile + ['executable' => $executable]);
-        $this->assertSame($expectedBinaries, $handler->getSubpackage()->getBinaries());
-    }
-
-    abstract public function getInvalidBinariesTests(): array;
-
-    /**
-     * @dataProvider getInvalidBinariesTests
-     */
-    public function testSubpackageInvalidBinaries(mixed $executable, string $type): void
-    {
-        $this->parent->expects($this->exactly(2))->method('getName')->willReturn($this->parentName);
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile + ['executable' => $executable]);
-        $this->expectException(\UnexpectedValueException::class);
-        $this->expectExceptionMessage(sprintf('Attribute "executable" of extra file "%s" defined in package "%s" must be '.$this->getExecutableType().', "%s" given.', $this->id, $this->parentName, $type));
-        $handler->getSubpackage();
+        $this->assertSame($this->subpackage, $this->handler->getSubpackage());
     }
 
     public function testGetTrackingData(): void
     {
-        $this->parent->expects($this->once())->method('getName')->willReturn($this->parentName);
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile);
-        $this->assertSame($this->getTrackingData(), $handler->getTrackingData());
+        $this->assertSame($this->getTrackingData(), $this->handler->getTrackingData());
     }
 
     public function testGetChecksum(): void
     {
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile);
-        $this->assertSame($this->getChecksum(), $handler->getChecksum());
-    }
-
-    public function testGetTargetPath(): void
-    {
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile);
-        $this->assertSame($this->targetPath, $handler->getTargetPath());
+        $this->assertSame($this->getChecksum(), $this->handler->getChecksum());
     }
 
     public function testGetTrackingFile(): void
     {
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile);
-        $this->assertSame($this->getTrackingFile(), $handler->getTrackingFile());
+        $this->assertSame($this->getTrackingFile(), $this->handler->getTrackingFile());
     }
 
     public function testInstall(): void
     {
         $this->assertDownload();
         $this->assertBinariesInstaller();
-        $handler = $this->createHandler($this->parent, $this->parentPath, $this->extraFile);
-        $handler->install($this->composer, $this->io);
+        $this->handler->install($this->composer, $this->io);
     }
 
     protected function assertBinariesInstaller(): void
@@ -148,7 +100,7 @@ abstract class BaseHandlerTestCase extends TestCase
         $this->binariesInstaller
             ->expects($this->once())
             ->method('install')
-            ->with($this->isInstanceOf(Subpackage::class), $this->parentPath, $this->io);
+            ->with($this->isInstanceOf(Subpackage::class), $this->io);
     }
 
     abstract protected function assertDownload(): void;
@@ -159,7 +111,7 @@ abstract class BaseHandlerTestCase extends TestCase
 
     abstract protected function getTrackingFile(): string;
 
-    abstract protected function getDistType(): string;
+    abstract protected function getSubpackageType(): string;
 
     abstract protected function getChecksum(): string;
 
@@ -167,10 +119,10 @@ abstract class BaseHandlerTestCase extends TestCase
 
     abstract protected function getTrackingData(): array;
 
-    protected function createHandler(PackageInterface $parent, string $parentPath, array $extraFile): HandlerInterface
+    protected function createHandler(): HandlerInterface
     {
         $class = $this->getHandlerClass();
 
-        return new $class($parent, $parentPath, $extraFile, $this->binariesInstaller, ...$this->getHandlerExtraArguments());
+        return new $class($this->subpackage, $this->binariesInstaller, ...$this->getHandlerExtraArguments());
     }
 }

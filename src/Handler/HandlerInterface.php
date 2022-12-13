@@ -17,6 +17,4 @@ interface HandlerInterface
     public function getTrackingData(): array;
 
     public function getChecksum(): string;
-
-    public function getTargetPath(): string;
 }

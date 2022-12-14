@@ -1,11 +1,12 @@
 <?php
 
-namespace LastCall\DownloadsPlugin\Tests\Integration;
+namespace LastCall\DownloadsPlugin\Tests\Integration\Valid;
+
+use LastCall\DownloadsPlugin\Tests\Integration\CommandTestCase;
 
 class CreateProjectTest extends CommandTestCase
 {
     private static ?string $tmpDir;
-    protected static bool $needChangeDir = false;
 
     public function testDownload(): void
     {
@@ -55,6 +56,11 @@ class CreateProjectTest extends CommandTestCase
             self::$testDir = sys_get_temp_dir().\DIRECTORY_SEPARATOR.uniqid('test-project-', true);
             self::cleanDir(self::$testDir);
         }
+    }
+
+    protected static function shouldChangeDir(): bool
+    {
+        return false;
     }
 
     private static function initTempProject(): void

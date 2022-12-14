@@ -3,6 +3,7 @@
 namespace LastCall\DownloadsPlugin\Filter;
 
 use Composer\Package\PackageInterface;
+use LastCall\DownloadsPlugin\Exception\UnexpectedValueException;
 
 abstract class BaseFilter implements FilterInterface
 {
@@ -27,6 +28,6 @@ abstract class BaseFilter implements FilterInterface
 
     protected function throwException(string $attribute, string $reason): void
     {
-        throw new \UnexpectedValueException(sprintf('Attribute "%s" of extra file "%s" defined in package "%s" %s.', $attribute, $this->subpackageName, $this->parent->getName(), $reason));
+        throw new UnexpectedValueException(sprintf('Attribute "%s" of extra file "%s" defined in package "%s" %s.', $attribute, $this->subpackageName, $this->parent->getName(), $reason));
     }
 }

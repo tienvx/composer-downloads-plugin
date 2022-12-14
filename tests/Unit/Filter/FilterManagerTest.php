@@ -3,6 +3,7 @@
 namespace LastCall\DownloadsPlugin\Tests\Unit;
 
 use Composer\Package\PackageInterface;
+use LastCall\DownloadsPlugin\Exception\OutOfRangeException;
 use LastCall\DownloadsPlugin\Filter\ExecutableFilter;
 use LastCall\DownloadsPlugin\Filter\FilterManager;
 use LastCall\DownloadsPlugin\Filter\IgnoreFilter;
@@ -52,7 +53,7 @@ class FilterManagerTest extends TestCase
 
     public function testGetInvalidFilter(): void
     {
-        $this->expectException(\OutOfRangeException::class);
+        $this->expectException(OutOfRangeException::class);
         $this->expectExceptionMessage('Filter "invalid" not found.');
         $this->manager->get('invalid');
     }

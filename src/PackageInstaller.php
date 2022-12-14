@@ -6,6 +6,7 @@ use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Package\RootPackageInterface;
+use LastCall\DownloadsPlugin\Exception\UnexpectedValueException;
 
 class PackageInstaller
 {
@@ -21,19 +22,16 @@ class PackageInstaller
             return;
         }
 
-        $installationManager = $composer->getInstallationManager();
-        $basePath = $package instanceof RootPackageInterface ? getcwd() : $installationManager->getInstallPath($package);
-        $this->downloadExtraFiles($basePath, $package, $composer, $io);
+        $this->downloadExtraFiles($package, $composer, $io);
         if (!$package instanceof RootPackageInterface) {
-            $installationManager->ensureBinariesPresence($package);
+            $composer->getInstallationManager()->ensureBinariesPresence($package);
         }
     }
 
-    private function downloadExtraFiles(string $basePath, PackageInterface $package, Composer $composer, IOInterface $io): void
+    private function downloadExtraFiles(PackageInterface $package, Composer $composer, IOInterface $io): void
     {
         $first = true;
-        $factory = $this->factory ?? new SubpackageFactory();
-        foreach ($factory->create($package, $basePath) as $subpackage) {
+        foreach ($this->getSubpackages($package, $composer, $io) as $subpackage) {
             $subpackageInstaller = $this->subpackageInstaller ?? new SubpackageInstaller($subpackage);
             if ($subpackageInstaller->isInstalled($io)) {
                 continue;
@@ -45,6 +43,21 @@ class PackageInstaller
             }
 
             $subpackageInstaller->install($composer, $io);
+        }
+    }
+
+    private function getSubpackages(PackageInterface $package, Composer $composer, IOInterface $io): array
+    {
+        $basePath = $package instanceof RootPackageInterface ? getcwd() : $composer->getInstallationManager()->getInstallPath($package);
+
+        try {
+            $factory = $this->factory ?? new SubpackageFactory();
+
+            return $factory->create($package, $basePath);
+        } catch (UnexpectedValueException $exception) {
+            $io->writeError(sprintf('    Skipped download extra files for package %s: %s', $package->getName(), $exception->getMessage()));
+
+            return [];
         }
     }
 }

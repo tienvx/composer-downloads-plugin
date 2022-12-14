@@ -3,6 +3,7 @@
 namespace LastCall\DownloadsPlugin\Filter;
 
 use Composer\Package\PackageInterface;
+use LastCall\DownloadsPlugin\Exception\OutOfRangeException;
 
 class FilterManager
 {
@@ -35,7 +36,7 @@ class FilterManager
     public function get(string $name): FilterInterface
     {
         if (!isset($this->filters[$name])) {
-            throw new \OutOfRangeException(sprintf('Filter "%s" not found.', $name));
+            throw new OutOfRangeException(sprintf('Filter "%s" not found.', $name));
         }
 
         return $this->filters[$name];

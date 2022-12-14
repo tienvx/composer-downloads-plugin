@@ -17,7 +17,7 @@ class BinariesInstaller
             if (Platform::isWindows() || (method_exists(Platform::class, 'isWindowsSubsystemForLinux') ? Platform::isWindowsSubsystemForLinux() : false)) {
                 $proxy = $path.'.bat';
                 if (file_exists($proxy)) {
-                    $io->writeError('    Skipped installation of bin '.$bin.'.bat proxy for package '.$subpackage->getName().': a .bat proxy was already installed');
+                    $io->writeError(sprintf('    Skipped installation of bin %s.bat proxy for package %s: a .bat proxy was already installed', $bin, $subpackage->getName()));
                 } else {
                     $caller = BinaryInstaller::determineBinaryCaller($path);
                     file_put_contents($proxy, '@'.$caller.' "%~dp0'.ProcessExecutor::escape(basename($proxy, '.bat')).'" %*');

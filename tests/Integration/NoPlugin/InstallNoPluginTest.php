@@ -1,6 +1,6 @@
 <?php
 
-namespace LastCall\DownloadsPlugin\Tests\Integration;
+namespace LastCall\DownloadsPlugin\Tests\Integration\NoPlugin;
 
 class InstallNoPluginTest extends CommandNoPluginTestCase
 {

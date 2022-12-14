@@ -11,7 +11,6 @@ abstract class CommandTestCase extends TestCase
     private static ?string $origDir;
     protected static ?string $testDir;
     private static ?Process $server;
-    protected static bool $needChangeDir = true;
 
     protected static function getComposerJson(): array
     {
@@ -123,7 +122,7 @@ abstract class CommandTestCase extends TestCase
         return self::$testDir.\DIRECTORY_SEPARATOR.$path;
     }
 
-    protected function getFiles(): array
+    protected function getFilesFromProject(): array
     {
         return [
             // From project
@@ -153,6 +152,12 @@ abstract class CommandTestCase extends TestCase
             'files/markup/empty.xml' => '4be690ad5983b2a40f640481fdb27dcc43ac162e14fa9aab2ff45775521d9213',
             'vendor/bin/hello' => false,
             'vendor/bin/hello.bat' => false,
+        ];
+    }
+
+    protected function getFilesFromLibrary(): array
+    {
+        return [
             // From library
             'vendor/test/library/files/php/hello-php' => \PHP_OS_FAMILY === 'Windows'
                 ? '6094c815897bac5498a356d6c93272b16cc2745ac643129aba55fe429cb0622f'
@@ -175,12 +180,27 @@ abstract class CommandTestCase extends TestCase
         ];
     }
 
+    protected function getFiles(): array
+    {
+        return array_merge($this->getFilesFromProject(), $this->getFilesFromLibrary());
+    }
+
     protected function runComposerCommandAndAssert(array $command): void
     {
-        $this->assertFiles(false);
-        self::runComposer($command);
-        $this->assertFiles(true);
+        $this->assertFiles($this->shouldExistBeforeCommand());
+        $this->runComposer($command);
+        $this->assertFiles($this->shouldExistAfterCommand());
         $this->assertExecutable();
+    }
+
+    protected function shouldExistBeforeCommand(): bool
+    {
+        return false;
+    }
+
+    protected function shouldExistAfterCommand(): bool
+    {
+        return true;
     }
 
     protected function assertFiles(bool $exist = true): void
@@ -197,10 +217,16 @@ abstract class CommandTestCase extends TestCase
         }
     }
 
-    protected function getExecutableFiles(): array
+    protected function getExecutableFilesFromProject(): array
     {
         return [
             'files/phar/hello' => 'Hello from phar file!',
+        ];
+    }
+
+    protected function getExecutableFilesFromLibrary(): array
+    {
+        return [
             'vendor/test/library/files/php/hello-php' => 'Hello from php file!',
             'vendor/test/library/files/ruby/hello-ruby' => 'Hello from ruby file!'.$this->eol(),
             'vendor/test/library/files/mix/bin/hello-python' => 'Hello from python file!'.$this->eol(),
@@ -210,6 +236,16 @@ abstract class CommandTestCase extends TestCase
         ];
     }
 
+    protected function getExecutableFiles(): array
+    {
+        return array_merge($this->getExecutableFilesFromProject(), $this->getExecutableFilesFromLibrary());
+    }
+
+    protected function getMissingExecutableFiles(): array
+    {
+        return [];
+    }
+
     protected function assertExecutable(): void
     {
         foreach ($this->getExecutableFiles() as $file => $output) {
@@ -217,6 +253,17 @@ abstract class CommandTestCase extends TestCase
             $process->run();
             $this->assertSame($output, $process->getOutput());
             $this->assertSame(0, $process->getExitCode());
+        }
+        foreach ($this->getMissingExecutableFiles() as $file) {
+            $process = new Process([self::getPathToTestDir($file)]);
+            $process->run();
+            $this->assertSame('', $process->getOutput());
+            $exitCodeMap = [
+                'Windows' => 1,
+                'Darwin' => 126,
+                'Linux' => 127,
+            ];
+            $this->assertSame($exitCodeMap[\PHP_OS_FAMILY], $process->getExitCode());
         }
     }
 
@@ -239,13 +286,13 @@ abstract class CommandTestCase extends TestCase
             mkdir(self::$testDir);
         }
         file_put_contents(self::getPathToTestDir('composer.json'), json_encode(static::getComposerJson(), \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES));
-        static::$needChangeDir && chdir(self::$testDir);
+        static::shouldChangeDir() && chdir(self::$testDir);
     }
 
     protected static function cleanTestProjectDir(): void
     {
         if (self::$testDir) {
-            static::$needChangeDir && chdir(self::$origDir);
+            static::shouldChangeDir() && chdir(self::$origDir);
             self::$origDir = null;
 
             if (getenv('USE_TEST_PROJECT')) {
@@ -255,6 +302,11 @@ abstract class CommandTestCase extends TestCase
             }
             self::$testDir = null;
         }
+    }
+
+    protected static function shouldChangeDir(): bool
+    {
+        return true;
     }
 
     protected static function startLocalServer(): void
@@ -274,7 +326,7 @@ abstract class CommandTestCase extends TestCase
         }
     }
 
-    private static function runComposer(array $command): void
+    private function runComposer(array $command): void
     {
         $process = new Process([self::getComposerPath(), ...$command, '-v']);
         $process->run(getenv('DEBUG_COMPOSER') ? function ($type, $buffer) {
@@ -284,6 +336,12 @@ abstract class CommandTestCase extends TestCase
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
+
+        $this->assertComposerErrorOutput($process->getErrorOutput());
+    }
+
+    protected function assertComposerErrorOutput(string $output): void
+    {
     }
 
     protected static function cleanDir(string $dir): void
@@ -300,7 +358,7 @@ abstract class CommandTestCase extends TestCase
         }
     }
 
-    private static function getComposerPath(): string
+    protected static function getComposerPath(): string
     {
         return realpath(__DIR__.'/../../vendor/bin/composer');
     }
@@ -325,7 +383,7 @@ abstract class CommandTestCase extends TestCase
         return realpath(self::getFixturesPath().'/library');
     }
 
-    private function eol(): string
+    protected function eol(): string
     {
         return \PHP_OS_FAMILY === 'Windows' ? "\r\n" : "\n";
     }

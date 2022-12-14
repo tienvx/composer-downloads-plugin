@@ -30,6 +30,10 @@ class UrlFilter extends BaseFilter
             $this->throwException('url', 'is invalid url');
         }
 
+        if (!\in_array(parse_url($url, \PHP_URL_SCHEME), ['http', 'https'])) {
+            $this->throwException('url', 'has invalid scheme');
+        }
+
         return $url;
     }
 }

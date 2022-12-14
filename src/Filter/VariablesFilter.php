@@ -42,11 +42,11 @@ class VariablesFilter extends BaseFilter
         ]);
         foreach ($values as $key => $value) {
             if (!preg_match('/^{\$[^}]+}$/', $key)) {
-                throw new \UnexpectedValueException(sprintf('Expected variable key in this format "{$variable-name}", "%s" given.', $key));
+                $this->throwException('variables', sprintf('is invalid: Variable key "%s" should be this format "{$variable-name}"', $key));
             }
             $result = $smpl->evaluate($value);
             if (!\is_string($result)) {
-                throw new \UnexpectedValueException(sprintf('Expected the the result of expression "%s" to be a string, "%s" given.', $value, get_debug_type($result)));
+                $this->throwException('variables', sprintf('is invalid: Expression "%s" should be evaluated to string, "%s" given', $value, get_debug_type($result)));
             }
             $variables[$key] = $result;
         }

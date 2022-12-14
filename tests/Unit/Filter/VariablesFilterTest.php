@@ -67,8 +67,8 @@ class VariablesFilterTest extends BaseFilterTestCase
      */
     public function testInvalidVariableKey(string $invalidVariableKey): void
     {
-        $this->expectException(\UnexpectedValueException::class);
-        $this->expectDeprecationMessage(sprintf('Expected variable key in this format "{$variable-name}", "%s" given.', $invalidVariableKey));
+        $this->parent->expects($this->once())->method('getName')->willReturn($this->parentName);
+        $this->expectUnexpectedValueException('variables', sprintf('is invalid: Variable key "%s" should be this format "{$variable-name}"', $invalidVariableKey));
         $this->filter->filter([
             'variables' => [
                 $invalidVariableKey => '"baz"',
@@ -95,8 +95,8 @@ class VariablesFilterTest extends BaseFilterTestCase
      */
     public function testInvalidVariableValue(string $invalidVariableValue, string $type): void
     {
-        $this->expectException(\UnexpectedValueException::class);
-        $this->expectDeprecationMessage(sprintf('Expected the the result of expression "%s" to be a string, "%s" given.', $invalidVariableValue, $type));
+        $this->parent->expects($this->once())->method('getName')->willReturn($this->parentName);
+        $this->expectUnexpectedValueException('variables', sprintf('is invalid: Expression "%s" should be evaluated to string, "%s" given', $invalidVariableValue, $type));
         $this->filter->filter([
             'variables' => [
                 '{$baz}' => $invalidVariableValue,

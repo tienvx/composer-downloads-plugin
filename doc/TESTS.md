@@ -9,5 +9,5 @@ To run the tests:
 To debug, set project dir so it will not be removed after running:
 
 ```
-env USE_TEST_PROJECT=$HOME/my-project DEBUG_COMPOSER=1 ./vendor/bin/phpunit tests/Integration/InstallTest.php
+env USE_TEST_PROJECT=$HOME/my-project DEBUG_COMPOSER=1 ./vendor/bin/phpunit tests/Integration/Valid/InstallTest.php
 ```

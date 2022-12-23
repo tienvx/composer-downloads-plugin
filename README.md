@@ -27,7 +27,7 @@ Suppose your PHP package `foo/bar` relies on an external archive file (`examplel
             "{$architecture}": "strtolower(php_uname('m'))",
             "{$extension}": "PHP_OS_FAMILY === 'Windows' ? 'zip' : 'tar.gz'",
         },
-        "ignore": ["tests", "doc", ".*"]
+        "ignore": ["tests", "doc", "*.md"]
       }
     }
   }
@@ -36,7 +36,7 @@ Suppose your PHP package `foo/bar` relies on an external archive file (`examplel
 
 When a downstream user of `foo/bar` runs `composer require foo/bar`, it will download and extract the archive file to `vendor/foo/bar/extern/examplelib`. 
 
-## Configuration:
+## Attribute:
 
 * `url`: The URL to the extra file.
 
@@ -70,17 +70,18 @@ When a downstream user of `foo/bar` runs `composer require foo/bar`, it will dow
 
 ## Variables
 
-### Supported Configuration
+### Supported Attribute
 
-Only following configuration support variables:
+Only following attribute support variables:
 
 * `url`
 * `path`
+* `ignore`
 
 ### Default Variables
 
 * `{$id}`: The identifier of the download. (In the example, it would be `examplelib`.)
-* `{$version}`: Just a text defined in the `version` configuration, if not defined, the value will be empty string (`""`).
+* `{$version}`: Just a text defined in the `version` attribute, if not defined, the value will be empty string (`""`).
 
 ### Custom Variables
 
@@ -108,9 +109,9 @@ Custom variable support these constants:
 * `PHP_SHLIB_SUFFIX`
 * `DIRECTORY_SEPARATOR`
 
-## Defaults Configuration
+## Default Attributes
 
-You may set default properties for all downloads. Place them under `*`, as in:
+You may set default attributes for all downloads. Place them under `*`, as in:
 
 ```json
 {

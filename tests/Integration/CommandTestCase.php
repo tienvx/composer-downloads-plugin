@@ -68,6 +68,10 @@ abstract class CommandTestCase extends TestCase
                     ],
                     'presentation' => [
                         'url' => 'http://localhost:8000/archive/presentation.tar.bz2',
+                        'variables' => [
+                            '{$extension}' => 'PHP_OS_FAMILY === "Windows" ? "pptx" : "odp"',
+                        ],
+                        'ignore' => ['*', '!empty.{$extension}'],
                     ],
                     'text' => [
                         'url' => 'http://localhost:8000/archive/text.tar',
@@ -139,8 +143,8 @@ abstract class CommandTestCase extends TestCase
             'files/doc/v1.3.0/empty.txt' => false,
             'files/spreadsheet/empty.xls' => '6ed659132105ff18df7946a66ac1853f693ac93504d1f21b82d0b0514d1f7ed0',
             'files/spreadsheet/empty.xlsx' => '4eb8bea601f7673e25c11ecf8cd18e2535a194f06f3df09ea238e89bf16cd7d7',
-            'files/presentation/empty.odp' => 'c663570ba816d2ec8813ae02e5a78257a3a56a8f60e7ad657119e6f0052a26fe',
-            'files/presentation/empty.pptx' => '778847dd7f5802f602032a00c8da248062659a3344b93816489fc003f57f21dd',
+            'files/presentation/empty.odp' => \PHP_OS_FAMILY === 'Windows' ? false : 'c663570ba816d2ec8813ae02e5a78257a3a56a8f60e7ad657119e6f0052a26fe',
+            'files/presentation/empty.pptx' => \PHP_OS_FAMILY === 'Windows' ? '778847dd7f5802f602032a00c8da248062659a3344b93816489fc003f57f21dd' : false,
             'files/text/empty.csv' => 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
             'files/text/empty.json' => 'ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356',
             'files/text/empty.txt' => 'b42f2099187886def637d6aa840022266e05cb6c987a9394e708e23cd505eb46',

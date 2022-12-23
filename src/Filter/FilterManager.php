@@ -29,7 +29,7 @@ class FilterManager
             self::VERSION => new VersionFilter($subpackageName, $parent),
             self::TYPE => $typeFilter = new TypeFilter($subpackageName, $parent, $urlFilter),
             self::EXECUTABLE => new ExecutableFilter($subpackageName, $parent, $parentPath, $typeFilter, $pathFilter),
-            self::IGNORE => new IgnoreFilter($subpackageName, $parent, $typeFilter),
+            self::IGNORE => new IgnoreFilter($subpackageName, $parent, $typeFilter, $variablesFilter),
         ];
     }
 

@@ -5,16 +5,19 @@ namespace LastCall\DownloadsPlugin\Tests\Unit\Filter;
 use LastCall\DownloadsPlugin\Filter\FilterInterface;
 use LastCall\DownloadsPlugin\Filter\IgnoreFilter;
 use LastCall\DownloadsPlugin\Filter\TypeFilter;
+use LastCall\DownloadsPlugin\Filter\VariablesFilter;
 use LastCall\DownloadsPlugin\Types;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class IgnoreFilterTest extends BaseFilterTestCase
 {
     private TypeFilter|MockObject $typeFilter;
+    private VariablesFilter|MockObject $variablesFilter;
 
     protected function setUp(): void
     {
         $this->typeFilter = $this->createMock(TypeFilter::class);
+        $this->variablesFilter = $this->createMock(VariablesFilter::class);
         parent::setUp();
     }
 
@@ -68,17 +71,46 @@ class IgnoreFilterTest extends BaseFilterTestCase
         $this->filter->filter($extraFile);
     }
 
+    public function testInvalidIgnoreItem(): void
+    {
+        $extraFile = [
+            'ignore' => [
+                ['not a string'],
+                123,
+                null,
+            ],
+        ];
+        $this->parent->expects($this->once())->method('getName')->willReturn($this->parentName);
+        $this->typeFilter->expects($this->once())->method('filter')->with($extraFile)->willReturn(Types::TYPE_ZIP);
+        $this->variablesFilter->expects($this->once())->method('filter')->with($extraFile)->willReturn([]);
+        $this->expectUnexpectedValueException('ignore', 'must be array of string');
+        $this->filter->filter($extraFile);
+    }
+
     public function testFilterIgnore(): void
     {
         $ignore = ['dir/*', '!dir/file'];
         $extraFile = ['ignore' => $ignore];
         $this->typeFilter->expects($this->once())->method('filter')->with($extraFile)->willReturn(Types::TYPE_ZIP);
+        $this->variablesFilter->expects($this->once())->method('filter')->with($extraFile)->willReturn([]);
         $this->assertSame($ignore, $this->filter->filter($extraFile));
         $this->assertSame($ignore, $this->filter->filter([]));
     }
 
+    public function testFilterIgnoreWithVariables(): void
+    {
+        $ignore = ['dir/*', '!dir/file{$extension}'];
+        $extraFile = ['ignore' => $ignore];
+        $variables = ['{$extension}' => '.txt'];
+        $this->typeFilter->expects($this->once())->method('filter')->with($extraFile)->willReturn(Types::TYPE_ZIP);
+        $this->variablesFilter->expects($this->once())->method('filter')->with($extraFile)->willReturn($variables);
+        $ignores = ['dir/*', '!dir/file.txt'];
+        $this->assertSame($ignores, $this->filter->filter($extraFile));
+        $this->assertSame($ignores, $this->filter->filter([]));
+    }
+
     protected function createFilter(): FilterInterface
     {
-        return new IgnoreFilter($this->name, $this->parent, $this->typeFilter);
+        return new IgnoreFilter($this->name, $this->parent, $this->typeFilter, $this->variablesFilter);
     }
 }

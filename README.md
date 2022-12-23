@@ -27,7 +27,7 @@ Suppose your PHP package `foo/bar` relies on an external archive file (`examplel
             "{$architecture}": "strtolower(php_uname('m'))",
             "{$extension}": "PHP_OS_FAMILY === 'Windows' ? 'zip' : 'tar.gz'",
         },
-        "ignore": ["tests", "doc", ".*"]
+        "ignore": ["tests", "doc", "*.md"]
       }
     }
   }
@@ -76,6 +76,7 @@ Only following configuration support variables:
 
 * `url`
 * `path`
+* `ignore`
 
 ### Default Variables
 

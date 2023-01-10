@@ -14,14 +14,14 @@ class InvalidVariableExpressionTest extends InstallInvalidExtraDownloadsTest
         return [
             'path' => 'files/invalid/variables',
             'variables' => [
-                '{$valid-key}' => '["invalid value"]',
+                '{$version}' => 'VERSION in ["dev", "test"] ? "0.0.1" : "1.0.0"',
             ],
-            'url' => 'http://localhost:8000/archive/doc/v1.2.3/doc.zip',
+            'url' => 'http://localhost:8000/archive/doc/v{$version}/doc.zip',
         ];
     }
 
     protected static function getErrorMessage(): string
     {
-        return 'Skipped download extra files for package test/project: Attribute "variables" of extra file "invalid-variable-expression" defined in package "test/project" is invalid: Expression "["invalid value"]" should be evaluated to string, "array" given.';
+        return 'Skipped download extra files for package test/project: Attribute "variables" of extra file "invalid-variable-expression" defined in package "test/project" is invalid. There is an error while evaluating expression "VERSION in ["dev", "test"] ? "0.0.1" : "1.0.0"": unexpected end of string.';
     }
 }

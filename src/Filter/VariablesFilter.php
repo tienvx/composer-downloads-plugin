@@ -2,6 +2,7 @@
 
 namespace LastCall\DownloadsPlugin\Filter;
 
+use Le\SMPLang\Exception;
 use Le\SMPLang\SMPLang;
 
 class VariablesFilter extends BaseFilter
@@ -44,7 +45,11 @@ class VariablesFilter extends BaseFilter
             if (!preg_match('/^{\$[^}]+}$/', $key)) {
                 $this->throwException('variables', sprintf('is invalid: Variable key "%s" should be this format "{$variable-name}"', $key));
             }
-            $result = $smpl->evaluate($value);
+            try {
+                $result = $smpl->evaluate($value);
+            } catch (Exception $exception) {
+                $this->throwException('variables', sprintf('is invalid. There is an error while evaluating expression "%s": %s', $value, $exception->getMessage()));
+            }
             if (!\is_string($result)) {
                 $this->throwException('variables', sprintf('is invalid: Expression "%s" should be evaluated to string, "%s" given', $value, get_debug_type($result)));
             }

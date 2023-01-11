@@ -104,6 +104,30 @@ class VariablesFilterTest extends BaseFilterTestCase
         ]);
     }
 
+    public function getInvalidVariableExpressionSyntaxTests(): array
+    {
+        return [
+            ['in_array(1, range(1, 10)', 'expected closing `)`'],
+            ["'foo' in ['foo', 'baz']", 'unexpected end of string'],
+            ["invalid('test')", 'var `invalid` not defined'],
+            ["PHP_OS('test')", '`PHP_OS` is not callable'],
+        ];
+    }
+
+    /**
+     * @dataProvider getInvalidVariableExpressionSyntaxTests
+     */
+    public function testInvalidVariableExpressionSyntax(string $expression, string $reason): void
+    {
+        $this->parent->expects($this->once())->method('getName')->willReturn($this->parentName);
+        $this->expectUnexpectedValueException('variables', sprintf('is invalid. There is an error while evaluating expression "%s": %s', $expression, $reason));
+        $this->filter->filter([
+            'variables' => [
+                '{$baz}' => $expression,
+            ],
+        ]);
+    }
+
     public function testFilterVariables(): void
     {
         $expectedVariables = [

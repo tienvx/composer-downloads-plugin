@@ -57,6 +57,7 @@ abstract class BaseHandler implements HandlerInterface
             'id' => $this->subpackage->getSubpackageName(),
             'url' => $this->subpackage->getDistUrl(),
             'path' => $this->subpackage->getTargetDir(),
+            'executable' => $this->subpackage->getExecutable(),
         ];
     }
 
